@@ -1,0 +1,10 @@
+# Força LF em todo o repo. CRLF do Windows quebra scripts .sh e hooks do
+# live-build com "bad interpreter".
+* text=auto eol=lf
+*.sh text eol=lf
+
+# Binários
+*.iso binary
+*.img binary
+*.png binary
+*.jpg binary

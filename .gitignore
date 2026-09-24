@@ -1,0 +1,35 @@
+# Artefatos de build do live-build (a pasta config/ deve ser versionada)
+chroot/
+binary/
+cache/
+.build/
+local/
+*.iso
+*.img
+live-image-*
+*.contents
+*.files
+*.packages
+*.log
+
+# Runtime do Containerlab
+clab-*/
+.clab.*
+
+# Ansible e segredos
+*.retry
+.vault_pass*
+.env
+.env.*
+*.pem
+*.key
+
+# Lixo de SO e editor
+Thumbs.db
+Desktop.ini
+.DS_Store
+.vscode/
+.idea/
+
+# Configuração local do Claude Code (settings.json é versionado: só desliga o link de sessão nos commits)
+.claude/settings.local.json
