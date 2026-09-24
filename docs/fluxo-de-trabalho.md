@@ -61,6 +61,7 @@ Use o nome da sua branch no lugar de `<sua-branch>`.
 
 - Revisar e aprovar os PRs para `marcos` e mergear com merge commit.
 - Abrir e mergear o PR de `marcos` para `main`.
+- O merge de `marcos` para `main` exige o bypass de Admin: na CLI use `gh pr merge <número> --merge --admin`; na página do PR, use "Merge without waiting for requirements to be met".
 - Depois de cada merge na `main`, atualizar a `marcos`:
 
   ```
