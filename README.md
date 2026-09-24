@@ -23,7 +23,7 @@ Distro Linux baseada em Debian 13 (trixie), especializada em virtualização de 
 
 ## Aviso: build exige Linux
 
-O live-build só roda em Debian/Ubuntu, com root e sistema de arquivos Linux. Não builde em pasta Windows.
+O live-build deve ser executado em Debian/Ubuntu, com root e sistema de arquivos Linux. Não builde em pasta Windows.
 Veja [docs/ambiente-de-build.md](docs/ambiente-de-build.md).
 
 Licenciado sob GPL-3.0-or-later.

@@ -2,13 +2,13 @@
 
 ## Por que exige Linux
 
-O live-build só roda em Debian ou Ubuntu, com root e sistema de arquivos Linux.
+O live-build deve ser executado em Debian ou Ubuntu, com root e sistema de arquivos Linux.
 Ele quebra em pasta Windows e em `/mnt/c` do WSL. Esta pasta serve para editar e versionar.
 O build da ISO acontece a partir de um clone do repositório em um ambiente Linux.
 
 ## Base da distro
 
-Debian estável. Em 24/09/2026 a estável é o Debian 13.7, codinome trixie (lançada em 12/09/2026).
+Debian estável. Em 24/09/2026 a estável é o Debian 13 (codinome trixie), na versão pontual 13.7, publicada em 12/09/2026.
 A versão pontual muda com o tempo; o codinome trixie permanece até a próxima release estável.
 Fonte: https://www.debian.org/releases/stable/
 
