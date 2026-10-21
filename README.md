@@ -27,7 +27,7 @@ Como foram medidas: [docs/ambiente-de-build.md](docs/ambiente-de-build.md).
 - `nfv/`: KVM/QEMU + libvirt, FRRouting, NFVO/VNFM simplificado
 - `ansible/`: scripts e playbooks de orquestração
 - `labs/containerlab/` e `labs/gns3/`: topologias de demonstração
-- `scripts/`: comando único de build da ISO
+- `scripts/`: build da ISO (`build-iso.sh`) e sincronização das branches (`sync-branches.sh`)
 - `tests/`: testes
 
 ## Como gerar a ISO
@@ -57,6 +57,19 @@ Preparo da VM: [docs/ambiente-de-build.md](docs/ambiente-de-build.md). Resultado
    ```
 
 4. Antes de commitar, rode `tests/lint-repo.sh`.
+
+## Fluxo de trabalho
+
+Branches, PRs e revisão: [docs/fluxo-de-trabalho.md](docs/fluxo-de-trabalho.md).
+
+Os PRs entram na `main` com "Rebase and merge" (histórico linear). Depois de cada merge, o revisor final roda `scripts/sync-branches.sh` para alinhar a `marcos` e as branches pessoais com a `main`.
+Cada integrante atualiza a própria branch com:
+
+```
+git fetch origin
+git switch <sua-branch>
+git merge --no-edit origin/main
+```
 
 ## Aviso: build exige Linux
 
