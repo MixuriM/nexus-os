@@ -9,6 +9,8 @@ Distro Linux remasterizada (Debian estável, live-build) para virtualização de
 - NFVO/VNFM: simplificado (scripts/Ansible)
 - Demonstração: Containerlab (principal) e GNS3 (secundário)
 
+Escopo em revisão: OpenDaylight opcional, GNS3 só documentado, Ansible fora (aguardando aprovação). Ver plano de desenvolvimento.
+
 ## Regras
 - Build da ISO só em Linux (VM Debian ou WSL2 em ext4), nunca em pasta Windows nem em /mnt/c.
 - Arquivos sempre com LF.
@@ -20,4 +22,7 @@ Distro Linux remasterizada (Debian estável, live-build) para virtualização de
 - Não inventar conteúdo técnico, comandos nem versões.
 
 ## Comandos
-Ainda não existem, a preencher.
+Em Linux (VM Debian 13), na raiz do repo:
+- Gerar a ISO: `sudo scripts/build-iso.sh` (saída em `dist/`, log em `live-build/build.log`)
+- Testar a ISO: `tests/iso.sh dist/nexus-os-poc-amd64.iso`
+- Verificação estática do repo (roda também no Git Bash): `tests/lint-repo.sh`

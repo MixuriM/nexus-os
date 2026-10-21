@@ -12,6 +12,21 @@ live-image-*
 *.packages
 *.log
 
+# Saída do scripts/build-iso.sh (ISO e SHA256 nunca entram no Git)
+dist/
+
+# Gerados pelo "lb config" a cada build (o auto/config os recria)
+live-build/config/binary
+live-build/config/bootstrap
+live-build/config/chroot
+live-build/config/common
+live-build/config/source
+live-build/config/package-lists/live.list.chroot
+live-build/config/hooks/live/
+live-build/config/hooks/normal/
+live-build/binary.modified_timestamps
+live-build/chroot.packages.*
+
 # Runtime do Containerlab
 clab-*/
 .clab.*
