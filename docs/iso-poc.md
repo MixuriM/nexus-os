@@ -52,6 +52,7 @@ tests/iso.sh dist/nexus-os-poc-amd64.iso
 
 O teste confere o SHA256 contra o `.sha256`, inicia a ISO em QEMU sem interface, com a serial gravada em arquivo temporário, e espera `login:` por até 300 s com KVM ou 900 s sem KVM.
 O menu do isolinux espera uma tecla (`timeout 0` em `isolinux.cfg`), então o teste envia Enter pelo monitor do QEMU nos primeiros 60 s.
+O monitor usa FIFOs dentro do diretório temporário (modo 0700), e não uma porta TCP, para que outro usuário da máquina não consiga mandar comandos ao QEMU.
 
 Medido na VM de build, `/dev/kvm` ausente, QEMU 10.0.13 em emulação por software:
 
@@ -59,6 +60,7 @@ Medido na VM de build, `/dev/kvm` ausente, QEMU 10.0.13 em emulação por softwa
 | --- | --- | --- |
 | 1 | OK | 827 s |
 | 2 | OK, linha `debian login: ` | 104 s |
+| 3 | OK, linha `debian login: `, já com o monitor do QEMU por FIFO | 129 s |
 
 ## Limitações
 
