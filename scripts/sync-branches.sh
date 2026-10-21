@@ -28,7 +28,8 @@ elif git push --force-with-lease="marcos:$(git rev-parse origin/marcos)" origin 
     if [ "$(git branch --show-current)" = marcos ]; then
         git reset --hard origin/main
     else
-        git branch -f marcos origin/main
+        # update-ref só move a branch; "git branch -f" trocaria o upstream dela para origin/main.
+        git update-ref refs/heads/marcos refs/remotes/origin/main
     fi
     echo "OK: marcos = main"
 else
@@ -44,3 +45,13 @@ for b in "${pessoais[@]}"; do
         echo "AVISO: $b não é fast-forward (tem commits próprios); sincronizar na mão"
     fi
 done
+
+# 3. main local acompanha a origin/main, só se for fast-forward.
+if [ "$(git branch --show-current)" = main ]; then
+    git merge --ff-only origin/main
+elif git merge-base --is-ancestor main origin/main 2>/dev/null; then
+    git update-ref refs/heads/main refs/remotes/origin/main
+fi
+
+# 4. termina na marcos, com o upstream em origin/marcos.
+git switch marcos && git branch --set-upstream-to=origin/marcos marcos

@@ -78,6 +78,8 @@ Use o nome da sua branch no lugar de `<sua-branch>`.
   1. `git fetch origin --prune` e confere que o working tree está limpo.
   2. Realinha a `marcos` com a `main` (force push com `--force-with-lease`, permitido pelo bypass de Admin). Só faz isso se todos os commits da `marcos` já estiverem na `main` (conferido com `git cherry`). Se houver commit que a `main` não tem, pula a `marcos` e avisa.
   3. Avança `renato`, `giulliano`, `gudryan`, `jean` e `sayuri` por fast-forward para a `main`, sem checkout e sem merge local. Branch com commits próprios é recusada pelo servidor: o script avisa e segue para a próxima. Isso é comum para quem teve o PR mergeado com rebase, porque os commits originais da branch não existem na `main`. Essa pessoa resolve com o `git merge --no-edit origin/main` descrito abaixo.
+  4. Avança a `main` local para a `origin/main`, só se for fast-forward.
+  5. Termina na branch `marcos`, com o upstream em `origin/marcos`.
 
   O script age no repositório onde ele está e só roda se o `origin` for o `nexus-os`.
 - Cada integrante precisa atualizar a própria branch depois da sincronização: `git fetch origin`, `git switch <sua-branch>` e `git merge --no-edit origin/main`.
