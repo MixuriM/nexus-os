@@ -1,0 +1,5 @@
+#!/bin/sh
+# O log é gravado por scripts/build-iso.sh (um pipe aqui esconderia o código de saída).
+set -e
+
+lb build noauto "${@}"
