@@ -54,6 +54,7 @@ Use o nome da sua branch no lugar de `<sua-branch>`.
 ## Regras
 
 - PRs pequenos e frequentes.
+- Integrantes abrem PR somente para a `marcos`, nunca direto para a `main`. Só Marcos abre PR para a `main`, e sempre a partir da `marcos`, porque a `main` só recebe o que já passou pela `marcos`.
 - Se o PR tiver conflito, resolva na sua branch: `git merge origin/marcos`, corrija os arquivos, faça o commit e o push.
 - Nunca commite na branch de outra pessoa.
 - Force push e apagar branch são bloqueados pelo GitHub nas branches pessoais.
@@ -85,3 +86,4 @@ Use o nome da sua branch no lugar de `<sua-branch>`.
 
 - Push rejeitado com aviso de violação de regra do repositório: você tentou push em `main` ou `marcos`, force push ou apagar branch. Abra um PR.
 - Sem botão de merge no PR: esperado, só o revisor final mergeia.
+- PR aberto com base `main` por engano: feche e abra de novo com base `marcos`.
