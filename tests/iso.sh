@@ -26,11 +26,15 @@ fi
 
 tmp=$(mktemp -d)
 qpid=
+dpid=
 # shellcheck disable=SC2317  # chamada indiretamente pelo trap
 cleanup() {
     if [ -n "$qpid" ]; then
         kill "$qpid" 2>/dev/null || true
         wait "$qpid" 2>/dev/null || true
+    fi
+    if [ -n "$dpid" ]; then
+        kill "$dpid" 2>/dev/null || true
     fi
     rm -rf "$tmp"
 }
@@ -38,10 +42,15 @@ trap cleanup EXIT
 
 serial="$tmp/serial.log"
 : >"$serial"
-port=$((20000 + RANDOM % 20000))
+# Monitor do QEMU por FIFOs dentro do mktemp (modo 0700): só o usuário que roda o teste alcança.
+# Não usar TCP: qualquer usuário local conseguiria mandar comandos ao QEMU.
+mkfifo "$tmp/mon.in" "$tmp/mon.out"
+exec 3<>"$tmp/mon.in"
+cat "$tmp/mon.out" >/dev/null &
+dpid=$!
 qemu-system-x86_64 "${accel[@]}" -m 1024 -smp 2 -cdrom "$iso" -boot d \
     -display none -serial "file:$serial" \
-    -monitor "tcp:127.0.0.1:$port,server,nowait" 2>"$tmp/qemu.err" &
+    -chardev "pipe,id=mon,path=$tmp/mon" -mon chardev=mon,mode=readline 2>"$tmp/qemu.err" &
 qpid=$!
 
 # O menu do isolinux espera uma tecla (timeout 0): manda Enter nos primeiros 60 s.
@@ -49,7 +58,7 @@ start=$SECONDS
 while [ $((SECONDS - start)) -lt "$limit" ]; do
     kill -0 "$qpid" 2>/dev/null || fail "QEMU terminou antes do login: $(tail -n 3 "$tmp/qemu.err")"
     if [ $((SECONDS - start)) -lt 60 ]; then
-        ( exec 3<>"/dev/tcp/127.0.0.1/$port" && printf 'sendkey ret\n' >&3 ) 2>/dev/null || true
+        printf 'sendkey ret\n' >&3
     fi
     linha=$(tr -d '\r' <"$serial" | grep -aE 'login:[[:space:]]*$' | tail -n 1 || true)
     if [ -n "$linha" ]; then
