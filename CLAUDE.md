@@ -26,3 +26,6 @@ Em Linux (VM Debian 13), na raiz do repo:
 - Gerar a ISO: `sudo scripts/build-iso.sh` (saída em `dist/`, log em `live-build/build.log`)
 - Testar a ISO: `tests/iso.sh dist/nexus-os-poc-amd64.iso`
 - Verificação estática do repo (roda também no Git Bash): `tests/lint-repo.sh`
+- Laboratório Open vSwitch (F2.5): `sudo tests/sdn.sh`
+- Libvirt com `virsh` (F2.6): `sudo tests/virtualizacao.sh`
+- FRR com Containerlab (F2.7): `sudo tests/nfv.sh` (precisa de Docker e Containerlab)
