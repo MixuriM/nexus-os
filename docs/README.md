@@ -9,3 +9,6 @@ O relatório acadêmico do projeto não fica neste repositório.
 - [SDN: Open vSwitch com regras OpenFlow manuais](sdn.md)
 - [Virtualização: KVM/QEMU com libvirt](virtualizacao.md)
 - [NFV: FRRouting com Containerlab](nfv.md)
+- [Modelo de manual](manual-modelo.md)
+- [Checklist de teste da documentação](checklist-teste-documentacao.md)
+- [Oficina de Git](oficina-git.md)
