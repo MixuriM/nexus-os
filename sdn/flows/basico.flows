@@ -1,0 +1,6 @@
+# Regras OpenFlow do laboratório: h1 (porta 1) e h2 (porta 2) só trocam ARP e ICMP.
+# Fora destas regras o modo secure descarta tudo. Formato aceito por: ovs-ofctl add-flows
+priority=100,arp,in_port=1,actions=output:2
+priority=100,arp,in_port=2,actions=output:1
+priority=100,icmp,in_port=1,nw_dst=192.0.2.2,actions=output:2
+priority=100,icmp,in_port=2,nw_dst=192.0.2.1,actions=output:1
