@@ -41,14 +41,14 @@ Criação da VM (PowerShell no Windows), com a ISO netinst do Debian 13 baixada 
 $vb  = 'C:\Program Files\Oracle\VirtualBox\VBoxManage.exe'
 $iso = "$env:USERPROFILE\Downloads\debian-13.7.0-amd64-netinst.iso"
 $base = "$env:USERPROFILE\VirtualBox VMs"
-$vdi = "$base\nexus-dev\nexus-dev.vdi"
+$vdi = "$base\nexus-build\nexus-build.vdi"
 
-& $vb createvm --name=nexus-dev --ostype=Debian_64 --basefolder="$base" --register
-& $vb modifyvm nexus-dev --cpus=4 --memory=8192 --vram=16 --graphicscontroller=vmsvga --audio-driver=none --nic1=nat --nat-pf1="ssh,tcp,127.0.0.1,2222,,22" --nested-hw-virt=on
+& $vb createvm --name=nexus-build --ostype=Debian_64 --basefolder="$base" --register
+& $vb modifyvm nexus-build --cpus=4 --memory=8192 --vram=16 --graphicscontroller=vmsvga --audio-driver=none --nic1=nat --nat-pf1="ssh,tcp,127.0.0.1,2222,,22" --nested-hw-virt=on
 & $vb createmedium disk --filename="$vdi" --size=81920 --format=VDI --variant=Standard
-& $vb storagectl nexus-dev --name=SATA --add=sata --controller=IntelAhci
-& $vb storageattach nexus-dev --storagectl=SATA --port=0 --device=0 --type=hdd --medium="$vdi"
-& $vb storageattach nexus-dev --storagectl=SATA --port=1 --device=0 --type=dvddrive --medium="$iso"
+& $vb storagectl nexus-build --name=SATA --add=sata --controller=IntelAhci
+& $vb storageattach nexus-build --storagectl=SATA --port=0 --device=0 --type=hdd --medium="$vdi"
+& $vb storageattach nexus-build --storagectl=SATA --port=1 --device=0 --type=dvddrive --medium="$iso"
 ```
 
 No instalador do Debian: deixar a senha de root vazia (cria o `sudo` para o usuário comum), particionamento guiado com o disco inteiro e, em "Software selection", desmarcar o ambiente gráfico e marcar apenas "SSH server" e "standard system utilities".
