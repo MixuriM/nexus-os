@@ -21,14 +21,14 @@ Como foram medidas: [docs/ambiente-de-build.md](docs/ambiente-de-build.md).
 
 ## Estrutura
 
-- `docs/`: documentação técnica
-- `live-build/`: configuração da ISO (a ser gerada em Linux)
-- `sdn/`: OpenDaylight, OpenFlow, Open vSwitch
-- `nfv/`: KVM/QEMU + libvirt, FRRouting, NFVO/VNFM simplificado
-- `ansible/`: scripts e playbooks de orquestração
-- `labs/containerlab/` e `labs/gns3/`: topologias de demonstração
+- `docs/`: documentação técnica ([índice](docs/README.md))
+- `live-build/`: configuração da ISO (receita em `auto/` e `config/`)
+- `sdn/`: laboratório Open vSwitch com regras OpenFlow manuais (`lab-ovs.sh`, `flows/`)
+- `nfv/`: VM de teste do libvirt (`libvirt/vm-teste.xml`)
+- `ansible/`: scripts e playbooks de orquestração (sem conteúdo ainda)
+- `labs/containerlab/`: topologia com dois nós FRR e OSPF. `labs/gns3/`: sem conteúdo ainda
 - `scripts/`: build da ISO (`build-iso.sh`) e sincronização das branches (`sync-branches.sh`)
-- `tests/`: testes
+- `tests/`: testes da ISO e dos componentes ([lista](tests/README.md))
 
 ## Como gerar a ISO
 
@@ -57,6 +57,11 @@ Preparo da VM: [docs/ambiente-de-build.md](docs/ambiente-de-build.md). Resultado
    ```
 
 4. Antes de commitar, rode `tests/lint-repo.sh`.
+
+## Testes dos componentes
+
+Na VM Debian, depois de gerar a ISO, `tests/run-fase2.sh dist/nexus-os-poc-amd64.iso` roda em ordem a verificação do repositório, o boot da ISO e os laboratórios de Open vSwitch, libvirt e FRR com Containerlab, e para no primeiro erro.
+Cada laboratório tem o seu guia: [SDN](docs/sdn.md), [virtualização](docs/virtualizacao.md) e [NFV](docs/nfv.md). Para quem vai testar a documentação do zero: [checklist](docs/checklist-teste-documentacao.md).
 
 ## Fluxo de trabalho
 
