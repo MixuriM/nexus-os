@@ -4,5 +4,6 @@
 O relatório acadêmico do projeto não fica neste repositório.
 
 - [Ambiente de build](ambiente-de-build.md)
-
-Status: vazio, a ser preenchido pela equipe.
+- [SDN: Open vSwitch com regras OpenFlow manuais](sdn.md)
+- [Virtualização: KVM/QEMU com libvirt](virtualizacao.md)
+- [NFV: FRRouting com Containerlab](nfv.md)
