@@ -16,6 +16,19 @@ Nenhum pacote de Open vSwitch, libvirt, FRRouting, Docker ou Containerlab entra 
 
 O hash vale só para a ISO medida nesta data. A igualdade de hash entre builds diferentes não foi testada: cada build gera o seu próprio `.sha256`.
 
+## Validação em clone limpo pelo autor (22/10/2026)
+
+Não vale como reprodução por segunda pessoa: quem validou é o autor do build. A reprodução por segunda pessoa segue pendente ([checklist-teste-documentacao.md](checklist-teste-documentacao.md)).
+
+| Item | Valor |
+| --- | --- |
+| Ambiente | VM Debian 13 no VirtualBox (4 vCPU, 8 GB), clone novo de `origin/marcos` no commit `c201c42`, sem `/dev/kvm` |
+| Passos | os do `README.md`: `sudo scripts/build-iso.sh` e `tests/iso.sh` |
+| Build | saída 0, 399 s (o primeiro build levou 1374 s; a causa da diferença não foi diagnosticada) |
+| Tamanho | 363855872 bytes (igual ao build anterior) |
+| SHA256 | `bb79026c02ded030efdf037ff58fcc1ccf5ca08e23fd934c609a264ac086aad2` (difere do build de 21/10/2026, como esperado: cada build gera o seu) |
+| `tests/run-fase2.sh` | `OK` nos 5 testes (`lint-repo`, `iso`, `sdn`, `virtualizacao`, `nfv`); `iso` chegou ao `login:` em 97 s sem KVM; total do runner 125 s |
+
 ## Como gerar
 
 Na VM de build ([ambiente-de-build.md](ambiente-de-build.md)), com o repositório clonado no disco da VM:
