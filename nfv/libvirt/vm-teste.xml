@@ -1,0 +1,12 @@
+<domain type='qemu'>
+  <name>nexus-vm-teste</name>
+  <memory unit='MiB'>128</memory>
+  <vcpu>1</vcpu>
+  <os>
+    <type arch='x86_64' machine='q35'>hvm</type>
+  </os>
+  <devices>
+    <emulator>/usr/bin/qemu-system-x86_64</emulator>
+    <graphics type='vnc' port='-1' listen='127.0.0.1'/>
+  </devices>
+</domain>
