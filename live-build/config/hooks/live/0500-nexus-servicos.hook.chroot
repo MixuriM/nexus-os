@@ -18,5 +18,10 @@ chmod 0755 /usr/share/nexus-os/nfv/libvirt/nexus-vm.sh
 # O pacote cria a rede default sem autostart (o postinst não roda o virsh no chroot): mesmo efeito de virsh net-autostart default.
 ln -sf /etc/libvirt/qemu/networks/default.xml /etc/libvirt/qemu/networks/autostart/default.xml
 
+# F3.4: Docker e imagens offline (o nexus-images.service carrega /var/lib/nexus-os/images/*.tar sem rede)
+systemctl enable docker.service
+systemctl enable nexus-images.service
+chmod 0755 /usr/local/bin/nexus-images-load
+
 # Smoke test (só age com o CD NEXUS_SMOKE)
 systemctl enable nexus-smoke.service

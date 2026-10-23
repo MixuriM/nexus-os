@@ -1,0 +1,16 @@
+[Unit]
+Description=Carrega no Docker as imagens de contêiner embutidas na ISO (sem rede)
+After=docker.service
+Requires=docker.service
+ConditionPathExists=/var/lib/nexus-os/images
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/nexus-images-load
+# Só journal: texto no console depois do "login:" quebraria a espera do tests/iso.sh.
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
