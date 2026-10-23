@@ -34,10 +34,20 @@ if [ ${#texto[@]} -gt 0 ]; then
     done < <(grep -l $'\xe2\x80\x94' -- "${texto[@]}" || true)
 fi
 
-# 3. ISO ou .img rastreados
+# 3. ISO, .img, .tar ou .deb rastreados
 while IFS= read -r f; do
-    fail "imagem rastreada pelo git: $f"
-done < <(git ls-files | grep -iE '\.(iso|img)$' || true)
+    fail "imagem ou pacote rastreado pelo git: $f"
+done < <(git ls-files | grep -iE '\.(iso|img|tar|deb)$' || true)
+
+# 3b. Arquivo da ISO que o .gitignore esconde (o git não o versionaria). Fora: os dois diretórios
+# gerados pelo build; dentro de hooks/live só os nexus-* (o resto é link criado pelo lb config).
+while IFS= read -r -d '' f; do
+    case $f in
+        live-build/config/includes.chroot/usr/share/nexus-os/* | live-build/config/includes.chroot/var/lib/nexus-os/*) ;;
+        live-build/config/includes.chroot/*) fail "ignorado pelo .gitignore: $f" ;;
+        live-build/config/hooks/live/*nexus-*) fail "ignorado pelo .gitignore: $f" ;;
+    esac
+done < <(git ls-files --others --ignored --exclude-standard -z -- live-build/config/includes.chroot live-build/config/hooks/live)
 
 # 4. Padrões óbvios de segredo (este arquivo define os padrões, então fica de fora)
 padrao='-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|(password|passwd|senha|secret|token|api_?key)[[:space:]]*[:=][[:space:]]*["'"'"']?[A-Za-z0-9/+_-]{8,}'
