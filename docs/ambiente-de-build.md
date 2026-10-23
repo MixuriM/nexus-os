@@ -65,6 +65,27 @@ git clone -b marcos https://github.com/MixuriM/nexus-os.git ~/nexus-os
 
 Para gerar a ISO, veja a seção "Como gerar a ISO" do `README.md` e [iso-poc.md](iso-poc.md).
 
+## VM de build no Hyper-V (com KVM)
+
+Em 23/10/2026, em um notebook com CPU AMD, o VirtualBox 7.2.20 não serve para KVM (veja a seção seguinte e o issue #25). A alternativa que funcionou foi uma VM Debian 13 de Geração 2 no Hyper-V do Windows 11 Pro, com o hypervisor ligado. Medido: `/dev/kvm` presente, `egrep -c '(vmx|svm)' /proc/cpuinfo` igual ao número de vCPU, build da ISO em 348 s e todos os smokes com KVM.
+
+Criação (PowerShell 7 como administrador, com a ISO netinst do Debian 13 em `C:\HyperV`; troque `NOME-DA-ISO.iso`):
+
+```powershell
+$vm = "<nome-da-vm>"
+New-VM -Name $vm -Generation 2 -MemoryStartupBytes 8GB -NewVHDPath "C:\HyperV\$vm.vhdx" -NewVHDSizeBytes 80GB -SwitchName "Default Switch"
+Set-VMProcessor -VMName $vm -Count 4 -ExposeVirtualizationExtensions $true
+Set-VMMemory -VMName $vm -DynamicMemoryEnabled $false -StartupBytes 8GB
+Set-VMFirmware -VMName $vm -EnableSecureBoot Off
+Add-VMDvdDrive -VMName $vm -Path "C:\HyperV\NOME-DA-ISO.iso"
+Set-VMFirmware -VMName $vm -FirstBootDevice (Get-VMDvdDrive -VMName $vm)
+```
+
+- Desligue a Memória Dinâmica (`Set-VMMemory ... -DynamicMemoryEnabled $false`): com ela ligada a VM enxergou só cerca de 528 MB (`MemTotal`) e o build não tem RAM. O comando exige a VM desligada.
+- A Microsoft documenta nested em AMD (Ryzen e EPYC) com host Windows 11 e VM de versão 9.3 ou mais nova: https://learn.microsoft.com/windows-server/virtualization/hyper-v/enable-nested-virtualization
+- O IP da VM no `Default Switch` muda quando o Windows reinicia. O nome `<nome-da-vm>.mshome.net`, resolvido pelo Windows, continua valendo: `ssh <usuario>@<nome-da-vm>.mshome.net`.
+- Instalação do Debian e preparação do build: as mesmas da seção "Preparar a VM para o build".
+
 ## Virtualização aninhada (KVM dentro da VM)
 
 A VM é criada com `--nested-hw-virt=on`. Mesmo assim, com o Hyper-V ou a Plataforma de Hipervisor do Windows ativos,
