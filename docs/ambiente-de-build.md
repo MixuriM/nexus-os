@@ -69,7 +69,7 @@ Para gerar a ISO, veja a seção "Como gerar a ISO" do `README.md` e [iso-poc.md
 
 Em 23/10/2026, em um notebook com CPU AMD, o VirtualBox 7.2.20 não serve para KVM (veja a seção seguinte e o issue #25). A alternativa que funcionou foi uma VM Debian 13 de Geração 2 no Hyper-V do Windows 11 Pro, com o hypervisor ligado. Medido: `/dev/kvm` presente, `egrep -c '(vmx|svm)' /proc/cpuinfo` igual ao número de vCPU, build da ISO em 348 s e todos os smokes com KVM.
 
-Criação (PowerShell 7 como administrador, com a ISO netinst do Debian 13 em `C:\HyperV`; troque `NOME-DA-ISO.iso`):
+Passo a passo completo (preparo do Windows, instalação do Debian, SSH e validação): [hyperv.md](hyperv.md). Resumo da criação (PowerShell 7 como administrador, com a ISO netinst do Debian 13 em `C:\HyperV`; troque `NOME-DA-ISO.iso`):
 
 ```powershell
 $vm = "<nome-da-vm>"

@@ -5,6 +5,7 @@ O relatório acadêmico do projeto não fica neste repositório.
 
 - [Fluxo de trabalho](fluxo-de-trabalho.md)
 - [Ambiente de build](ambiente-de-build.md)
+- [VM de build no Hyper-V (com KVM)](hyperv.md)
 - [ISO da prova de conceito](iso-poc.md)
 - [Integração dos componentes na ISO](integracao-iso.md)
 - [SDN: Open vSwitch com regras OpenFlow manuais](sdn.md)
