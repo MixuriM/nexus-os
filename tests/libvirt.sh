@@ -13,7 +13,8 @@ command -v nexus-vm >/dev/null || fail "nexus-vm não encontrado em /usr/local/b
 
 uri=qemu:///system
 nome=smoke1
-virsh_() { virsh -c "$uri" "$@"; }
+# LC_ALL=C: o teste lê o estado e os campos do virsh, que mudam com o idioma (por exemplo "executando" em pt_BR).
+virsh_() { LC_ALL=C virsh -c "$uri" "$@"; }
 # shellcheck disable=SC2317  # chamada indiretamente pelo trap
 cleanup() {
     virsh_ destroy "$nome" >/dev/null 2>&1 || true
