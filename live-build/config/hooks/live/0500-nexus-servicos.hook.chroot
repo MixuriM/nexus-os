@@ -11,5 +11,12 @@ systemctl enable openvswitch-switch.service
 ln -sf /usr/share/nexus-os/sdn/lab-ovs.sh /usr/local/bin/nexus-sdn
 chmod 0755 /usr/share/nexus-os/sdn/lab-ovs.sh
 
+# F3.3: KVM/QEMU e libvirt (o libvirtd.service ativa os três sockets pelo Also=)
+systemctl enable libvirtd.service
+ln -sf /usr/share/nexus-os/nfv/libvirt/nexus-vm.sh /usr/local/bin/nexus-vm
+chmod 0755 /usr/share/nexus-os/nfv/libvirt/nexus-vm.sh
+# O pacote cria a rede default sem autostart (o postinst não roda o virsh no chroot): mesmo efeito de virsh net-autostart default.
+ln -sf /etc/libvirt/qemu/networks/default.xml /etc/libvirt/qemu/networks/autostart/default.xml
+
 # Smoke test (só age com o CD NEXUS_SMOKE)
 systemctl enable nexus-smoke.service
