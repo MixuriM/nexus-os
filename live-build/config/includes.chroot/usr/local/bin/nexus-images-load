@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Carrega no Docker os .tar de /var/lib/nexus-os/images/ (gerados por scripts/prepare-offline.sh).
+# Idempotente: pula o arquivo cujas tags já existem. Não usa rede.
+set -euo pipefail
+
+dir=${NEXUS_IMAGES_DIR:-/var/lib/nexus-os/images}
+shopt -s nullglob
+for tar in "$dir"/*.tar; do
+    # O manifest.json do docker save lista as tags da imagem em "RepoTags".
+    mapfile -t tags < <(tar -xOf "$tar" manifest.json | grep -o '"RepoTags":\[[^]]*\]' | grep -o '"[^"]*"' | tr -d '"' | grep -vx RepoTags)
+    [ ${#tags[@]} -gt 0 ] || { echo "FALHA: ${tar##*/} sem RepoTags" >&2; exit 1; }
+    faltando=0
+    for tag in "${tags[@]}"; do
+        docker image inspect "$tag" >/dev/null 2>&1 || faltando=1
+    done
+    if [ "$faltando" -eq 0 ]; then
+        echo "nexus-images: ${tags[*]} já carregada"
+        continue
+    fi
+    docker load -i "$tar" >/dev/null
+    echo "nexus-images: carregada ${tags[*]}"
+done

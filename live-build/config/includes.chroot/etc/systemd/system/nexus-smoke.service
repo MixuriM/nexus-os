@@ -1,7 +1,7 @@
 [Unit]
 Description=Smoke tests do Nexus OS (só roda com o CD NEXUS_SMOKE)
 # Cada componente acrescenta aqui o seu serviço.
-After=openvswitch-switch.service libvirtd.service
+After=openvswitch-switch.service libvirtd.service nexus-images.service
 
 [Service]
 Type=oneshot

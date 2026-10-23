@@ -1,0 +1,9 @@
+[Unit]
+Description=tmpfs para os dados do Docker (overlay2 não roda sobre o overlayfs da raiz da live)
+
+[Mount]
+What=tmpfs
+Where=/var/lib/docker
+Type=tmpfs
+# 50% da RAM é só o teto: a imagem do FRR ocupa 193 MB (medido).
+Options=size=50%,mode=0711
