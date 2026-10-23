@@ -81,13 +81,15 @@ Medido na VM de build, `/dev/kvm` ausente, QEMU 10.0.13 em emulação por softwa
 
 ## Boot com KVM
 
-Tentado em 23/10/2026, com o hypervisor do Windows desligado e `--nested-hw-virt on`: a VM de build passou a ter `/dev/kvm` e `svm`, mas o boot da ISO com KVM (`tests/iso.sh`, 2 vCPU e 1024 MiB) derrubou o VirtualBox 7.2.20 com `Guru Meditation -4060 (VERR_SVM_UNKNOWN_EXIT)`. Repetido com o smoke `sdn` (1 vCPU e 2048 MiB), o resultado foi o mesmo. Nenhum boot com KVM foi concluído, então a F2.4 continua 🟡 e os tempos acima são todos sem KVM. Detalhes e caminhos a avaliar em [virtualizacao.md](virtualizacao.md), seção "Problemas conhecidos".
+Em 23/10/2026, em uma VM Debian 13 de Geração 2 no Hyper-V com virtualização aninhada (Windows 11 Pro, 4 vCPU, 8 GB), `tests/iso.sh dist/ref-parte1.iso` deu `OK: ISO chegou ao login ("debian login: ") em 21 s, com KVM, SHA256 conferido`. Os tempos das tabelas acima são sem KVM.
+
+No VirtualBox 7.2.20, o mesmo teste com KVM derrubou a VM de build com `Guru Meditation -4060 (VERR_SVM_UNKNOWN_EXIT)` (duas vezes). Detalhes em [virtualizacao.md](virtualizacao.md), seções "Com KVM no Hyper-V" e "Problemas conhecidos".
 
 ## Limitações
 
 - **Sem KVM.** (Atualização de 23/10/2026: veja "Boot com KVM" acima.) O Hyper-V do Windows está ativo no notebook de build, então o VirtualBox não expõe VT-x/AMD-V à VM de build:
   `/dev/kvm` não existe e `egrep -c '(vmx|svm)' /proc/cpuinfo` retorna 0, mesmo com `--nested-hw-virt=on`. O boot foi medido em emulação por software (QEMU TCG), e não em KVM.
-  O critério F2.4 pede boot em VM KVM: falta repetir o teste em máquina com KVM (limite de 300 s no `tests/iso.sh`).
+  O critério F2.4 pede boot em VM KVM: cumprido no Hyper-V (21 s, seção "Boot com KVM"); a reprodução por segunda pessoa segue pendente.
 - **Tempo de boot instável sem KVM.** Duas execuções iguais deram 827 s e 104 s. A causa não foi diagnosticada. O limite de 900 s foi mantido, mas o pior caso medido passa de 90% dele.
 - **Reprodução por segunda pessoa: pendente.** Falta outra pessoa seguir a seção "Como gerar a ISO" do `README.md` em máquina limpa e conferir o boot.
 
