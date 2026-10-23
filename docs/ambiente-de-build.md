@@ -63,6 +63,14 @@ sudo apt-get install -y --no-install-recommends git ca-certificates live-build d
 git clone -b marcos https://github.com/MixuriM/nexus-os.git ~/nexus-os
 ```
 
+Desde a F3.4 o build também precisa de Docker e de internet na VM de build: o `scripts/prepare-offline.sh` baixa as imagens de contêiner (`docker pull`) e as grava na ISO. Instale o Docker (medido em 23/10/2026: `docker.io` 26.1.5+dfsg1-9+deb13u1, `apt-cache policy docker.io`):
+
+```bash
+sudo apt-get install -y docker.io
+```
+
+O `scripts/build-iso.sh` roda como root, então o usuário comum não precisa estar no grupo `docker`. Detalhes: [containers.md](containers.md).
+
 Para gerar a ISO, veja a seção "Como gerar a ISO" do `README.md` e [iso-poc.md](iso-poc.md).
 
 ## VM de build no Hyper-V (com KVM)

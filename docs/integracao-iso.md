@@ -14,7 +14,7 @@ Contrato entre a receita do live-build e os componentes da Fase 3. Cada componen
 | `/etc/live/config.conf.d/nexus.conf` | `live-build/config/includes.chroot/etc/live/config.conf.d/nexus.conf` | `includes.chroot` (grupos do usuário `user`, lidos pelo live-config) |
 | `/usr/share/nexus-os/tests/smoke.list` | `tests/smoke.list` | cópia de `tests/` |
 
-A pasta gerada `live-build/config/includes.chroot/usr/share/nexus-os/` (e `var/lib/nexus-os/`, reservada) está no `.gitignore`. O resto de `includes.chroot/` e o hook `live-build/config/hooks/live/*nexus-*` são versionados.
+A pasta gerada `live-build/config/includes.chroot/usr/share/nexus-os/` e `var/lib/nexus-os/` (os `.tar` das imagens de contêiner, gerados pelo `scripts/prepare-offline.sh`, que o `scripts/build-iso.sh` roda depois do stage e antes do `lb build`) estão no `.gitignore`. O resto de `includes.chroot/` e o hook `live-build/config/hooks/live/*nexus-*` são versionados.
 O `tests/lint-repo.sh` falha se um arquivo versionável dessas pastas estiver ignorado pelo git.
 
 No live-build instalado na VM de build (`20250505+deb13u1`), `includes.chroot` é aceito como nome antigo de `includes.chroot_after_packages` (função `select_includes_chroot`), desde que a pasta nova esteja vazia. Os hooks `*.hook.chroot` em `config/hooks/live/` rodam depois dos de `config/hooks/normal/`, e o live-build torna o hook executável se ele não for.
@@ -46,7 +46,7 @@ Habilitado em `multi-user.target`. A condição `ExecCondition=/usr/sbin/blkid -
 Com o CD, `nexus-smoke --cd` monta o CD em leitura, lê `testes.txt` (nomes ou `all`), copia `extra/*.sh` do CD para `/usr/share/nexus-os/tests/` (sobrescreve), roda os testes, imprime `DONE` e executa `systemctl --no-block poweroff`.
 A saída vai para a serial: o último `console=` da linha de comando do kernel é `console=ttyS0,115200n8`.
 
-Ordenação: o `After=` lista só os serviços de componente existentes (hoje `openvswitch-switch.service` e `libvirtd.service`). Não há `After=multi-user.target`, para não criar ciclo com o `WantedBy=`.
+Ordenação: o `After=` lista só os serviços de componente existentes (hoje `openvswitch-switch.service`, `libvirtd.service` e `nexus-images.service`). Não há `After=multi-user.target`, para não criar ciclo com o `WantedBy=`.
 
 ## Como rodar no host (VM de build)
 
@@ -76,7 +76,7 @@ Sai com 0 só se o `DONE` apareceu com 0 falhas, todos os `END` têm código 0 e
 | --- | --- | --- | --- |
 | F3.2 Open vSwitch | `openvswitch-switch` 3.5.0-1+b1 (`iproute2` e `iputils-ping` já vêm na base) | `sdn` | ✅ `iso-smoke` OK sem KVM (119 s) e com KVM no Hyper-V (24 s, 2 vezes); reprodução por segunda pessoa pendente |
 | F3.3 KVM/QEMU e libvirt | `libvirt-daemon-system` e `libvirt-clients` 11.3.0-3+deb13u3, `qemu-system-x86` 1:10.0.13+ds-0+deb13u1 (`dnsmasq-base` e `nftables` vêm por dependência) | `virtualizacao`, `libvirt` | ✅ `iso-smoke` OK sem KVM (156 s) e com KVM no Hyper-V (24 s, `virt-type kvm`); reprodução por segunda pessoa pendente; KVM aninhado não funciona no VirtualBox 7.2.20 em AMD (veja [virtualizacao.md](virtualizacao.md)) |
-| F3.4 Docker e imagens offline | | | ⏳ parte 3 |
+| F3.4 Docker e imagens offline | `docker.io` 26.1.5+dfsg1-9+deb13u1; imagem `quay.io/frrouting/frr:10.7.1` em `/var/lib/nexus-os/images/*.tar`, listada em `live-build/offline/imagens.txt` e preparada por `scripts/prepare-offline.sh` (veja [containers.md](containers.md)) | `containers` | ✅ `iso-smoke` OK com KVM no Hyper-V (30 s, sem rede, driver `overlay2` sobre tmpfs); reprodução por segunda pessoa pendente |
 | F3.5 FRRouting | | `nfv` | ⏳ parte 4 |
 | F3.7 Containerlab | | `nfv` | ⏳ parte 4 |
 
@@ -130,4 +130,4 @@ O nome `nexus-os-poc-amd64.iso` fica até o congelamento da RC1.
 - O tempo de boot sem KVM varia muito (veja [iso-poc.md](iso-poc.md)). O limite padrão do smoke sem KVM é 2400 s.
 - Na VM de build (VirtualBox com Hyper-V no Windows), o QEMU sem KVM às vezes sufoca a VM: o kernel dela mostra `soft lockup` de 23 s a 713 s, o SSH deixa de responder e o teste termina em `FALHA: NEXUS-SMOKE-DONE não apareceu`. Aconteceu 5 vezes em 23/10/2026, também durante o `mksquashfs` do build, e uma vez o guest parou em `Bringing up secondary CPUs` com 2 vCPU. Reiniciar a VM resolve. O que funcionou: `NEXUS_SMOKE_SMP=1 NEXUS_SMOKE_MEM=2048 NEXUS_SMOKE_LIMIT=900`, um teste por vez, sem consultar a VM por SSH nos primeiros minutos.
 - Com KVM no Hyper-V o smoke padrão (2 vCPU, 4096 MiB) passou 2 vezes seguidas (24 s), então o contorno acima não é necessário lá. No VirtualBox 7.2.20 com AMD o KVM aninhado derruba a VM de build (`VERR_SVM_UNKNOWN_EXIT`): nesse ambiente fica a emulação com o contorno (`NEXUS_SMOKE_SMP=1`, 2048 MiB). Veja [virtualizacao.md](virtualizacao.md).
-- Sem rede (`-nic none`) o smoke não baixa nada. Testes que dependam de imagens de contêiner precisam delas dentro da ISO (parte 3).
+- Sem rede (`-nic none`) o smoke não baixa nada. Testes que dependam de imagens de contêiner usam as que vão dentro da ISO (F3.4, veja [containers.md](containers.md)).
