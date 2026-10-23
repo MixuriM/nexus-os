@@ -10,6 +10,7 @@ O relatório acadêmico do projeto não fica neste repositório.
 - [Integração dos componentes na ISO](integracao-iso.md)
 - [SDN: Open vSwitch com regras OpenFlow manuais](sdn.md)
 - [Virtualização: KVM/QEMU com libvirt](virtualizacao.md)
+- [Contêineres: Docker e imagens offline na ISO](containers.md)
 - [NFV: FRRouting com Containerlab](nfv.md)
 - [Modelo de manual](manual-modelo.md)
 - [Checklist de teste da documentação](checklist-teste-documentacao.md)

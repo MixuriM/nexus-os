@@ -3,7 +3,7 @@
 Configuração da ISO do Nexus OS com live-build.
 
 - `auto/config`, `auto/build` e `auto/clean`: scripts que o `lb` chama. Os parâmetros da ISO ficam em `auto/config`.
-- `config/package-lists/nexus-base.list.chroot` e `nexus-sdn.list.chroot`: pacotes da base e do Open vSwitch (um arquivo por componente).
+- `config/package-lists/nexus-<componente>.list.chroot`: pacotes da base e de cada componente (um arquivo por componente).
 - `config/includes.chroot/`: arquivos copiados para a ISO (`nexus-smoke`, `nexus-smoke.service`). A subpasta `usr/share/nexus-os/` é gerada por `scripts/stage-iso-files.sh` e está no `.gitignore`.
 - `config/hooks/live/0500-nexus-servicos.hook.chroot`: habilita os serviços e cria os links dos comandos.
 - O restante de `config/` é gerado pelo `lb config` a cada build e está no `.gitignore`.
