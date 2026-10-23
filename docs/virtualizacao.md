@@ -60,8 +60,30 @@ O teste automatizado faz esse roteiro e a limpeza, e registra `vmx/svm` e `/dev/
 sudo tests/virtualizacao.sh
 ```
 
+## Na ISO (F3.3)
+
+A ISO já traz o libvirt pronto. Pacotes (`live-build/config/package-lists/nexus-virt.list.chroot`): `libvirt-daemon-system` e `libvirt-clients` 11.3.0-3+deb13u3, `qemu-system-x86` 1:10.0.13+ds-0+deb13u1. A rede `default` precisa de `dnsmasq-base` (2.91) e de `nftables` (1.1.3), que o `libvirt-daemon-driver-network` já puxa por dependência (`apt-cache depends`): nenhum pacote extra foi acrescentado. `qemu-utils` fica de fora porque nenhum script o usa.
+
+- **Serviço:** `libvirtd.service`, habilitado no hook; o `Also=` dele ativa `libvirtd.socket`, `libvirtd-ro.socket` e `libvirtd-admin.socket`. A `nexus-smoke.service` roda depois dele.
+- **Rede `default`:** o pacote cria a rede sem autostart, porque o postinst não consegue rodar o `virsh` no chroot. O hook cria o link `/etc/libvirt/qemu/networks/autostart/default.xml`, o mesmo efeito de `virsh net-autostart default`. No boot, `virsh net-list --all` mostra `default` ativa, com autostart (sem internet).
+- **Grupo:** o usuário `user` (senha `live`, pública do Debian Live) entra no grupo `libvirt` por `LIVE_USER_DEFAULT_GROUPS` em `/etc/live/config.conf.d/nexus.conf`, que o live-config lê em `/usr/lib/live/init-config.sh`. O arquivo repete a lista padrão do live-config e acrescenta `libvirt`.
+- **`nexus-vm`:** link em `/usr/local/bin` para `nfv/libvirt/nexus-vm.sh`. `nexus-vm criar <nome>` define e inicia a VM de `vm-teste.xml` com outro nome (nome `[a-z0-9-]`, sem hífen no início), `virt-type kvm` se existir `/dev/kvm` e `qemu` se não, sempre em `qemu:///system`; `nexus-vm listar`; `nexus-vm remover <nome>`.
+
+Smoke test dentro da ISO (veja [integracao-iso.md](integracao-iso.md)):
+
+```bash
+tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso virtualizacao,libvirt
+```
+
+`virtualizacao` roda o `tests/virtualizacao.sh` sem alteração. `libvirt` (`tests/libvirt.sh`) confere a rede `default`, o grupo e o ciclo `nexus-vm criar`, `list --all` com `running`, `nexus-vm remover`, domínio e processo QEMU ausentes. Só roda dentro da ISO (`boot=live` em `/proc/cmdline`).
+
+Medições em 23/10/2026, sem KVM no hospedeiro (QEMU em emulação por software, 1 vCPU e 2048 MiB): `OK: 2 teste(s) sem falha em 156 s`, `virtualizacao=23s`, `libvirt=7s`.
+
+O guest da ISO enxerga `/dev/kvm` (`crw-rw---- root kvm 10, 232`), tem `kvm` e `kvm_amd` carregados e 1 CPU com `svm`, mesmo com o hospedeiro em emulação. Por isso os dois testes usaram `virt-type kvm` (saída `OK: tests/virtualizacao.sh (virt-type kvm ...)` e `OK: VM smoke1 criada e iniciada (virt-type kvm)`). O QEMU emula o `svm` do guest, então é um KVM aninhado lento sobre emulação, que só prova criar e iniciar.
+
 ## Problemas conhecidos
 
+- **KVM aninhado derruba o VirtualBox (AMD).** Em 23/10/2026, com o hypervisor do Windows desligado e `--nested-hw-virt on`, a VM de build ganhou `/dev/kvm` e `svm`. Quando o QEMU interno usou KVM, o VirtualBox 7.2.20 abortou a VM com `Guru Meditation -4060 (VERR_SVM_UNKNOWN_EXIT)` (`VBox.log`). Aconteceu duas vezes: `tests/iso.sh` com 2 vCPU e 1024 MiB, e o smoke `sdn` com 1 vCPU e 2048 MiB. O changelog oficial da série 7.2 que conseguimos ler (até a 7.2.6) não cita correção de nested em AMD. Por isso a revalidação com KVM (F2.4, F2.6, F3.2) não foi feita e continua 🟡. A VM de build roda sem os módulos `kvm` (`/etc/modprobe.d/nexus-sem-kvm.conf`, só na VM, fora do repositório). Caminhos a avaliar: versão mais nova do VirtualBox, outro hospedeiro de VM (Hyper-V ou VMware) ou WSL2, em máquina diferente.
 - Sem `/dev/kvm`, a VM roda em emulação por software. Serve para provar criar e iniciar, não para medir desempenho.
 - A VM de teste não tem disco nem sistema: o QEMU inicia e fica tentando boot. O teste prova só que o domínio é definido e entra em `running`.
 - O teste valida `qemu:///system` com root. Para usar `virsh` sem `sudo`, o usuário precisa estar no grupo `libvirt` (a mudança vale a partir do próximo login).
