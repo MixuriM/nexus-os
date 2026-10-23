@@ -40,6 +40,10 @@ sudo scripts/build-iso.sh
 O script recusa rodar fora de Linux, em `/mnt/*` ou sem root. Ele entra em `live-build/`, roda `lb clean`, `lb config` (via `live-build/auto/config`) e `lb build`,
 grava o log em `live-build/build.log`, move a ISO para `dist/nexus-os-poc-amd64.iso` e gera `dist/nexus-os-poc-amd64.iso.sha256`.
 
+## ISO integrada (Fase 3)
+
+A mesma receita (`sudo scripts/build-iso.sh`) agora gera a ISO integrada: além da base, ela traz o Open vSwitch, os arquivos de `/usr/share/nexus-os/` e o runner `nexus-smoke` ([integracao-iso.md](integracao-iso.md)). O nome `nexus-os-poc-amd64.iso` fica até o congelamento da RC1. Os números acima são da ISO da prova de conceito, sem a stack.
+
 ## Parâmetros da ISO
 
 Definidos em `live-build/auto/config`, com os nomes das opções conferidos em `lb config --help`:
@@ -86,5 +90,5 @@ Medido na VM de build, `/dev/kvm` ausente, QEMU 10.0.13 em emulação por softwa
 ## Problemas conhecidos
 
 - O `lb config` e o `lb build` criam em `live-build/` links para hooks padrão (`config/hooks/live/` e `config/hooks/normal/`), `config/package-lists/live.list.chroot` e arquivos de controle.
-  Eles são gerados a cada build e estão no `.gitignore`. Hook próprio precisa de `git add -f` ou de uma exceção no `.gitignore`.
+  Eles são gerados a cada build e estão no `.gitignore`. Hook próprio precisa de `nexus-` no nome (exceção no `.gitignore`), como o `0500-nexus-servicos.hook.chroot`.
 - O `tests/lint-repo.sh` só roda o `shellcheck` se ele estiver instalado (na VM de build está; no Git Bash do Windows, não).

@@ -65,6 +65,32 @@ O teste automatizado faz esse roteiro inteiro (caso positivo, caso negativo, rec
 sudo tests/sdn.sh
 ```
 
+## Na ISO (F3.2)
+
+A ISO traz o pacote `openvswitch-switch` e o serviço do Open vSwitch habilitado no boot. O repositório vai para `/usr/share/nexus-os/` e o comando `nexus-sdn` aponta para `sdn/lab-ovs.sh`. Depois do boot, logado como `user` (senha `live`, a credencial pública do Debian Live):
+
+```bash
+sudo nexus-sdn up
+sudo ip netns exec h1 ping -c 2 192.0.2.2
+sudo nexus-sdn down
+```
+
+Saída esperada: `0% packet loss` no ping, como na VM de build.
+
+O mesmo teste roda dentro da ISO, sem rede e sem interface, pelo smoke test (veja [integracao-iso.md](integracao-iso.md)):
+
+```bash
+tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso sdn
+```
+
+| Item | Valor (23/10/2026, sem KVM) |
+| --- | --- |
+| Resultado | `OK: 1 teste(s) sem falha em 119 s`, código 0 |
+| Tempo do `tests/sdn.sh` dentro da ISO | 10 s (`sdn=10s`) |
+| ISO | 386924544 bytes, SHA256 `8761d1bce93c4ee1de569ef59304146d40e90d978e7745aee5a4f29040cbd66e` |
+
+Reprodução por segunda pessoa: pendente.
+
 ## Problemas conhecidos
 
 - O `ovs-vsctl` e o `ovs-ofctl` precisam de root (o socket do `ovsdb-server` não é acessível a usuário comum). Todos os comandos usam `sudo`.
