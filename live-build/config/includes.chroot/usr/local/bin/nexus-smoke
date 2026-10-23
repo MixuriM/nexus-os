@@ -48,6 +48,11 @@ roda() {
 cd_modo() {
     local dev mnt rc nomes=() extra
     dev=$(/usr/sbin/blkid -L "$rotulo") || { erro "CD $rotulo ausente"; exit 1; }
+    # Só CD-ROM (sr*): pendrive USB com esse rótulo não pode rodar script como root.
+    case $(basename "$(readlink -f "$dev")") in
+        sr[0-9]*) ;;
+        *) erro "$dev não é CD-ROM, recusado"; exit 1 ;;
+    esac
     mnt=$(mktemp -d)
     if mount -o ro "$dev" "$mnt" && [ -f "$mnt/testes.txt" ]; then
         mapfile -t nomes < <(grep -vE '^[[:space:]]*$' "$mnt/testes.txt" | tr -d '\r')

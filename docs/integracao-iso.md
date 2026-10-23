@@ -95,6 +95,8 @@ O nome `nexus-os-poc-amd64.iso` fica até o congelamento da RC1.
 
 ## Problemas conhecidos
 
+- Segurança: o serviço executa como root os scripts `extra/*.sh` do CD `NEXUS_SMOKE`. O `nexus-smoke --cd` só aceita dispositivo `sr*` (CD-ROM), então um pendrive USB com esse rótulo é recusado, mas quem tem acesso físico a uma ISO ligada pode inserir um CD. A ISO serve a laboratório e testes. Para uma ISO de entrega, desabilite `nexus-smoke.service` no hook. Essa restrição entrou depois do build da ISO medida e só será exercitada na próxima reconstrução.
+- O stage copia só o que o git versiona ou o que é novo e não ignorado (`git ls-files --cached --others --exclude-standard`). Arquivo ignorado, como um `.log`, não vai para a ISO. Arquivo novo ainda não ignorado e não commitado vai.
 - O `.gitignore` ignora `live-build/config/hooks/live/*` (links criados pelo `lb config`) e libera só os nomes com `nexus-`. O hook precisa conter `nexus-` no nome.
 - O `scripts/build-iso.sh` roda o stage como root: a pasta gerada pertence ao root depois do build. Rodar o stage à mão como usuário comum falha até alguém apagá-la com `sudo`.
 - O tempo de boot sem KVM varia muito (veja [iso-poc.md](iso-poc.md)). O limite padrão do smoke sem KVM é 2400 s.
