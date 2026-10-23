@@ -29,5 +29,6 @@ Em Linux (VM Debian 13), na raiz do repo:
 - Laboratório Open vSwitch (F2.5): `sudo tests/sdn.sh`
 - Libvirt com `virsh` (F2.6): `sudo tests/virtualizacao.sh`
 - FRR com Containerlab (F2.7): `sudo tests/nfv.sh` (precisa de Docker e Containerlab)
+- Libvirt dentro da ISO (F3.3): `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso virtualizacao,libvirt`; na ISO, `nexus-vm criar|listar|remover`
 - Smoke test dentro da ISO: `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso sdn` (QEMU sem rede; veja `docs/integracao-iso.md`)
 - Todos os testes da Fase 2 em ordem (para no primeiro erro): `tests/run-fase2.sh [iso]`

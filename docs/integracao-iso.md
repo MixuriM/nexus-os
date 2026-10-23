@@ -10,6 +10,8 @@ Contrato entre a receita do live-build e os componentes da Fase 3. Cada componen
 | `/usr/local/bin/nexus-smoke` | `live-build/config/includes.chroot/usr/local/bin/nexus-smoke` | `includes.chroot` do live-build |
 | `/etc/systemd/system/nexus-smoke.service` | `live-build/config/includes.chroot/etc/systemd/system/nexus-smoke.service` | `includes.chroot` |
 | `/usr/local/bin/nexus-sdn` | link para `/usr/share/nexus-os/sdn/lab-ovs.sh` | hook `0500-nexus-servicos.hook.chroot` |
+| `/usr/local/bin/nexus-vm` | link para `/usr/share/nexus-os/nfv/libvirt/nexus-vm.sh` | hook `0500-nexus-servicos.hook.chroot` |
+| `/etc/live/config.conf.d/nexus.conf` | `live-build/config/includes.chroot/etc/live/config.conf.d/nexus.conf` | `includes.chroot` (grupos do usuário `user`, lidos pelo live-config) |
 | `/usr/share/nexus-os/tests/smoke.list` | `tests/smoke.list` | cópia de `tests/` |
 
 A pasta gerada `live-build/config/includes.chroot/usr/share/nexus-os/` (e `var/lib/nexus-os/`, reservada) está no `.gitignore`. O resto de `includes.chroot/` e o hook `live-build/config/hooks/live/*nexus-*` são versionados.
@@ -44,7 +46,7 @@ Habilitado em `multi-user.target`. A condição `ExecCondition=/usr/sbin/blkid -
 Com o CD, `nexus-smoke --cd` monta o CD em leitura, lê `testes.txt` (nomes ou `all`), copia `extra/*.sh` do CD para `/usr/share/nexus-os/tests/` (sobrescreve), roda os testes, imprime `DONE` e executa `systemctl --no-block poweroff`.
 A saída vai para a serial: o último `console=` da linha de comando do kernel é `console=ttyS0,115200n8`.
 
-Ordenação: o `After=` lista só os serviços de componente existentes (hoje `openvswitch-switch.service`). Não há `After=multi-user.target`, para não criar ciclo com o `WantedBy=`.
+Ordenação: o `After=` lista só os serviços de componente existentes (hoje `openvswitch-switch.service` e `libvirtd.service`). Não há `After=multi-user.target`, para não criar ciclo com o `WantedBy=`.
 
 ## Como rodar no host (VM de build)
 
@@ -73,7 +75,7 @@ Sai com 0 só se o `DONE` apareceu com 0 falhas, todos os `END` têm código 0 e
 | Componente | Pacotes na ISO | Teste (`tests/<nome>.sh`) | Status |
 | --- | --- | --- | --- |
 | F3.2 Open vSwitch | `openvswitch-switch` 3.5.0-1+b1 (`iproute2` e `iputils-ping` já vêm na base) | `sdn` | ✅ `iso-smoke` OK sem KVM (119 s); reprodução por segunda pessoa pendente |
-| F3.3 libvirt | | `virtualizacao` | ⏳ parte 2 |
+| F3.3 KVM/QEMU e libvirt | `libvirt-daemon-system` e `libvirt-clients` 11.3.0-3+deb13u3, `qemu-system-x86` 1:10.0.13+ds-0+deb13u1 (`dnsmasq-base` e `nftables` vêm por dependência) | `virtualizacao`, `libvirt` | ✅ `iso-smoke` OK sem KVM (156 s); reprodução por segunda pessoa pendente; KVM aninhado indisponível (veja [virtualizacao.md](virtualizacao.md)) |
 | F3.4 Docker e imagens offline | | | ⏳ parte 3 |
 | F3.5 FRRouting | | `nfv` | ⏳ parte 4 |
 | F3.7 Containerlab | | `nfv` | ⏳ parte 4 |
@@ -93,6 +95,21 @@ Sai com 0 só se o `DONE` apareceu com 0 falhas, todos os `END` têm código 0 e
 
 O nome `nexus-os-poc-amd64.iso` fica até o congelamento da RC1.
 
+## Medições da F3.3 (23/10/2026, VM de build sem KVM)
+
+| Item | Valor |
+| --- | --- |
+| Build da ISO com libvirt | 267 s, `Build completed successfully` |
+| Tamanho da ISO | 688914432 bytes (a ISO da parte 1 tinha 386924544: +301989888 bytes) |
+| SHA256 | `8e8dd046b49b1e7a101f5329c8f36394c2a30d6e0944a724e3230beec10c16f8` |
+| `tests/iso-smoke.sh ... virtualizacao,libvirt` (1 vCPU, 2048 MiB) | `OK: 2 teste(s) sem falha em 156 s`, `virtualizacao=23s`, `libvirt=7s`, sem KVM |
+| Antes da correção do autostart | `FALHA: rede default não está ativa`, `NEXUS-SMOKE-END libvirt 1` |
+| RED na ISO da parte 1 | `FALHA: virsh não instalado`, `DONE 2 2`, código 1 |
+| Regressão `sdn` | `OK: 1 teste(s) sem falha em 144 s`, `sdn=16s`, sem KVM |
+| Regressão `tests/iso.sh` | `OK: ISO chegou ao login` em 108 s, sem KVM |
+| Mutação M1 (`libvirt.sh` exigindo a rede `outra`) | `FALHA: smoke com falhas: DONE 1 1, END com erro: NEXUS-SMOKE-END libvirt 1` |
+| Mutação M2 (`virtualizacao.sh` com `type='invalido'`) | `FALHA: smoke com falhas: DONE 1 1, END com erro: NEXUS-SMOKE-END virtualizacao 1` |
+
 ## Problemas conhecidos
 
 - Segurança: o serviço executa como root os scripts `extra/*.sh` do CD `NEXUS_SMOKE`. O `nexus-smoke --cd` só aceita dispositivo `sr*` (CD-ROM), então um pendrive USB com esse rótulo é recusado, mas quem tem acesso físico a uma ISO ligada pode inserir um CD. A ISO serve a laboratório e testes. Para uma ISO de entrega, desabilite `nexus-smoke.service` no hook. Essa restrição entrou depois do build da ISO medida e só será exercitada na próxima reconstrução.
@@ -101,4 +118,5 @@ O nome `nexus-os-poc-amd64.iso` fica até o congelamento da RC1.
 - O `scripts/build-iso.sh` roda o stage como root: a pasta gerada pertence ao root depois do build. Rodar o stage à mão como usuário comum falha até alguém apagá-la com `sudo`.
 - O tempo de boot sem KVM varia muito (veja [iso-poc.md](iso-poc.md)). O limite padrão do smoke sem KVM é 2400 s.
 - Na VM de build (VirtualBox com Hyper-V no Windows), o QEMU sem KVM às vezes sufoca a VM: o kernel dela mostra `soft lockup` de 23 s a 713 s, o SSH deixa de responder e o teste termina em `FALHA: NEXUS-SMOKE-DONE não apareceu`. Aconteceu 5 vezes em 23/10/2026, também durante o `mksquashfs` do build, e uma vez o guest parou em `Bringing up secondary CPUs` com 2 vCPU. Reiniciar a VM resolve. O que funcionou: `NEXUS_SMOKE_SMP=1 NEXUS_SMOKE_MEM=2048 NEXUS_SMOKE_LIMIT=900`, um teste por vez, sem consultar a VM por SSH nos primeiros minutos.
+- Com KVM no hospedeiro o smoke não foi medido: o VirtualBox 7.2.20 aborta a VM de build (`VERR_SVM_UNKNOWN_EXIT`) quando o QEMU interno usa KVM. Por isso o contorno acima (`NEXUS_SMOKE_SMP=1`, 2048 MiB) continua recomendado. Veja [virtualizacao.md](virtualizacao.md).
 - Sem rede (`-nic none`) o smoke não baixa nada. Testes que dependam de imagens de contêiner precisam delas dentro da ISO (parte 3).
