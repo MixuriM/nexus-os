@@ -3,7 +3,7 @@ chroot/
 binary/
 cache/
 .build/
-local/
+live-build/local/
 *.iso
 *.img
 live-image-*
@@ -22,8 +22,11 @@ live-build/config/chroot
 live-build/config/common
 live-build/config/source
 live-build/config/package-lists/live.list.chroot
-live-build/config/hooks/live/
+live-build/config/hooks/live/*
+!live-build/config/hooks/live/*nexus-*
 live-build/config/hooks/normal/
+live-build/config/includes.chroot/usr/share/nexus-os/
+live-build/config/includes.chroot/var/lib/nexus-os/
 live-build/binary.modified_timestamps
 live-build/chroot.packages.*
 

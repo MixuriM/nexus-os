@@ -15,7 +15,7 @@ command -v lb >/dev/null || die "live-build não instalado (veja docs/ambiente-d
 
 cd "$raiz/live-build"
 inicio=$SECONDS
-{ lb clean && lb config && lb build; } 2>&1 | tee build.log \
+{ lb clean && lb config && bash "$raiz/scripts/stage-iso-files.sh" && lb build; } 2>&1 | tee build.log \
     || die "o build falhou, veja live-build/build.log"
 
 shopt -s nullglob

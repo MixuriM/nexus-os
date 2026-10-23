@@ -1,0 +1,16 @@
+[Unit]
+Description=Smoke tests do Nexus OS (só roda com o CD NEXUS_SMOKE)
+# Cada componente acrescenta aqui o seu serviço.
+After=openvswitch-switch.service
+
+[Service]
+Type=oneshot
+# Sai com 2 (rótulo não encontrado) sem o CD: o systemd pula a unidade sem marcar falha.
+ExecCondition=/usr/sbin/blkid -L NEXUS_SMOKE
+ExecStart=/usr/local/bin/nexus-smoke --cd
+StandardOutput=journal+console
+StandardError=journal+console
+TimeoutStartSec=infinity
+
+[Install]
+WantedBy=multi-user.target

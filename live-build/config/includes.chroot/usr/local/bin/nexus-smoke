@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# Roda os smoke tests da ISO (/usr/share/nexus-os/tests/<nome>.sh) e imprime os marcadores
+# NEXUS-SMOKE-BEGIN, -TIME, -END e -DONE. Veja docs/integracao-iso.md.
+# Uso (root): nexus-smoke [nome...|all]
+# O serviço nexus-smoke.service chama "nexus-smoke --cd": lê o CD de rótulo NEXUS_SMOKE, roda e desliga.
+set -u
+
+dir=/usr/share/nexus-os/tests
+rotulo=NEXUS_SMOKE
+
+erro() { echo "FALHA: $*" >&2; }
+
+roda() {
+    local nome codigo inicio total=0 falhas=0 lista=()
+    for nome in "$@"; do
+        if [ "$nome" = all ]; then
+            if [ -f "$dir/smoke.list" ]; then
+                mapfile -t todos < <(grep -vE '^[[:space:]]*(#|$)' "$dir/smoke.list")
+                lista+=("${todos[@]}")
+            else
+                erro "lista ausente: $dir/smoke.list"
+                lista+=("smoke.list")
+            fi
+        else
+            lista+=("$nome")
+        fi
+    done
+    for nome in "${lista[@]}"; do
+        total=$((total + 1))
+        echo "NEXUS-SMOKE-BEGIN $nome"
+        inicio=$SECONDS
+        if [[ $nome =~ ^[A-Za-z0-9_-]+$ ]] && [ -f "$dir/$nome.sh" ]; then
+            bash "$dir/$nome.sh" </dev/null
+            codigo=$?
+        else
+            erro "teste ausente: $dir/$nome.sh"
+            codigo=127
+        fi
+        [ "$codigo" -eq 0 ] || falhas=$((falhas + 1))
+        echo "NEXUS-SMOKE-TIME $nome $((SECONDS - inicio))"
+        echo "NEXUS-SMOKE-END $nome $codigo"
+    done
+    echo "NEXUS-SMOKE-DONE $total $falhas"
+    [ "$falhas" -eq 0 ]
+}
+
+# Modo do serviço: monta o CD, copia extra/*.sh para o diretório de testes, roda e desliga.
+cd_modo() {
+    local dev mnt rc nomes=() extra
+    dev=$(/usr/sbin/blkid -L "$rotulo") || { erro "CD $rotulo ausente"; exit 1; }
+    mnt=$(mktemp -d)
+    if mount -o ro "$dev" "$mnt" && [ -f "$mnt/testes.txt" ]; then
+        mapfile -t nomes < <(grep -vE '^[[:space:]]*$' "$mnt/testes.txt" | tr -d '\r')
+        for extra in "$mnt"/extra/*.sh; do
+            [ -f "$extra" ] && cp -f "$extra" "$dir/"
+        done
+    fi
+    umount "$mnt" 2>/dev/null
+    rmdir "$mnt" 2>/dev/null
+    if [ ${#nomes[@]} -eq 0 ]; then
+        erro "o CD $rotulo não trouxe testes.txt com testes"
+        echo "NEXUS-SMOKE-DONE 0 1"
+        rc=1
+    else
+        roda "${nomes[@]}"
+        rc=$?
+    fi
+    systemctl --no-block poweroff
+    exit "$rc"
+}
+
+if [ "$(id -u)" -ne 0 ]; then
+    erro "rode como root: sudo nexus-smoke [nome...|all]"
+    exit 1
+fi
+case ${1:-} in
+    --cd) cd_modo ;;
+    "") erro "uso: nexus-smoke [nome...|all]"; exit 2 ;;
+    *) roda "$@" ;;
+esac
