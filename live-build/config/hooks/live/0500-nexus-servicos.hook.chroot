@@ -1,0 +1,15 @@
+#!/bin/sh
+# Hook do Nexus OS (roda dentro do chroot): habilita as unidades e cria os links dos comandos.
+# Cada componente acrescenta as suas linhas abaixo. Veja docs/integracao-iso.md.
+set -e
+
+# Os includes do live-build mantêm o modo do repositório, que no Windows perde o bit de execução.
+chmod 0755 /usr/local/bin/nexus-smoke
+
+# F3.2: Open vSwitch
+systemctl enable openvswitch-switch.service
+ln -sf /usr/share/nexus-os/sdn/lab-ovs.sh /usr/local/bin/nexus-sdn
+chmod 0755 /usr/share/nexus-os/sdn/lab-ovs.sh
+
+# Smoke test (só age com o CD NEXUS_SMOKE)
+systemctl enable nexus-smoke.service
