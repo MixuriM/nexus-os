@@ -4,7 +4,7 @@
 # Uso: sudo sdn/lab-ovs.sh up|flows|down
 set -euo pipefail
 
-raiz=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+raiz=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)
 regras=$raiz/sdn/flows/basico.flows
 br='br-nexus'
 
