@@ -74,8 +74,8 @@ Sai com 0 só se o `DONE` apareceu com 0 falhas, todos os `END` têm código 0 e
 
 | Componente | Pacotes na ISO | Teste (`tests/<nome>.sh`) | Status |
 | --- | --- | --- | --- |
-| F3.2 Open vSwitch | `openvswitch-switch` 3.5.0-1+b1 (`iproute2` e `iputils-ping` já vêm na base) | `sdn` | ✅ `iso-smoke` OK sem KVM (119 s); reprodução por segunda pessoa pendente |
-| F3.3 KVM/QEMU e libvirt | `libvirt-daemon-system` e `libvirt-clients` 11.3.0-3+deb13u3, `qemu-system-x86` 1:10.0.13+ds-0+deb13u1 (`dnsmasq-base` e `nftables` vêm por dependência) | `virtualizacao`, `libvirt` | ✅ `iso-smoke` OK sem KVM (156 s); reprodução por segunda pessoa pendente; KVM aninhado indisponível (veja [virtualizacao.md](virtualizacao.md)) |
+| F3.2 Open vSwitch | `openvswitch-switch` 3.5.0-1+b1 (`iproute2` e `iputils-ping` já vêm na base) | `sdn` | ✅ `iso-smoke` OK sem KVM (119 s) e com KVM no Hyper-V (24 s, 2 vezes); reprodução por segunda pessoa pendente |
+| F3.3 KVM/QEMU e libvirt | `libvirt-daemon-system` e `libvirt-clients` 11.3.0-3+deb13u3, `qemu-system-x86` 1:10.0.13+ds-0+deb13u1 (`dnsmasq-base` e `nftables` vêm por dependência) | `virtualizacao`, `libvirt` | ✅ `iso-smoke` OK sem KVM (156 s) e com KVM no Hyper-V (24 s, `virt-type kvm`); reprodução por segunda pessoa pendente; KVM aninhado não funciona no VirtualBox 7.2.20 em AMD (veja [virtualizacao.md](virtualizacao.md)) |
 | F3.4 Docker e imagens offline | | | ⏳ parte 3 |
 | F3.5 FRRouting | | `nfv` | ⏳ parte 4 |
 | F3.7 Containerlab | | `nfv` | ⏳ parte 4 |
@@ -94,6 +94,15 @@ Sai com 0 só se o `DONE` apareceu com 0 falhas, todos os `END` têm código 0 e
 | Mutação M3 (arquivo ignorado em `includes.chroot/`) | `tests/lint-repo.sh`: `FALHA: ignorado pelo .gitignore`, código 1 |
 
 O nome `nexus-os-poc-amd64.iso` fica até o congelamento da RC1.
+
+## Medições com KVM (23/10/2026, VM Debian 13 no Hyper-V, 4 vCPU e 8 GB)
+
+| Item | Valor |
+| --- | --- |
+| `tests/iso.sh dist/ref-parte1.iso` | `OK` em 21 s, com KVM |
+| `tests/iso-smoke.sh dist/ref-parte1.iso sdn`, 2 execuções, padrão do runner | `OK` em 24 s e 24 s, `sdn=5s` |
+| `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso virtualizacao,libvirt` | `OK: 2 teste(s) sem falha em 24 s`, `virtualizacao=2s`, `libvirt=1s`, `virt-type kvm` dentro da ISO |
+| `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso sdn` | `OK` em 27 s, `sdn=7s` |
 
 ## Medições da F3.3 (23/10/2026, VM de build sem KVM)
 
@@ -118,5 +127,5 @@ O nome `nexus-os-poc-amd64.iso` fica até o congelamento da RC1.
 - O `scripts/build-iso.sh` roda o stage como root: a pasta gerada pertence ao root depois do build. Rodar o stage à mão como usuário comum falha até alguém apagá-la com `sudo`.
 - O tempo de boot sem KVM varia muito (veja [iso-poc.md](iso-poc.md)). O limite padrão do smoke sem KVM é 2400 s.
 - Na VM de build (VirtualBox com Hyper-V no Windows), o QEMU sem KVM às vezes sufoca a VM: o kernel dela mostra `soft lockup` de 23 s a 713 s, o SSH deixa de responder e o teste termina em `FALHA: NEXUS-SMOKE-DONE não apareceu`. Aconteceu 5 vezes em 23/10/2026, também durante o `mksquashfs` do build, e uma vez o guest parou em `Bringing up secondary CPUs` com 2 vCPU. Reiniciar a VM resolve. O que funcionou: `NEXUS_SMOKE_SMP=1 NEXUS_SMOKE_MEM=2048 NEXUS_SMOKE_LIMIT=900`, um teste por vez, sem consultar a VM por SSH nos primeiros minutos.
-- Com KVM no hospedeiro o smoke não foi medido: o VirtualBox 7.2.20 aborta a VM de build (`VERR_SVM_UNKNOWN_EXIT`) quando o QEMU interno usa KVM. Por isso o contorno acima (`NEXUS_SMOKE_SMP=1`, 2048 MiB) continua recomendado. Veja [virtualizacao.md](virtualizacao.md).
+- Com KVM no Hyper-V o smoke padrão (2 vCPU, 4096 MiB) passou 2 vezes seguidas (24 s), então o contorno acima não é necessário lá. No VirtualBox 7.2.20 com AMD o KVM aninhado derruba a VM de build (`VERR_SVM_UNKNOWN_EXIT`): nesse ambiente fica a emulação com o contorno (`NEXUS_SMOKE_SMP=1`, 2048 MiB). Veja [virtualizacao.md](virtualizacao.md).
 - Sem rede (`-nic none`) o smoke não baixa nada. Testes que dependam de imagens de contêiner precisam delas dentro da ISO (parte 3).
