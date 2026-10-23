@@ -103,6 +103,8 @@ O nome `nexus-os-poc-amd64.iso` fica até o congelamento da RC1.
 | `tests/iso-smoke.sh dist/ref-parte1.iso sdn`, 2 execuções, padrão do runner | `OK` em 24 s e 24 s, `sdn=5s` |
 | `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso virtualizacao,libvirt` | `OK: 2 teste(s) sem falha em 24 s`, `virtualizacao=2s`, `libvirt=1s`, `virt-type kvm` dentro da ISO |
 | `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso sdn` | `OK` em 27 s, `sdn=7s` |
+| Build da ISO nessa VM, com `shellcheck` 0.10.0 no `tests/lint-repo.sh` | `OK: dist/nexus-os-poc-amd64.iso, 688914432 bytes, 348 s`, SHA256 `93eecdf77e1edb4029faed27fafad25083e1c17a1262f8c584ce68ee10e82bc9` (o conteúdo muda a cada build, então o hash difere do da VM do VirtualBox; o tamanho é o mesmo) |
+| Mesma ISO: `virtualizacao,libvirt`, `sdn`, `tests/iso.sh` | `OK` em 24 s (`virtualizacao=2s`, `libvirt=1s`), `OK` em 24 s (`sdn=5s`), `OK` em 21 s até o `login:`; todos com KVM |
 
 ## Medições da F3.3 (23/10/2026, VM de build sem KVM)
 
