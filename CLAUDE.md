@@ -32,4 +32,5 @@ Em Linux (VM Debian 13), na raiz do repo:
 - Libvirt dentro da ISO (F3.3): `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso virtualizacao,libvirt`; na ISO, `nexus-vm criar|listar|remover`
 - Docker e imagens offline na ISO (F3.4): `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso containers`; o build precisa de Docker e internet na VM (`scripts/prepare-offline.sh`, veja `docs/containers.md`)
 - Smoke test dentro da ISO: `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso sdn` (QEMU sem rede; veja `docs/integracao-iso.md`)
+- FRR e Containerlab dentro da ISO (F3.5 e F3.7): `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso frr,nfv`; na ISO, `sudo containerlab deploy -t /usr/share/nexus-os/labs/containerlab/frr-duo.clab.yml`; o build baixa o `.deb` do Containerlab (SHA256 em `live-build/offline/containerlab.sha256`, veja `docs/nfv.md`)
 - Todos os testes da Fase 2 em ordem (para no primeiro erro): `tests/run-fase2.sh [iso]`

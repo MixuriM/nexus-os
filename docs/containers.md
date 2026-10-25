@@ -88,5 +88,5 @@ O `tests/iso.sh` continua com 1024 MiB: a carga cabe, então não foi criada a v
 - Os dados do Docker ficam em RAM (tmpfs) e somem no desligamento. Cada imagem a mais aumenta o uso de RAM da ISO: meça de novo ao acrescentar uma.
 - Com 768 MiB o smoke `containers` falhou. A causa não foi investigada nem o mínimo exato.
 - `docker load` não preserva `RepoDigests`: dentro da ISO o teste confere a tag, e o digest só é conferido no build.
-- O smoke `containers` só prova o Docker e a imagem do FRR. O pacote `frr` e o Containerlab entram na parte 4.
+- O smoke `containers` só prova o Docker e a imagem do FRR. O pacote `frr` e o Containerlab entraram na parte 4 (veja [nfv.md](nfv.md)); a lista de imagens não mudou, e o `scripts/prepare-offline.sh` agora também baixa o `.deb` do Containerlab.
 - Reprodução por segunda pessoa pendente.
