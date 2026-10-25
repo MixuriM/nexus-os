@@ -27,6 +27,7 @@ live-build/config/hooks/live/*
 live-build/config/hooks/normal/
 live-build/config/includes.chroot/usr/share/nexus-os/
 live-build/config/includes.chroot/var/lib/nexus-os/
+live-build/config/packages.chroot/
 live-build/binary.modified_timestamps
 live-build/chroot.packages.*
 
