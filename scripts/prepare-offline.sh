@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Prepara as imagens de contêiner que entram na ISO (F3.4): lê live-build/offline/imagens.txt, baixa
-# a imagem se faltar ou se o digest local divergir, confere o digest travado e salva um .tar em
-# live-build/config/includes.chroot/var/lib/nexus-os/images/ (pasta gerada, ignorada pelo git).
+# Prepara o que entra na ISO sem rede: as imagens de contêiner (F3.4) e o .deb do Containerlab (F3.7).
+# Lê live-build/offline/imagens.txt, baixa a imagem se faltar ou se o digest local divergir, confere o
+# digest travado e salva um .tar em live-build/config/includes.chroot/var/lib/nexus-os/images/ (pasta
+# gerada, ignorada pelo git). Baixa o .deb para live-build/config/packages.chroot/ (ignorado) e confere
+# o SHA256 de live-build/offline/containerlab.sha256.
 # Chamado por scripts/build-iso.sh antes do "lb build". Precisa de Docker e de internet na VM de build.
 # Uso: sudo scripts/prepare-offline.sh
 set -euo pipefail
@@ -22,6 +24,31 @@ digest_local() {
     docker image inspect --format '{{range .RepoDigests}}{{println .}}{{end}}' "$1" 2>/dev/null |
         awk -F@ -v repo="${1%:*}" '$1 == repo { print $2; exit }'
 }
+
+# Pacotes .deb locais (F3.7): o live-build instala o que estiver em config/packages.chroot/. O SHA256
+# travado vem de live-build/offline/containerlab.sha256 (formato do sha256sum); divergência é falha.
+debs=$raiz/live-build/config/packages.chroot
+sums=${NEXUS_DEBS:-$raiz/live-build/offline/containerlab.sha256}
+url_base=https://github.com/srl-labs/containerlab/releases/download
+[ -f "$sums" ] || die "lista ausente: ${sums#"$raiz"/}"
+command -v curl >/dev/null || die "curl não instalado"
+mkdir -p "$debs"
+ndebs=0
+while read -r hash nome resto; do
+    case $hash in ''|'#'*) continue ;; esac
+    [ -z "${resto:-}" ] || die "linha inválida em ${sums##*/}: $hash $nome $resto"
+    [[ $hash =~ ^[0-9a-f]{64}$ ]] || die "SHA256 inválido para $nome: $hash"
+    [[ $nome =~ ^containerlab_([0-9.]+)_linux_amd64\.deb$ ]] || die "nome de pacote inválido: $nome"
+    if ! { [ -f "$debs/$nome" ] && echo "$hash  $debs/$nome" | sha256sum -c --status; }; then
+        echo "baixando $nome"
+        curl -fsSL -o "$debs/$nome" "$url_base/v${BASH_REMATCH[1]}/$nome" || die "download de $nome falhou"
+    fi
+    echo "$hash  $debs/$nome" | sha256sum -c --status \
+        || die "SHA256 de $nome diverge: travado $hash, obtido $(sha256sum "$debs/$nome" | cut -d' ' -f1)"
+    echo "OK: $nome $hash -> ${debs#"$raiz"/} ($(stat -c %s "$debs/$nome") bytes)"
+    ndebs=$((ndebs + 1))
+done <"$sums"
+[ "$ndebs" -gt 0 ] || die "nenhum pacote em ${sums##*/}"
 
 rm -rf "$destino"
 mkdir -p "$destino"
@@ -47,4 +74,4 @@ while read -r ref digest resto; do
 done <"$lista"
 
 [ "$total" -gt 0 ] || die "nenhuma imagem em ${lista##*/}"
-echo "OK: prepare-offline, $total imagem(ns)"
+echo "OK: prepare-offline, $total imagem(ns), $ndebs pacote(s) .deb"

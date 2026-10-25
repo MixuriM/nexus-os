@@ -23,5 +23,10 @@ systemctl enable docker.service
 systemctl enable nexus-images.service
 chmod 0755 /usr/local/bin/nexus-images-load
 
+# F3.5: FRRouting do pacote frr (configuração de exemplo em /usr/share/nexus-os/nfv/frr/exemplo)
+systemctl enable frr.service
+
+# F3.7: Containerlab (o .deb vem de live-build/config/packages.chroot/, veja scripts/prepare-offline.sh)
+
 # Smoke test (só age com o CD NEXUS_SMOKE)
 systemctl enable nexus-smoke.service
