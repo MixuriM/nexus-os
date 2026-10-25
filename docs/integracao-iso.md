@@ -46,7 +46,7 @@ Habilitado em `multi-user.target`. A condição `ExecCondition=/usr/sbin/blkid -
 Com o CD, `nexus-smoke --cd` monta o CD em leitura, lê `testes.txt` (nomes ou `all`), copia `extra/*.sh` do CD para `/usr/share/nexus-os/tests/` (sobrescreve), roda os testes, imprime `DONE` e executa `systemctl --no-block poweroff`.
 A saída vai para a serial: o último `console=` da linha de comando do kernel é `console=ttyS0,115200n8`.
 
-Ordenação: o `After=` lista só os serviços de componente existentes (hoje `openvswitch-switch.service`, `libvirtd.service` e `nexus-images.service`). Não há `After=multi-user.target`, para não criar ciclo com o `WantedBy=`.
+Ordenação: o `After=` lista só os serviços de componente existentes (hoje `openvswitch-switch.service`, `libvirtd.service`, `nexus-images.service` e `frr.service`). Não há `After=multi-user.target`, para não criar ciclo com o `WantedBy=`.
 
 ## Como rodar no host (VM de build)
 
@@ -77,8 +77,8 @@ Sai com 0 só se o `DONE` apareceu com 0 falhas, todos os `END` têm código 0 e
 | F3.2 Open vSwitch | `openvswitch-switch` 3.5.0-1+b1 (`iproute2` e `iputils-ping` já vêm na base) | `sdn` | ✅ `iso-smoke` OK sem KVM (119 s) e com KVM no Hyper-V (24 s, 2 vezes); reprodução por segunda pessoa pendente |
 | F3.3 KVM/QEMU e libvirt | `libvirt-daemon-system` e `libvirt-clients` 11.3.0-3+deb13u3, `qemu-system-x86` 1:10.0.13+ds-0+deb13u1 (`dnsmasq-base` e `nftables` vêm por dependência) | `virtualizacao`, `libvirt` | ✅ `iso-smoke` OK sem KVM (156 s) e com KVM no Hyper-V (24 s, `virt-type kvm`); reprodução por segunda pessoa pendente; KVM aninhado não funciona no VirtualBox 7.2.20 em AMD (veja [virtualizacao.md](virtualizacao.md)) |
 | F3.4 Docker e imagens offline | `docker.io` 26.1.5+dfsg1-9+deb13u1; imagem `quay.io/frrouting/frr:10.7.1` em `/var/lib/nexus-os/images/*.tar`, listada em `live-build/offline/imagens.txt` e preparada por `scripts/prepare-offline.sh` (veja [containers.md](containers.md)) | `containers` | ✅ `iso-smoke` OK com KVM no Hyper-V (30 s, sem rede, driver `overlay2` sobre tmpfs); reprodução por segunda pessoa pendente |
-| F3.5 FRRouting | | `nfv` | ⏳ parte 4 |
-| F3.7 Containerlab | | `nfv` | ⏳ parte 4 |
+| F3.5 FRRouting | `frr` 10.3-3+deb13u1 (Debian main; a imagem de contêiner é 10.7.1), configuração de exemplo em `nfv/frr/exemplo/` | `frr` | ✅ `iso-smoke` OK com KVM no Hyper-V (1 s, sem rede); reprodução por segunda pessoa pendente (veja [nfv.md](nfv.md)) |
+| F3.7 Containerlab | `containerlab` 0.81.1 (`.deb` oficial em `live-build/config/packages.chroot/`, SHA256 em `live-build/offline/containerlab.sha256`) | `nfv` (o `tests/nfv.sh` da F2.7, sem alteração) | ✅ `iso-smoke` OK com KVM no Hyper-V (18 s, sem rede, OSPF convergiu em 12 s); reprodução por segunda pessoa pendente |
 
 ## Medições (23/10/2026, VM de build sem KVM)
 
@@ -120,6 +120,22 @@ O nome `nexus-os-poc-amd64.iso` fica até o congelamento da RC1.
 | Regressão `tests/iso.sh` | `OK: ISO chegou ao login` em 108 s, sem KVM |
 | Mutação M1 (`libvirt.sh` exigindo a rede `outra`) | `FALHA: smoke com falhas: DONE 1 1, END com erro: NEXUS-SMOKE-END libvirt 1` |
 | Mutação M2 (`virtualizacao.sh` com `type='invalido'`) | `FALHA: smoke com falhas: DONE 1 1, END com erro: NEXUS-SMOKE-END virtualizacao 1` |
+
+## Medições da F3.5 e F3.7 (25/10/2026, VM Debian 13 no Hyper-V, com KVM, sem rede na ISO)
+
+| Item | Valor |
+| --- | --- |
+| Build da ISO com `frr` e Containerlab | `OK: dist/nexus-os-poc-amd64.iso, 921698304 bytes, 346 s` (a ISO da parte 3 tinha 893386752: +28311552) |
+| SHA256 | `392e651860a1e25c8682befcc42d14319ce5364bd2888aa1004704df016f68ef` |
+| RED na ISO da parte 3 (`--extra tests/frr.sh --extra tests/nfv.sh`, `frr,nfv`) | `FALHA: smoke com falhas: DONE 2 2`, `FALHA: vtysh não instalado (pacote frr)`, `FALHA: containerlab não instalado` |
+| GREEN `frr,nfv` | `OK: 2 teste(s) sem falha em 48 s`, `frr=1s`, `nfv=18s` |
+| `all` (6 testes) | `OK` em 60 s |
+| Regressão `sdn,virtualizacao,libvirt,containers` | `OK` em 42 s |
+| Mutação M1 (`prepare-offline.sh` com SHA256 `0000...`) | `FALHA: SHA256 de containerlab_0.81.1_linux_amd64.deb diverge`, código 1 |
+| Mutação M2 (`--extra` de `frr.sh` esperando o loopback 198.51.100.99/32) | `FALHA: smoke com falhas: DONE 1 1, END com erro: NEXUS-SMOKE-END frr 1` |
+| Mutação M3 (`--extra` de `nfv.sh` esperando `198.51.100.9/32`, limite 30 s) | `FALHA: OSPF não convergiu em 30 s`, código 1 |
+
+Detalhes e problemas conhecidos em [nfv.md](nfv.md).
 
 ## Problemas conhecidos
 
