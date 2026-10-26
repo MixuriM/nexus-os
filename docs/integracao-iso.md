@@ -41,6 +41,16 @@ NEXUS-SMOKE-DONE <total> <falhas>
 
 O código de saída do runner é 0 só se `falhas` for 0.
 
+Medição (F3.9, informativa): antes do primeiro teste e depois de cada um o runner imprime a RAM usada, e antes do `DONE` o pico:
+
+```text
+NEXUS-SMOKE-MEM <repouso|nome> <MiB>       (coluna "used" do free -m)
+NEXUS-SMOKE-DISK <repouso|fim>:<caminho> <MiB>   (df -m, caminhos / e /var/lib/docker)
+NEXUS-SMOKE-MEMPEAK <MiB>                  (maior uso visto, amostrado a cada 5 s)
+```
+
+O pico pode escapar de um teste mais curto que 5 s. O `tests/iso-smoke.sh` repassa esses valores no `OK:`. Método e números: `requisitos.md`.
+
 ## Serviço `nexus-smoke.service`
 
 Habilitado em `multi-user.target`. A condição `ExecCondition=/usr/sbin/blkid -L NEXUS_SMOKE` faz o systemd pular a unidade (sem marcar falha) quando não existe um CD com esse rótulo: o `blkid` sai com 2 e, pelo `man systemd.service`, códigos de 1 a 254 pulam a unidade. Sem o CD o serviço não faz nada.
