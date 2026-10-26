@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Roda os smoke tests da ISO (/usr/share/nexus-os/tests/<nome>.sh) e imprime os marcadores
-# NEXUS-SMOKE-BEGIN, -TIME, -END e -DONE. Veja docs/integracao-iso.md.
+# NEXUS-SMOKE-BEGIN, -TIME, -END e -DONE, mais -MEM, -MEMPEAK e -DISK (medição de RAM e disco, F3.9).
+# Veja docs/integracao-iso.md.
 # Uso (root): nexus-smoke [nome...|all]
 # O serviço nexus-smoke.service chama "nexus-smoke --cd": lê o CD de rótulo NEXUS_SMOKE, roda e desliga.
 set -u
@@ -10,8 +11,33 @@ rotulo=NEXUS_SMOKE
 
 erro() { echo "FALHA: $*" >&2; }
 
+# Memória usada em MiB (coluna "used" do free -m) e disco usado em MiB de um caminho.
+usado_mib() { LC_ALL=C free -m | awk '/^Mem:/ {print $3}'; }
+disco_mib() { df -m --output=used "$1" 2>/dev/null | tail -n 1 | tr -d ' '; }
+
+mede_disco() {
+    local c v
+    for c in / /var/lib/docker; do
+        v=$(disco_mib "$c")
+        [ -z "$v" ] || echo "NEXUS-SMOKE-DISK $1:$c $v"
+    done
+}
+
+# Grava em $1 o maior uso de RAM visto, amostrado a cada 5 s (um teste mais curto que isso pode escapar).
+amostra_pico() {
+    local maior=0 u
+    while :; do
+        u=$(usado_mib)
+        if [ -n "$u" ] && [ "$u" -gt "$maior" ]; then
+            maior=$u
+            echo "$maior" >"$1"
+        fi
+        sleep 5
+    done
+}
+
 roda() {
-    local nome codigo inicio total=0 falhas=0 lista=()
+    local nome codigo inicio total=0 falhas=0 lista=() u pico=0 arq_pico spid
     for nome in "$@"; do
         if [ "$nome" = all ]; then
             if [ -f "$dir/smoke.list" ]; then
@@ -25,6 +51,14 @@ roda() {
             lista+=("$nome")
         fi
     done
+    arq_pico=$(mktemp)
+    echo 0 >"$arq_pico"
+    amostra_pico "$arq_pico" &
+    spid=$!
+    u=$(usado_mib)
+    echo "NEXUS-SMOKE-MEM repouso ${u:-0}"
+    pico=${u:-0}
+    mede_disco repouso
     for nome in "${lista[@]}"; do
         total=$((total + 1))
         echo "NEXUS-SMOKE-BEGIN $nome"
@@ -39,7 +73,17 @@ roda() {
         [ "$codigo" -eq 0 ] || falhas=$((falhas + 1))
         echo "NEXUS-SMOKE-TIME $nome $((SECONDS - inicio))"
         echo "NEXUS-SMOKE-END $nome $codigo"
+        u=$(usado_mib)
+        echo "NEXUS-SMOKE-MEM $nome ${u:-0}"
+        [ "${u:-0}" -le "$pico" ] || pico=$u
     done
+    mede_disco fim
+    kill "$spid" 2>/dev/null
+    wait "$spid" 2>/dev/null
+    u=$(cat "$arq_pico")
+    rm -f "$arq_pico"
+    [ "$u" -le "$pico" ] || pico=$u
+    echo "NEXUS-SMOKE-MEMPEAK $pico"
     echo "NEXUS-SMOKE-DONE $total $falhas"
     [ "$falhas" -eq 0 ]
 }

@@ -132,4 +132,10 @@ if [ "$nomes" != all ]; then
 fi
 
 tempos=$(grep -aoE 'NEXUS-SMOKE-TIME [A-Za-z0-9_-]+ [0-9]+' <<<"$texto" | awk '{printf "%s%s=%ss", s, $2, $3; s=", "}')
-echo "OK: $total teste(s) sem falha em ${total_s} s, $modo${tempos:+, por teste: $tempos}"
+# Medição de RAM e disco (runner novo; ISO antiga não imprime e fica sem essa parte).
+repouso=$(grep -aoE 'NEXUS-SMOKE-MEM repouso [0-9]+' <<<"$texto" | awk '{print $3}' | tail -n 1 || true)
+pico=$(grep -aoE 'NEXUS-SMOKE-MEMPEAK [0-9]+' <<<"$texto" | awk '{print $2}' | tail -n 1 || true)
+discos=$(grep -aoE 'NEXUS-SMOKE-DISK (repouso|fim):[^ ]+ [0-9]+' <<<"$texto" | awk '{printf "%s%s=%s MiB", s, $2, $3; s=", "}' || true)
+medida=
+[ -z "$pico" ] || medida=", RAM usada: repouso ${repouso:-?} MiB, pico $pico MiB de ${mem} MiB${discos:+, disco: $discos}"
+echo "OK: $total teste(s) sem falha em ${total_s} s, $modo${tempos:+, por teste: $tempos}$medida"
