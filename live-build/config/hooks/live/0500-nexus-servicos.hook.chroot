@@ -28,5 +28,9 @@ systemctl enable frr.service
 
 # F3.7: Containerlab (o .deb vem de live-build/config/packages.chroot/, veja scripts/prepare-offline.sh)
 
+# F3.6: orquestração simplificada da VNF FRR (usa Docker e Containerlab)
+ln -sf /usr/share/nexus-os/nfv/nexus-vnf.sh /usr/local/bin/nexus-vnf
+chmod 0755 /usr/share/nexus-os/nfv/nexus-vnf.sh
+
 # Smoke test (só age com o CD NEXUS_SMOKE)
 systemctl enable nexus-smoke.service
