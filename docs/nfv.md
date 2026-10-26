@@ -137,3 +137,60 @@ O smoke `nfv` é o `tests/nfv.sh` da F2.7, sem alteração, rodando dentro da IS
 - O `.deb` do Containerlab define o binário com setuid e o grupo `clab_admins`; na ISO use `sudo` nos comandos `containerlab`.
 - O `tests/iso.sh` falhou uma vez (`login: não apareceu em 300 s, com KVM`) em 6 execuções com a ISO nova; as outras 5 passaram em 27 s e a falha não se repetiu. A causa não foi diagnosticada (a serial não foi guardada nessa execução).
 - Reprodução por segunda pessoa pendente.
+
+## Orquestração (F3.6)
+
+Um script único, `nfv/nexus-vnf.sh`, faz o papel simplificado de NFVO/VNFM: instancia a VNF FRR, consulta o estado e remove a VNF. Não usa Ansible.
+
+**Infraestrutura usada:** Containerlab com um contêiner FRR (Docker, imagem `quay.io/frrouting/frr:10.7.1`). O libvirt não participa da orquestração nesta fase; as máquinas virtuais continuam no `nexus-vm` (F3.3).
+
+```bash
+sudo nexus-vnf up        # na ISO; no repositório: sudo nfv/nexus-vnf.sh up
+sudo nexus-vnf status
+sudo nexus-vnf down
+```
+
+Na ISO, `/usr/local/bin/nexus-vnf` é um link (criado pelo hook) para `/usr/share/nexus-os/nfv/nexus-vnf.sh`; o script resolve o caminho real com `readlink -f` para achar a topologia.
+
+A VNF é o nó `vnf1` de `labs/containerlab/vnf-frr.clab.yml` (laboratório `vnf-frr`, contêiner `clab-vnf-frr-vnf1`), com `labs/containerlab/configs/vnf1/{daemons,frr.conf}`: loopback 198.51.100.11/32 em OSPF área 0. O nó não tem enlaces: o Containerlab aceitou a topologia sem a seção `links`, medido na VM de laboratório.
+
+| Comando | Efeito | Código de saída |
+| --- | --- | --- |
+| `up` | `containerlab deploy` e espera até 60 s pelo `vtysh`; se a VNF já roda, imprime `OK: ... já instanciada` e não recria | 0, ou 1 com `FALHA:` |
+| `status` | estado do contêiner, primeira linha de `show version` e o loopback de `show running-config` | 0 se roda, 1 se não roda |
+| `down` | `containerlab destroy --cleanup` e confere que nenhum contêiner nem a rede `clab` sobrou; repetir é seguro | 0, ou 1 com `FALHA:` |
+| outro | ajuda no erro padrão | 2 |
+
+Saída do `status` com a VNF rodando (VM de laboratório, 26/10/2026):
+
+```text
+contêiner: clab-vnf-frr-vnf1 (running)
+versão: FRRouting 10.7.1_git (vnf1) on Linux(6.12.113+deb13-amd64).
+loopback: 198.51.100.11/32
+OK: VNF vnf1 rodando
+```
+
+### Teste
+
+`sudo tests/orquestracao.sh` roda `up`, `status` (0, com FRR e o loopback), `down`, `status` (1), `up` duas vezes (o contêiner não é recriado), `down` duas vezes, confere que nada sobrou e que o uso inválido sai com 2. Na ISO é o smoke `orquestracao`, que usa o link `/usr/local/bin/nexus-vnf`.
+
+### Medições (26/10/2026, VM Debian 13 no Hyper-V, com KVM, sem rede na ISO)
+
+| Item | Valor |
+| --- | --- |
+| RED no laboratório (antes do script) | `FALHA: script ausente: nfv/nexus-vnf.sh`, código 1 |
+| GREEN no laboratório | `OK: tests/orquestracao.sh`, 2,6 s |
+| Mutação M1 (`destroy` comentado no `down`) | `FALHA: down saiu com 1: FALHA: contêiner da VNF sobrou depois do destroy`, código 1 |
+| Mutação M2 (tag `frr:10.7.99`) | `FALHA: up saiu com 1: FALHA: containerlab deploy falhou`, código 1 |
+| Regressão `sudo tests/nfv.sh` | `OK` (OSPF em 16 s) |
+| Build da ISO | 435 s, 921698304 bytes (igual à ISO anterior), SHA256 `729572f567dce43e455a87cf3fc37d2b94fb19c772121added3f8c5eb59637bb` |
+| `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso all` | `OK: 7 teste(s) sem falha em 75 s, com KVM` (`sdn=7s`, `virtualizacao=3s`, `libvirt=4s`, `containers=2s`, `frr=1s`, `nfv=18s`, `orquestracao=9s`) |
+| `tests/iso.sh` | `OK` em 28 s, com KVM |
+
+O build levou mais que os 346 s da parte anterior; a internet da VM oscilou durante o build, que terminou sem erro (SHA256 do `.deb` do Containerlab e `tar` da imagem conferidos).
+
+### Problemas conhecidos
+
+- O `down` assume o nome de rede `clab`, o padrão do Containerlab; se alguém mudar `mgmt` na topologia, a verificação precisa mudar junto.
+- O `status` lê o loopback da configuração em execução (primeiro `ip address 198.51.100.x/32`); não confere se o OSPF anunciou o endereço, porque a VNF sozinha não tem vizinhos.
+- Reprodução por segunda pessoa pendente.

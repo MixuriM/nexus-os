@@ -11,6 +11,7 @@ Contrato entre a receita do live-build e os componentes da Fase 3. Cada componen
 | `/etc/systemd/system/nexus-smoke.service` | `live-build/config/includes.chroot/etc/systemd/system/nexus-smoke.service` | `includes.chroot` |
 | `/usr/local/bin/nexus-sdn` | link para `/usr/share/nexus-os/sdn/lab-ovs.sh` | hook `0500-nexus-servicos.hook.chroot` |
 | `/usr/local/bin/nexus-vm` | link para `/usr/share/nexus-os/nfv/libvirt/nexus-vm.sh` | hook `0500-nexus-servicos.hook.chroot` |
+| `/usr/local/bin/nexus-vnf` | link para `/usr/share/nexus-os/nfv/nexus-vnf.sh` | hook `0500-nexus-servicos.hook.chroot` |
 | `/etc/live/config.conf.d/nexus.conf` | `live-build/config/includes.chroot/etc/live/config.conf.d/nexus.conf` | `includes.chroot` (grupos do usuário `user`, lidos pelo live-config) |
 | `/usr/share/nexus-os/tests/smoke.list` | `tests/smoke.list` | cópia de `tests/` |
 
@@ -79,6 +80,7 @@ Sai com 0 só se o `DONE` apareceu com 0 falhas, todos os `END` têm código 0 e
 | F3.4 Docker e imagens offline | `docker.io` 26.1.5+dfsg1-9+deb13u1; imagem `quay.io/frrouting/frr:10.7.1` em `/var/lib/nexus-os/images/*.tar`, listada em `live-build/offline/imagens.txt` e preparada por `scripts/prepare-offline.sh` (veja [containers.md](containers.md)) | `containers` | ✅ `iso-smoke` OK com KVM no Hyper-V (30 s, sem rede, driver `overlay2` sobre tmpfs); reprodução por segunda pessoa pendente |
 | F3.5 FRRouting | `frr` 10.3-3+deb13u1 (Debian main; a imagem de contêiner é 10.7.1), configuração de exemplo em `nfv/frr/exemplo/` | `frr` | ✅ `iso-smoke` OK com KVM no Hyper-V (1 s, sem rede); reprodução por segunda pessoa pendente (veja [nfv.md](nfv.md)) |
 | F3.7 Containerlab | `containerlab` 0.81.1 (`.deb` oficial em `live-build/config/packages.chroot/`, SHA256 em `live-build/offline/containerlab.sha256`) | `nfv` (o `tests/nfv.sh` da F2.7, sem alteração) | ✅ `iso-smoke` OK com KVM no Hyper-V (18 s, sem rede, OSPF convergiu em 12 s); reprodução por segunda pessoa pendente |
+| F3.6 Orquestração NFVO/VNFM | nenhum (usa Docker, Containerlab e a imagem FRR já na ISO), script `nfv/nexus-vnf.sh` e topologia `labs/containerlab/vnf-frr.clab.yml` | `orquestracao` | ✅ `iso-smoke` OK com KVM no Hyper-V (9 s, sem rede); `all` com 7 testes OK em 75 s; reprodução por segunda pessoa pendente (veja [nfv.md](nfv.md)) |
 
 ## Medições (23/10/2026, VM de build sem KVM)
 
