@@ -24,19 +24,24 @@ campo() {
     ' "$1"
 }
 
+# numerico <variável> <rótulo>: guarda o valor na variável (sem subshell, para o fail contar) e exige inteiro.
 numerico() {
-    local rotulo=$1 valor
-    valor=$(campo "$req" "$rotulo")
-    [[ $valor =~ ^[0-9]+$ ]] || { fail "$req: '$rotulo' ausente ou não numérico (achei '${valor:-}')"; return 0; }
-    printf '%s' "$valor"
+    local valor
+    valor=$(campo "$req" "$2")
+    if [[ $valor =~ ^[0-9]+$ ]]; then
+        printf -v "$1" '%s' "$valor"
+    else
+        printf -v "$1" '%s' ''
+        fail "$req: '$2' ausente ou não numérico (achei '${valor:-}')"
+    fi
 }
 
-repouso=$(numerico "RAM em repouso")
-pico=$(numerico "RAM de pico")
-recomendada=$(numerico "RAM recomendada")
-numerico "Disco do root em memória" >/dev/null
-numerico "Disco do Docker" >/dev/null
-bytes=$(numerico "ISO (bytes)")
+numerico repouso "RAM em repouso"
+numerico pico "RAM de pico"
+numerico recomendada "RAM recomendada"
+numerico disco_root "Disco do root em memória"
+numerico disco_docker "Disco do Docker"
+numerico bytes "ISO (bytes)"
 
 data=$(campo "$req" "Data")
 [[ $data =~ ^20[0-9]{2}-[0-9]{2}-[0-9]{2}$ ]] || fail "$req: 'Data' ausente ou fora de AAAA-MM-DD (achei '${data:-}')"
