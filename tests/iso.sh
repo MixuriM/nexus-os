@@ -60,7 +60,8 @@ while [ $((SECONDS - start)) -lt "$limit" ]; do
     if [ $((SECONDS - start)) -lt 60 ]; then
         printf 'sendkey ret\n' >&3
     fi
-    linha=$(tr -d '\r' <"$serial" | grep -aE 'login:[[:space:]]*$' | tail -n 1 || true)
+    # Sem âncora no fim da linha: com KVM o kernel imprime erros de fd0 logo após o prompt.
+    linha=$(tr -d '\r' <"$serial" | grep -aE '[[:alnum:]-]+ login:' | tail -n 1 || true)
     if [ -n "$linha" ]; then
         echo "OK: ISO chegou ao login (\"$linha\") em $((SECONDS - start)) s, $modo, SHA256 conferido"
         exit 0
