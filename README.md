@@ -32,7 +32,7 @@ Como foram medidas: [docs/ambiente-de-build.md](docs/ambiente-de-build.md).
 
 ## Como gerar a ISO
 
-Exige Linux (VM Debian 13), usuário com `sudo`, cerca de 10 GB livres e internet.
+Exige Linux (VM Debian 13), usuário com `sudo`, Docker, internet e espaço livre: o build limpo ocupou 5383 MiB (medido em 26/10/2026, veja [docs/rc1.md](docs/rc1.md)).
 Preparo da VM: [docs/ambiente-de-build.md](docs/ambiente-de-build.md). Resultado esperado e medições: [docs/iso-poc.md](docs/iso-poc.md).
 
 1. Clone o repositório no disco do Linux (nunca em pasta compartilhada com o Windows nem em `/mnt/*`):
@@ -42,7 +42,7 @@ Preparo da VM: [docs/ambiente-de-build.md](docs/ambiente-de-build.md). Resultado
    cd nexus-os
    ```
 
-2. Gere a ISO (leva cerca de 25 minutos; o log fica em `live-build/build.log`):
+2. Gere a ISO (516 s medidos com KVM na VM do Hyper-V; o log fica em `live-build/build.log`):
 
    ```
    sudo scripts/build-iso.sh
@@ -57,6 +57,18 @@ Preparo da VM: [docs/ambiente-de-build.md](docs/ambiente-de-build.md). Resultado
    ```
 
 4. Antes de commitar, rode `tests/lint-repo.sh`.
+
+## Usar a ISO integrada
+
+A RC1 (núcleo, sem ambiente gráfico) está descrita em [docs/rc1.md](docs/rc1.md).
+
+1. Inicie a ISO numa VM (testado: QEMU com KVM; o Hyper-V está descrito em [docs/rc1.md](docs/rc1.md)) com pelo menos **1536 MiB de RAM** e a ISO como CD. Os números medidos estão em [docs/requisitos.md](docs/requisitos.md). Na tela do isolinux, aperte Enter.
+2. Entre com o usuário `user` e a senha `live` (credencial pública da Debian Live, de laboratório). O `sudo` não pede senha.
+3. Comandos disponíveis (com `sudo`; o `nexus-vm` também funciona sem ele para quem está no grupo `libvirt`, como o `user`):
+   - `nexus-sdn up|flows|down`: laboratório Open vSwitch com regras OpenFlow manuais ([docs/sdn.md](docs/sdn.md)).
+   - `nexus-vm criar <nome>|listar|remover <nome>`: VMs de teste do libvirt ([docs/virtualizacao.md](docs/virtualizacao.md)).
+   - `nexus-vnf up|status|down`: ciclo da VNF FRR sobre o Containerlab ([docs/nfv.md](docs/nfv.md)). A topologia de dois nós: `sudo containerlab deploy -t /usr/share/nexus-os/labs/containerlab/frr-duo.clab.yml`.
+   - `nexus-smoke <nome>|all`: smoke tests dos componentes dentro da ISO, com medição de RAM e disco ([docs/integracao-iso.md](docs/integracao-iso.md)).
 
 ## Testes dos componentes
 

@@ -91,6 +91,7 @@ Sai com 0 só se o `DONE` apareceu com 0 falhas, todos os `END` têm código 0 e
 | F3.5 FRRouting | `frr` 10.3-3+deb13u1 (Debian main; a imagem de contêiner é 10.7.1), configuração de exemplo em `nfv/frr/exemplo/` | `frr` | ✅ `iso-smoke` OK com KVM no Hyper-V (1 s, sem rede); reprodução por segunda pessoa pendente (veja [nfv.md](nfv.md)) |
 | F3.7 Containerlab | `containerlab` 0.81.1 (`.deb` oficial em `live-build/config/packages.chroot/`, SHA256 em `live-build/offline/containerlab.sha256`) | `nfv` (o `tests/nfv.sh` da F2.7, sem alteração) | ✅ `iso-smoke` OK com KVM no Hyper-V (18 s, sem rede, OSPF convergiu em 12 s); reprodução por segunda pessoa pendente |
 | F3.6 Orquestração NFVO/VNFM | nenhum (usa Docker, Containerlab e a imagem FRR já na ISO), script `nfv/nexus-vnf.sh` e topologia `labs/containerlab/vnf-frr.clab.yml` | `orquestracao` | ✅ `iso-smoke` OK com KVM no Hyper-V (9 s, sem rede); `all` com 7 testes OK em 75 s; reprodução por segunda pessoa pendente (veja [nfv.md](nfv.md)) |
+| F3.9 a F3.11 RC1 | todos os acima | `all` (os 7 testes) | ✅ build limpo em 516 s, 921698304 bytes; `all` OK com KVM em 69 s (4096 MiB) e 73 s (1536 MiB, RAM recomendada); reprodução por segunda pessoa e boot no Hyper-V pendentes (veja [rc1.md](rc1.md) e [requisitos.md](requisitos.md)) |
 
 ## Medições (23/10/2026, VM de build sem KVM)
 

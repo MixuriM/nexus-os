@@ -34,4 +34,5 @@ Em Linux (VM Debian 13), na raiz do repo:
 - Smoke test dentro da ISO: `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso sdn` (QEMU sem rede; veja `docs/integracao-iso.md`)
 - FRR e Containerlab dentro da ISO (F3.5 e F3.7): `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso frr,nfv`; na ISO, `sudo containerlab deploy -t /usr/share/nexus-os/labs/containerlab/frr-duo.clab.yml`; o build baixa o `.deb` do Containerlab (SHA256 em `live-build/offline/containerlab.sha256`, veja `docs/nfv.md`)
 - Orquestração da VNF FRR (F3.6): `sudo tests/orquestracao.sh` (precisa de Docker e Containerlab); na ISO, `sudo nexus-vnf up|status|down` e `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso orquestracao`
+- Requisitos de hardware e RC1 (F3.9 e F3.11): `tests/requisitos.sh` (estático, roda também no Git Bash); a RAM e o disco da ISO saem do `OK:` do `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso all` (veja `docs/requisitos.md` e `docs/rc1.md`)
 - Todos os testes da Fase 2 em ordem (para no primeiro erro): `tests/run-fase2.sh [iso]`
