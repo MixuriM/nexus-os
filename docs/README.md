@@ -12,6 +12,8 @@ O relatório acadêmico do projeto não fica neste repositório.
 - [Virtualização: KVM/QEMU com libvirt](virtualizacao.md)
 - [Contêineres: Docker e imagens offline na ISO](containers.md)
 - [NFV: FRRouting com Containerlab](nfv.md)
+- [Requisitos mínimos de hardware da ISO](requisitos.md)
+- [RC1: ISO integrada do núcleo](rc1.md)
 - [Modelo de manual](manual-modelo.md)
 - [Checklist de teste da documentação](checklist-teste-documentacao.md)
 - [Oficina de Git](oficina-git.md)
