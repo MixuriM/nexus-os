@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/logo-nexus-os.png" alt="Logo do Nexus OS" width="220">
+<img src="assets/logo-nexus-os.svg" alt="Logo do Nexus OS" width="220">
 
 # Nexus OS
 
