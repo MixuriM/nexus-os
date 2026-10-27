@@ -1,6 +1,6 @@
 # Ambiente gráfico: especificação e escolha do desktop (F3.14)
 
-Este documento define o que o Nexus OS entende por interface gráfica, compara por medição os candidatos do Debian 13 (trixie) `main` e registra o desktop escolhido. A ISO entregue não muda nesta etapa: a instalação do desktop na ISO é a F3.15. Os números abaixo vêm de comandos executados em 27/10/2026, **com KVM**, na VM de build do Hyper-V (veja [hyperv.md](hyperv.md)).
+Este documento define o que o Nexus OS entende por interface gráfica, compara por medição os candidatos do Debian 13 (trixie) `main` e registra o desktop escolhido. As seções até "Impacto nos requisitos" são a especificação e a escolha (F3.14), com números de 27/10/2026 medidos **com KVM** na VM de build do Hyper-V (veja [hyperv.md](hyperv.md)). A instalação do desktop na ISO (F3.15) e dos atalhos (F3.16) está em "Como ficou na ISO", "Atalhos" e "Medições da ISO".
 
 ## Definição
 
@@ -107,7 +107,7 @@ qemu-system-x86_64 -enable-kvm -cpu host -m 4096 -smp 2 -vga std -usb -device us
     -chardev pipe,id=mon,path=<fifo> -mon chardev=mon,mode=readline
 ```
 
-`-vga std` e `-device usb-tablet` entram nas medições e na captura. O `tests/iso-smoke.sh` atual não passa `-vga std` nem o tablet; mesmo assim o smoke `containers` passou com a ISO do XFCE (tabela abaixo). A F3.15 deve acrescentar `-vga std` explícito ao script antes de criar o smoke `desktop`.
+`-vga std` e `-device usb-tablet` entraram nas medições e na captura da F3.14. Desde a F3.15 o `tests/iso-smoke.sh` passa `-vga std` explícito e não passa o tablet (o smoke não usa o ponteiro). Veja "Como ficou na ISO".
 
 Dentro do guest, sem tela, a sessão é consultada por `loginctl`:
 
@@ -131,7 +131,7 @@ RAM mínima medida com o XFCE (com KVM, 2 vCPU, uma execução por valor): o smo
 
 O mínimo medido com o desktop é **1024 MiB**; em 768 MiB o `containers` falha (como na ISO do núcleo, veja [requisitos.md](requisitos.md)). O `tests/iso.sh` com a ISO do XFCE passou com os 1024 MiB que ele usa: `OK: ISO chegou ao login` em 33 s, com KVM.
 
-Recomendação: manter `NEXUS_SMOKE_MEM=4096` (padrão). Para uso interativo, 2048 MiB como valor provisório; a RAM recomendada definitiva depende do `all` com desktop, que a F3.18 mede. O `tests/iso.sh` não tem a variável `NEXUS_ISO_MEM` (a memória é fixa em 1024 MiB) e não precisou dela com o XFCE.
+Recomendação: manter `NEXUS_SMOKE_MEM=4096` (padrão). Para uso interativo, 2048 MiB como valor provisório; a RAM recomendada definitiva fica para a F3.18, que refaz `requisitos.md` com o `all` e o desktop ativo (os picos medidos na F3.15 e na F3.16 estão em "Medições da ISO"). O `tests/iso.sh` ganhou a variável `NEXUS_ISO_MEM` na F3.15 (padrão 2048 MiB).
 
 VMs de build:
 
@@ -149,14 +149,80 @@ VMs de build:
 
 A ISO cresce 36%. O "repouso" do núcleo foi lido pelo `nexus-smoke` antes do primeiro teste, sem sessão gráfica; o do XFCE é a média de 3 leituras 30 s depois de a sessão ficar ativa. No `containers` com 4096 MiB o runner leu 989 MiB no início, com o desktop ainda subindo. A F3.18 refaz `docs/requisitos.md` com o `all` e o desktop ativo.
 
+## Como ficou na ISO
+
+F3.15 e F3.16, medidos em 27/10/2026 na VM de build do Hyper-V, **com KVM** (e uma vez **sem KVM**, indicado onde for o caso).
+
+- Pacotes: `live-build/config/package-lists/nexus-desktop.list.chroot` (`xfce4`, `xfce4-terminal`, `network-manager`, `network-manager-gnome`, `lightdm`, `lightdm-gtk-greeter`, `xorg`, `firefox-esr`, `virt-manager`, `desktop-file-utils`, `x11-utils`, `libgtk-3-bin`, `libglib2.0-bin`). Os quatro últimos servem ao smoke e aos atalhos: `desktop-file-validate`, `xwininfo`, `gtk-launch` e `gio`.
+- Login automático e sessão padrão: nenhum arquivo próprio. O `0100-lightdm` do `live-config` já grava `autologin-user=user` e o `lightdm` do pacote é o `display-manager`; a sessão padrão é a do XFCE.
+- `nexus-smoke.service` não ganhou `After=lightdm.service`, porque o teste `desktop` espera por laço (limite de 120 s) o `lightdm`, a sessão e os processos do desktop, sem depender da ordem das unidades. Uma primeira versão com o `After=` também passou; foi retirado para o laço de espera ser exercitado de verdade.
+- Menu: categoria "Nexus OS" por `etc/xdg/menus/applications-merged/nexus-os.menu` e `usr/share/desktop-directories/nexus-os.directory`. A categoria dos atalhos é `X-Nexus-OS` (categoria própria precisa do prefixo `X-`).
+- Área de trabalho: as cópias dos atalhos ficam em `/etc/skel/Desktop/` (o `live-config` cria o `user` a partir do `/etc/skel`). O xfdesktop só confia em atalho com o bit de execução e o checksum em `metadata::xfce-exe-checksum` ([fórum do Xfce](https://forum.xfce.org/viewtopic.php?pid=70670)). O hook dá `chmod 0755` nas cópias e o autostart `etc/xdg/autostart/nexus-atalhos-confiar.desktop` roda `/usr/local/bin/nexus-atalhos-confiar`, que grava o checksum com `gio set`. O smoke confere o bit e o checksum de cada cópia, e a captura abaixo mostra os ícones sem aviso de atalho não confiável.
+- `qemu:///system`: `etc/libvirt/libvirt.conf` com `uri_default = "qemu:///system"` e o atalho do `virt-manager` com `--connect qemu:///system`; o `user` já está no grupo `libvirt` (veja [integracao-iso.md](integracao-iso.md)).
+- `tests/iso-smoke.sh` passou a iniciar o QEMU com `-vga std` explícito e ganhou `NEXUS_SMOKE_KVM=0` (força a emulação). Não houve RED para o `-vga std`: o QEMU já usa `std` por padrão, e a ISO com desktop chegou à sessão sem o parâmetro (smoke `desktop` OK antes da mudança). O RED de `NEXUS_SMOKE_KVM=0` foi real: o script antigo ignorou a variável e imprimiu `com KVM`; o novo imprime `sem KVM (emulação por software)`.
+- `tests/iso.sh` ganhou `NEXUS_ISO_MEM` (padrão 2048 MiB, a RAM provisória recomendada para uso interativo) e chega ao `login:` da serial em 33 s com KVM.
+- Captura da sessão com o menu aberto (comando `screendump` do monitor do QEMU, convertida para PNG): ![Menu Nexus OS no XFCE](img/gui-nexus-atalhos.png)
+
+## Atalhos
+
+Nove arquivos `nexus-*.desktop`, em `/usr/share/applications/` (menu "Nexus OS") e em `~/Desktop/` do `user`. Fonte: `live-build/config/includes.chroot/usr/share/applications/` e `live-build/config/includes.chroot/etc/skel/Desktop/`. Os atalhos de terminal usam `xfce4-terminal --disable-server` (sem o servidor, a janela não abre dentro de uma instância já existente, que perderia o ambiente do chamador) e o wrapper `/usr/local/bin/nexus-atalho <nome> <comando>`: roda o comando, mostra a saída e o código, grava o código em `$XDG_RUNTIME_DIR/nexus-atalho-<nome>.status` e espera Enter, exceto com `NEXUS_ATALHO_TESTE=1`.
+
+| Atalho | Comando | Onde aparece |
+| --- | --- | --- |
+| Terminal do Nexus OS | `xfce4-terminal` | menu e área de trabalho |
+| Gerenciador de máquinas virtuais | `virt-manager --connect qemu:///system` | menu e área de trabalho |
+| Laboratório Open vSwitch | `sudo nexus-sdn up` (para remover: `sudo nexus-sdn down` no terminal) | menu e área de trabalho |
+| VNF FRR: instanciar | `sudo nexus-vnf up` | menu e área de trabalho |
+| VNF FRR: estado | `sudo nexus-vnf status` | menu e área de trabalho |
+| VNF FRR: remover | `sudo nexus-vnf down` | menu e área de trabalho |
+| Topologia Containerlab: criar | `sudo containerlab deploy -t /usr/share/nexus-os/labs/containerlab/frr-duo.clab.yml` | menu e área de trabalho |
+| Topologia Containerlab: remover | `sudo containerlab destroy -t /usr/share/nexus-os/labs/containerlab/frr-duo.clab.yml --cleanup` | menu e área de trabalho |
+| Documentação do Nexus OS | `thunar /usr/share/nexus-os/docs` | menu e área de trabalho |
+
+Testes:
+
+- `tests/atalhos.sh` (estático, roda no Git Bash e na VM): os 9 arquivos existem no menu e na área de trabalho com conteúdo igual, passam no `desktop-file-validate` (se instalado; senão o teste termina em `AVISO:`), têm as chaves `Type`, `Name`, `Exec`, `Icon` e `Categories`, `Comment` em português e `Exec` apontando para comando versionado ou do pacote; confere também `libvirt.conf`, o menu e que nenhum arquivo está ignorado pelo `.gitignore`.
+- Smoke `desktop` (`tests/desktop.sh`, dentro da ISO): `lightdm` ativo; sessão do `user` `active` e `x11` com `xfce4-session`, `xfce4-panel` e `xfwm4` no ar (espera por laço, limite de 120 s); sem rota padrão e sem erro do `lightdm` no journal (`journalctl -b -u lightdm -p err`); os 9 atalhos válidos no `desktop-file-validate` e com o comando existente; cópias na área de trabalho executáveis e com o checksum do xfdesktop. Cada atalho é lançado como o `user` por `gtk-launch <id>` (funcionou, sem precisar do `Exec` à mão), com `DISPLAY`, `XAUTHORITY`, `XDG_RUNTIME_DIR` e `DBUS_SESSION_BUS_ADDRESS` lidos do processo `xfce4-session`. Terminal, documentação e `virt-manager` são conferidos por janela no `xwininfo -root -tree` (o padrão não pode casar antes de abrir, porque o `Thunar --daemon` mantém janelas ocultas) e por processo vivo depois de 3 s (15 s no `virt-manager`); os seis atalhos de terminal, pelo arquivo de status com código 0. A limpeza (`nexus-sdn down`, `nexus-vnf down`, `containerlab destroy`, `thunar -q`) roda no `trap`, e o teste confere que nenhum contêiner nem a bridge `br-nexus` sobrou.
+
+## Medições da ISO
+
+| Item | Valor |
+| --- | --- |
+| ISO | `dist/nexus-os-poc-amd64.iso`, 1260126208 bytes, SHA256 `def4c0d541b1016b97d0e441a41851135ddc23edb84544931bdadcdfb0fa55c6` |
+| Diferença para a ISO do núcleo (RC1, 921698304 bytes) | +338427904 bytes (+36,7%); para a ISO de teste do XFCE da F3.14 (1252147200 bytes), +7979008 (o `virt-manager` e as ferramentas) |
+| Build (`sudo scripts/build-iso.sh`) | 457 s no build final e 536 s no primeiro, com o cache de pacotes quente (o download frio do XFCE levou 2240 s na F3.14) |
+| `tests/iso.sh` | `OK: ISO chegou ao login` em 33 s, com KVM, 2048 MiB |
+| `all` (8 testes), 4096 MiB, com KVM | `OK` em 120 s: `sdn=5s`, `virtualizacao=3s`, `libvirt=2s`, `containers=2s`, `frr=1s`, `nfv=18s`, `orquestracao=9s`, `desktop=41s`; repouso 971 MiB, pico 1007 MiB |
+| `all`, 2048 MiB, com KVM | `OK` em 114 s, `desktop=40s`; repouso 756 MiB, pico 925 MiB |
+| RAM em repouso, sessão ativa (`free -m`, `used`, 3 leituras 30 s depois) | 840,3 MiB com KVM e 4096 MiB (837, 842 e 842); 748 MiB sem KVM, 2048 MiB e 1 vCPU |
+| Sessão do `user` ativa, com KVM | já ativa quando o teste começou, com uptime do guest de 25,0 s |
+| Sessão do `user` ativa, sem KVM | já ativa quando o teste começou, com uptime de 258,8 s |
+| Smoke `desktop` sem KVM (`NEXUS_SMOKE_KVM=0 NEXUS_SMOKE_SMP=1 NEXUS_SMOKE_MEM=2048`) | `OK: 2 teste(s) sem falha em 477 s`, `desktop=161s`: os 9 atalhos executam sem KVM |
+
+O uptime da sessão é um limite superior: a sessão pode ter ficado ativa antes do início do teste, porque o `nexus-smoke.service` só começa depois dos serviços dos componentes. A medição de repouso e do uptime vem de um script fora do repositório (`--extra`: espera a sessão, lê `free -m` 3 vezes com 30 s de atraso).
+
+Mutações (4 de 4, com cópia de `tests/desktop.sh` por `--extra`, sem rebuild; as estáticas com cópia de backup, restaurada por cópia):
+
+| Mutação | Resultado |
+| --- | --- |
+| M1: remover o `Exec` de um atalho | `FALHA: ... sem a chave Exec`, `tests/atalhos.sh` sai com 1 |
+| M2: apagar o atalho do `virt-manager` | `FALHA: atalho ausente no menu: .../nexus-virt-manager.desktop` |
+| M3: esperar os processos do MATE (`mate-session mate-panel marco`) | `FALHA: processo mate-session não está rodando como user`, depois dos 120 s de espera |
+| M4: limite de espera da sessão menor que o boot | Com limite de 5 s o teste ainda passa: a sessão já está ativa quando ele começa e, mesmo depois de `systemctl stop lightdm` e `start`, a sessão e os processos sobem em 2 s com KVM. Com limite de 1 s e o `lightdm` reiniciado: `FALHA: sessão gráfica de user não ficou ativa em 1 s`; o controle (reinício e limite de 120 s) passa com a sessão ativa em 2 s. O laço de espera é real, mas o valor de 5 s do enunciado não chega a falhar nesta VM |
+
 ## Problemas conhecidos
 
 - Os números do passo A (candidatos) são relativos ao estado da VM de build (Docker, QEMU e outros já instalados) e usam `--no-install-recommends`; por isso a sanidade com `xorg` e o applet de rede está acima. A medição que decide é a do passo B, em ISO.
-- Item 8 da definição: o `nm-applet` (XFCE e MATE) e o `nm-tray` (LXQt) estão em execução, mas o ícone não aparece na captura do XFCE (sem rede). Foi verificado por processo e por comando, não por clique. A F3.15 deve conferir o ícone com o desktop em VM com rede.
-- Item 9: "sem erro de login" foi concluído pela sessão `active` e pelo `lightdm` ativo; os logs do `lightdm` não foram lidos.
+- Item 8 da definição: o `nm-applet` está em execução na ISO com desktop, mas o ícone não aparece na captura (sem rede). Foi verificado por processo, não por clique; o ícone com o desktop em VM com rede não foi conferido.
+- Item 9: o smoke `desktop` confere que `journalctl -b -u lightdm -p err` está vazio, além da sessão `active` e do `lightdm` ativo. Os arquivos de `/var/log/lightdm` não são lidos.
 - Boot em Hyper-V Geração 2, Secure Boot e VirtualBox não foram validados (veja "Sessão sem janela").
 - O tempo "até a sessão" é o `uptime` do guest: não inclui firmware nem o menu do isolinux. O tempo medido no host, do início do QEMU até o marcador, ficou entre 33 s e 38 s.
 - A RAM do 768 MiB foi testada em uma execução só, e o 3072 MiB e o 896 MiB não tiveram a sessão medida com o XFCE.
-- `all` (os 7 smokes) não foi executado com o desktop: só `containers`, a sessão e o `tests/iso.sh`.
-- Os scripts de medição (espera da sessão, três leituras de RAM, captura de tela) ficaram fora do repositório; o método está descrito acima. A F3.15 cria o smoke `desktop` definitivo.
+- `all` com o desktop foi executado na F3.15 e na F3.16 (8 testes, veja "Medições da ISO"). O 768 MiB, o 896 MiB e o 3072 MiB ainda não foram testados com os atalhos.
+- O script de medição de RAM e de uptime da sessão e o de captura de tela ficaram fora do repositório (o método está em "Medições da ISO" e em "Como ficou na ISO"). O smoke `desktop` definitivo é o `tests/desktop.sh`.
 - Reprodução por uma segunda pessoa e a medição nas máquinas dos demais integrantes continuam pendentes.
+- O smoke `desktop` começa com a sessão já ativa (a unidade só roda depois dos serviços dos componentes), então o tempo real até a sessão não sai dele: o uptime medido (25,0 s com KVM, 258,8 s sem) é só um limite superior.
+- Os atalhos de terminal funcionam no smoke com `NEXUS_ATALHO_TESTE=1`; o fluxo interativo (janela do terminal esperando Enter, clique no ícone) foi conferido só pela captura de tela dos ícones e do menu, não por clique.
+- O atalho "Laboratório Open vSwitch" só cria o laboratório; a remoção é `sudo nexus-sdn down` no terminal.
+- O `virt-manager` foi conferido por janela e por processo vivo depois de 15 s; não se abriu nem criou VM por ele.
+- Sem KVM a sessão leva cerca de 259 s para ficar ativa (1 vCPU, 2048 MiB), então o limite de 120 s do laço de espera do `tests/desktop.sh` só serve porque o teste começa depois de a sessão estar ativa; em outra ordem de unidades o limite sem KVM seria curto.
