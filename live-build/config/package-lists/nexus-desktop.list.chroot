@@ -1,0 +1,13 @@
+xfce4
+xfce4-terminal
+network-manager
+network-manager-gnome
+lightdm
+lightdm-gtk-greeter
+xorg
+firefox-esr
+virt-manager
+desktop-file-utils
+x11-utils
+libgtk-3-bin
+libglib2.0-bin
