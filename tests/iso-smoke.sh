@@ -4,6 +4,7 @@
 # desliga a máquina. Veja docs/integracao-iso.md.
 # Uso: tests/iso-smoke.sh [--extra arq.sh]... <iso> <nome[,nome]...|all>
 # Ambiente: NEXUS_SMOKE_LIMIT (segundos), NEXUS_SMOKE_MEM (MiB, padrão 4096), NEXUS_SMOKE_SMP (vCPU, padrão 2),
+# NEXUS_SMOKE_KVM=0 (força a emulação por software mesmo com /dev/kvm),
 # NEXUS_SMOKE_SERIAL (arquivo onde guardar a serial inteira, para diagnóstico).
 set -euo pipefail
 
@@ -32,7 +33,7 @@ for cmd in qemu-system-x86_64 xorriso; do
     command -v "$cmd" >/dev/null || fail "$cmd não instalado"
 done
 
-if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then
+if [ "${NEXUS_SMOKE_KVM:-1}" != 0 ] && [ -r /dev/kvm ] && [ -w /dev/kvm ]; then
     accel=(-enable-kvm -cpu host)
     limit_padrao=900
     modo="com KVM"
@@ -86,7 +87,7 @@ dpid=$!
 qemu-system-x86_64 "${accel[@]}" -m "$mem" -smp "$smp" \
     -drive "file=$iso,media=cdrom,readonly=on,index=2" \
     -drive "file=$tmp/smoke.iso,media=cdrom,readonly=on,index=3" \
-    -boot d -nic none -display none -serial "file:$serial" \
+    -boot d -nic none -vga std -display none -serial "file:$serial" \
     -chardev "pipe,id=mon,path=$tmp/mon" -mon chardev=mon,mode=readline 2>"$tmp/qemu.err" &
 qpid=$!
 

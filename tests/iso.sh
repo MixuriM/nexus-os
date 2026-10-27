@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Teste da ISO: confere o SHA256 e inicia a ISO em QEMU até aparecer "login:" na serial.
 # Uso: tests/iso.sh <iso>   (o arquivo <iso>.sha256 precisa estar ao lado)
+# Ambiente: NEXUS_ISO_MEM (MiB, padrão 2048: o desktop da F3.15 roda com 1024 MiB no mínimo, veja docs/gui.md).
 set -euo pipefail
 
 fail() { echo "FALHA: $*" >&2; exit 1; }
@@ -10,6 +11,7 @@ iso=$1
 [ -f "$iso" ] || fail "ISO não encontrada: $iso"
 [ -f "$iso.sha256" ] || fail "arquivo SHA256 não encontrado: $iso.sha256"
 command -v qemu-system-x86_64 >/dev/null || fail "qemu-system-x86_64 não instalado"
+[[ ${NEXUS_ISO_MEM:-2048} =~ ^[0-9]+$ ]] || fail "NEXUS_ISO_MEM inválido: $NEXUS_ISO_MEM"
 
 (cd "$(dirname "$iso")" && sha256sum -c "$(basename "$iso.sha256")" >/dev/null 2>&1) \
     || fail "SHA256 da ISO não confere com $iso.sha256"
@@ -48,7 +50,7 @@ mkfifo "$tmp/mon.in" "$tmp/mon.out"
 exec 3<>"$tmp/mon.in"
 cat "$tmp/mon.out" >/dev/null &
 dpid=$!
-qemu-system-x86_64 "${accel[@]}" -m 1024 -smp 2 -cdrom "$iso" -boot d \
+qemu-system-x86_64 "${accel[@]}" -m "${NEXUS_ISO_MEM:-2048}" -smp 2 -cdrom "$iso" -boot d \
     -display none -serial "file:$serial" \
     -chardev "pipe,id=mon,path=$tmp/mon" -mon chardev=mon,mode=readline 2>"$tmp/qemu.err" &
 qpid=$!
