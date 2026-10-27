@@ -36,3 +36,5 @@ Em Linux (VM Debian 13), na raiz do repo:
 - Orquestração da VNF FRR (F3.6): `sudo tests/orquestracao.sh` (precisa de Docker e Containerlab); na ISO, `sudo nexus-vnf up|status|down` e `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso orquestracao`
 - Requisitos de hardware e RC1 (F3.9 e F3.11): `tests/requisitos.sh` (estático, roda também no Git Bash); a RAM e o disco da ISO saem do `OK:` do `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso all` (veja `docs/requisitos.md` e `docs/rc1.md`)
 - Todos os testes da Fase 2 em ordem (para no primeiro erro): `tests/run-fase2.sh [iso]`
+- Documentação (F3.8 e F3.12): `tests/docs.sh` (estático, roda também no Git Bash); manual executado dentro da ISO: `tests/manual.sh dist/nexus-os-rc1-amd64.iso`; manual em `docs/manual.md`, GNS3 em `docs/gns3.md`
+- Todos os testes da Fase 3 em ordem (para no primeiro erro): `tests/run-fase3.sh [iso]`
