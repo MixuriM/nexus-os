@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Topologia Containerlab: remover
+Comment=Remove a topologia de dois roteadores FRR e limpa os restos
+Icon=edit-delete
+Exec=xfce4-terminal --disable-server "--title=Containerlab: remover" -x nexus-atalho clab-destroy sudo containerlab destroy -t /usr/share/nexus-os/labs/containerlab/frr-duo.clab.yml --cleanup
+Terminal=false
+Categories=X-Nexus-OS;

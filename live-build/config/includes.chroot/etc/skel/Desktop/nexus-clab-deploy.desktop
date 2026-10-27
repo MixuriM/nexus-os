@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Topologia Containerlab: criar
+Comment=Cria a topologia de dois roteadores FRR com o Containerlab
+Icon=network-workgroup
+Exec=xfce4-terminal --disable-server "--title=Containerlab: criar" -x nexus-atalho clab-deploy sudo containerlab deploy -t /usr/share/nexus-os/labs/containerlab/frr-duo.clab.yml
+Terminal=false
+Categories=X-Nexus-OS;

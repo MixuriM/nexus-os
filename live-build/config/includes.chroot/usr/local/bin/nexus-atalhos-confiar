@@ -1,0 +1,8 @@
+#!/bin/sh
+# Marca os atalhos da área de trabalho como confiáveis no Thunar/xfdesktop (bit de execução mais o
+# checksum em metadata::xfce-exe-checksum). Roda no início da sessão (etc/xdg/autostart).
+for f in "$HOME"/Desktop/nexus-*.desktop; do
+    [ -f "$f" ] || continue
+    chmod 0755 "$f"
+    gio set -t string "$f" metadata::xfce-exe-checksum "$(sha256sum "$f" | cut -d' ' -f1)"
+done
