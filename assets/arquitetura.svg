@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 640" width="1120" height="640" role="img" aria-labelledby="t d" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title id="t">Arquitetura do Nexus OS</title>
+  <desc id="d">O usuário aciona quatro comandos dentro da ISO: nexus-sdn para o Open vSwitch, nexus-vm para o libvirt com KVM e QEMU, nexus-vnf para a orquestração da VNF FRR sobre Docker e Containerlab, e nexus-smoke para os smoke tests.</desc>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b78c4"/>
+      <stop offset="1" stop-color="#8a3487"/>
+    </linearGradient>
+    <linearGradient id="gv" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3b78c4"/>
+      <stop offset="1" stop-color="#8a3487"/>
+    </linearGradient>
+    <marker id="seta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M1,1 L9,5 L1,9 Z" fill="#a58bd6"/>
+    </marker>
+    <filter id="sombra" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect width="1120" height="640" rx="22" fill="#1b1c36"/>
+
+  <!-- ISO -->
+  <rect x="20" y="170" width="1080" height="450" rx="20" fill="#202145" stroke="url(#g)" stroke-width="2"/>
+  <text x="44" y="602" font-size="15" font-weight="700" fill="#ffffff">Nexus <tspan fill="#c05bbd">OS</tspan><tspan font-weight="400" fill="#9aa0cf">  Debian 13 (trixie), live</tspan></text>
+
+  <!-- SDN -->
+  <rect x="50" y="215" width="230" height="345" rx="14" fill="#ffffff" fill-opacity="0.04" stroke="#4a4c80"/>
+  <circle cx="70" cy="241" r="5" fill="url(#g)"/>
+  <text x="84" y="246" font-size="14" font-weight="700" fill="#cfd3f5" letter-spacing="1">SDN</text>
+  <g filter="url(#sombra)">
+    <rect x="70" y="268" width="190" height="100" rx="12" fill="#2b2d52" stroke="#4a4c80"/>
+    <rect x="70" y="268" width="6" height="100" rx="3" fill="url(#gv)"/>
+  </g>
+  <text x="92" y="302" font-size="17" font-weight="700" fill="#ffffff">Open vSwitch</text>
+  <text x="92" y="326" font-size="12.5" fill="#b9bde0">Regras OpenFlow à mão</text>
+  <text x="92" y="346" font-size="12.5" fill="#b9bde0">ovs-ofctl, modo secure</text>
+  <g filter="url(#sombra)">
+    <rect x="70" y="388" width="190" height="100" rx="12" fill="#2b2d52" stroke="#4a4c80"/>
+    <rect x="70" y="388" width="6" height="100" rx="3" fill="url(#gv)"/>
+  </g>
+  <text x="92" y="422" font-size="17" font-weight="700" fill="#ffffff">Laboratório</text>
+  <text x="92" y="446" font-size="12.5" fill="#b9bde0">Bridge br-nexus e dois</text>
+  <text x="92" y="466" font-size="12.5" fill="#b9bde0">namespaces (h1 e h2)</text>
+
+  <!-- VIM -->
+  <rect x="300" y="215" width="230" height="345" rx="14" fill="#ffffff" fill-opacity="0.04" stroke="#4a4c80"/>
+  <circle cx="320" cy="241" r="5" fill="url(#g)"/>
+  <text x="334" y="246" font-size="14" font-weight="700" fill="#cfd3f5" letter-spacing="1">VIM</text>
+  <g filter="url(#sombra)">
+    <rect x="320" y="268" width="190" height="100" rx="12" fill="#2b2d52" stroke="#4a4c80"/>
+    <rect x="320" y="268" width="6" height="100" rx="3" fill="url(#gv)"/>
+  </g>
+  <text x="342" y="302" font-size="17" font-weight="700" fill="#ffffff">libvirt</text>
+  <text x="342" y="326" font-size="12.5" fill="#b9bde0">KVM e QEMU, rede</text>
+  <text x="342" y="346" font-size="12.5" fill="#b9bde0">default com autostart</text>
+  <g filter="url(#sombra)">
+    <rect x="320" y="388" width="190" height="100" rx="12" fill="#2b2d52" stroke="#4a4c80"/>
+    <rect x="320" y="388" width="6" height="100" rx="3" fill="url(#gv)"/>
+  </g>
+  <text x="342" y="422" font-size="17" font-weight="700" fill="#ffffff">VM de teste</text>
+  <text x="342" y="446" font-size="12.5" fill="#b9bde0">nexus-vm criar, listar</text>
+  <text x="342" y="466" font-size="12.5" fill="#b9bde0">e remover</text>
+
+  <!-- NFV -->
+  <rect x="550" y="215" width="340" height="345" rx="14" fill="#ffffff" fill-opacity="0.04" stroke="#4a4c80"/>
+  <circle cx="570" cy="241" r="5" fill="url(#g)"/>
+  <text x="584" y="246" font-size="14" font-weight="700" fill="#cfd3f5" letter-spacing="1">NFV</text>
+  <g filter="url(#sombra)">
+    <rect x="565" y="268" width="150" height="82" rx="12" fill="#2b2d52" stroke="#4a4c80"/>
+    <rect x="565" y="268" width="6" height="82" rx="3" fill="url(#gv)"/>
+  </g>
+  <text x="585" y="300" font-size="17" font-weight="700" fill="#ffffff">nexus-vnf</text>
+  <text x="585" y="322" font-size="12.5" fill="#b9bde0">NFVO e VNFM</text>
+  <text x="585" y="338" font-size="12.5" fill="#b9bde0">simplificado</text>
+  <g filter="url(#sombra)">
+    <rect x="725" y="268" width="150" height="82" rx="12" fill="#2b2d52" stroke="#4a4c80"/>
+    <rect x="725" y="268" width="6" height="82" rx="3" fill="url(#gv)"/>
+  </g>
+  <text x="745" y="300" font-size="17" font-weight="700" fill="#ffffff">Docker</text>
+  <text x="745" y="322" font-size="12.5" fill="#b9bde0">Imagem FRR</text>
+  <text x="745" y="338" font-size="12.5" fill="#b9bde0">embutida (offline)</text>
+
+  <g fill="none" stroke="#a58bd6" stroke-width="2" marker-end="url(#seta)">
+    <path d="M640,350 V396"/>
+    <path d="M800,350 V396"/>
+    <path d="M720,458 V496"/>
+  </g>
+  <g filter="url(#sombra)">
+    <rect x="600" y="398" width="240" height="60" rx="12" fill="#2b2d52" stroke="#4a4c80"/>
+    <rect x="600" y="398" width="6" height="60" rx="3" fill="url(#gv)"/>
+  </g>
+  <text x="622" y="425" font-size="17" font-weight="700" fill="#ffffff">Containerlab</text>
+  <text x="622" y="445" font-size="12.5" fill="#b9bde0">Topologias frr-duo e vnf-frr</text>
+  <g filter="url(#sombra)">
+    <rect x="600" y="498" width="240" height="50" rx="12" fill="url(#g)"/>
+  </g>
+  <text x="720" y="528" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">FRRouting (VNF)</text>
+
+  <!-- Smoke -->
+  <rect x="910" y="215" width="170" height="345" rx="14" fill="#ffffff" fill-opacity="0.04" stroke="#4a4c80"/>
+  <circle cx="930" cy="241" r="5" fill="url(#g)"/>
+  <text x="944" y="246" font-size="13" font-weight="700" fill="#cfd3f5">TESTES</text>
+  <g filter="url(#sombra)">
+    <rect x="925" y="268" width="140" height="100" rx="12" fill="#2b2d52" stroke="#4a4c80"/>
+    <rect x="925" y="268" width="6" height="100" rx="3" fill="url(#gv)"/>
+  </g>
+  <text x="945" y="302" font-size="17" font-weight="700" fill="#ffffff">nexus-smoke</text>
+  <text x="945" y="326" font-size="12.5" fill="#b9bde0">7 smoke tests</text>
+  <text x="945" y="346" font-size="12.5" fill="#b9bde0">dentro da ISO</text>
+  <g filter="url(#sombra)">
+    <rect x="925" y="388" width="140" height="100" rx="12" fill="#2b2d52" stroke="#4a4c80"/>
+    <rect x="925" y="388" width="6" height="100" rx="3" fill="url(#gv)"/>
+  </g>
+  <text x="945" y="422" font-size="17" font-weight="700" fill="#ffffff">Medição</text>
+  <text x="945" y="446" font-size="12.5" fill="#b9bde0">RAM e disco</text>
+  <text x="945" y="466" font-size="12.5" fill="#b9bde0">por teste</text>
+  <!-- Usuário e setas dos comandos -->
+  <g fill="none" stroke="#a58bd6" stroke-width="2" marker-end="url(#seta)">
+    <path d="M560,76 V104 Q560,112 552,112 H173 Q165,112 165,120 V266"/>
+    <path d="M560,76 V104 Q560,112 552,112 H423 Q415,112 415,120 V266"/>
+    <path d="M560,76 V104 Q560,112 568,112 H632 Q640,112 640,120 V266"/>
+    <path d="M560,76 V104 Q560,112 568,112 H987 Q995,112 995,120 V266"/>
+  </g>
+  <rect x="470" y="28" width="180" height="48" rx="24" fill="url(#g)" filter="url(#sombra)"/>
+  <text x="560" y="58" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff">Usuário</text>
+
+  <g font-family="'JetBrains Mono', Consolas, 'Courier New', monospace" font-size="13" text-anchor="middle">
+    <rect x="110" y="132" width="110" height="26" rx="13" fill="#1b1c36" stroke="#7b5ea7"/>
+    <text x="165" y="150" fill="#d7c9ff">nexus-sdn</text>
+    <rect x="365" y="132" width="100" height="26" rx="13" fill="#1b1c36" stroke="#7b5ea7"/>
+    <text x="415" y="150" fill="#d7c9ff">nexus-vm</text>
+    <rect x="590" y="132" width="100" height="26" rx="13" fill="#1b1c36" stroke="#7b5ea7"/>
+    <text x="640" y="150" fill="#d7c9ff">nexus-vnf</text>
+    <rect x="935" y="132" width="120" height="26" rx="13" fill="#1b1c36" stroke="#7b5ea7"/>
+    <text x="995" y="150" fill="#d7c9ff">nexus-smoke</text>
+  </g>
+
+</svg>

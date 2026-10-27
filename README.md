@@ -39,28 +39,9 @@ Fora da RC1: OpenDaylight (opcional, só depois que o núcleo estiver validado),
 
 ## Arquitetura
 
-```mermaid
-flowchart TB
-    subgraph ISO["Nexus OS (Debian 13, live)"]
-        direction TB
-        subgraph SDN["SDN"]
-            OVS["Open vSwitch<br/>regras OpenFlow escritas à mão (ovs-ofctl)"]
-        end
-        subgraph VIM["VIM"]
-            LV["libvirt + KVM/QEMU"]
-        end
-        subgraph NFV["NFV"]
-            DK["Docker<br/>imagem FRR offline"] --> CL["Containerlab"]
-            CL --> FRR["FRRouting (VNF)"]
-            ORQ["nexus-vnf<br/>NFVO/VNFM simplificado"] --> CL
-        end
-        SM["nexus-smoke<br/>smoke tests e medição de RAM e disco"]
-    end
-    U(["Usuário"]) -->|nexus-sdn| OVS
-    U -->|nexus-vm| LV
-    U -->|nexus-vnf| ORQ
-    U -->|nexus-smoke| SM
-```
+<p align="center">
+  <img src="assets/arquitetura.svg" alt="Arquitetura do Nexus OS: o usuário aciona nexus-sdn, nexus-vm, nexus-vnf e nexus-smoke; dentro da ISO ficam Open vSwitch, libvirt com KVM e QEMU, Docker, Containerlab, FRRouting e os smoke tests" width="100%">
+</p>
 
 ## Versões confirmadas (21/10/2026)
 
@@ -155,7 +136,7 @@ Para testar a documentação do zero: [checklist](docs/checklist-teste-documenta
 
 ```text
 nexus-os/
-├── assets/          logo do projeto
+├── assets/          logo e diagrama de arquitetura (SVG)
 ├── docs/            documentação técnica (índice em docs/README.md)
 ├── live-build/      configuração da ISO (receita em auto/ e config/)
 ├── sdn/             laboratório Open vSwitch (lab-ovs.sh, flows/)
