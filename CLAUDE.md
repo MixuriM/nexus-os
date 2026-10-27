@@ -37,6 +37,7 @@ Em Linux (VM Debian 13), na raiz do repo:
 - Requisitos de hardware e RC1 (F3.9 e F3.11): `tests/requisitos.sh` (estático, roda também no Git Bash); a RAM e o disco da ISO saem do `OK:` do `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso all` (veja `docs/requisitos.md` e `docs/rc1.md`)
 - Todos os testes da Fase 2 em ordem (para no primeiro erro): `tests/run-fase2.sh [iso]`
 - Documentação (F3.8 e F3.12): `tests/docs.sh` (estático, roda também no Git Bash); manual executado dentro da ISO: `tests/manual.sh dist/nexus-os-rc1-amd64.iso`; manual em `docs/manual.md`, GNS3 em `docs/gns3.md`
-- Ambiente gráfico (F3.14, desktop escolhido por medição: XFCE com `lightdm`): `tests/gui-spec.sh` (estático, roda também no Git Bash); documento em `docs/gui.md`
+- Ambiente gráfico (F3.14, desktop XFCE com `lightdm`, já instalado na ISO pela F3.15): `tests/gui-spec.sh` (estático, roda também no Git Bash); documento em `docs/gui.md`
 - Desktop na ISO e atalhos (F3.15 e F3.16): `tests/atalhos.sh` (estático, roda também no Git Bash; `desktop-file-validate` só na VM com `desktop-file-utils`); `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso desktop` (o `all` já o roda por último); sem KVM, `NEXUS_SMOKE_KVM=0 NEXUS_SMOKE_SMP=1 NEXUS_SMOKE_MEM=2048`; `tests/iso.sh` usa `NEXUS_ISO_MEM` (padrão 2048)
 - Todos os testes da Fase 3 em ordem (para no primeiro erro): `tests/run-fase3.sh [iso]`
+- Desktop (F3.15 e F3.16): os atalhos `nexus-*.desktop` ficam em `live-build/config/includes.chroot/usr/share/applications/` e a cópia idêntica em `.../etc/skel/Desktop/` (o `tests/atalhos.sh` exige as duas); arquivos com LF, comando de terminal sempre pelo `nexus-atalho`; o smoke `desktop` precisa de VM com vídeo (`-vga std`)

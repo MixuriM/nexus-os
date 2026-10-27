@@ -8,7 +8,7 @@
 
 ![Licença](https://img.shields.io/badge/licen%C3%A7a-GPL--3.0--or--later-blue)
 ![Base](https://img.shields.io/badge/base-Debian%2013%20(trixie)-a80030)
-![Estado](https://img.shields.io/badge/estado-RC1%20(n%C3%BAcleo%2C%20sem%20desktop)-purple)
+![Estado](https://img.shields.io/badge/estado-RC1%20%2B%20desktop%20(pr%C3%A9-RC2)-purple)
 
 [Estado atual](#estado-atual) · [Arquitetura](#arquitetura) · [Como gerar a ISO](#como-gerar-a-iso) · [Usar a ISO](#usar-a-iso-integrada) · [Requisitos](#requisitos-medidos-da-rc1) · [Testes](#testes) · [Documentação](#documentação)
 
@@ -24,7 +24,7 @@ Projeto Integrador acadêmico, em desenvolvimento.
 
 ## Estado atual
 
-A **RC1** é a primeira ISO integrada: só o núcleo, **sem ambiente gráfico** (o desktop está previsto para a RC2). Detalhes, medições e riscos em [docs/rc1.md](docs/rc1.md).
+A **RC1** é a primeira ISO integrada, só com o núcleo e sem ambiente gráfico ([docs/rc1.md](docs/rc1.md)). A ISO atual (pré-RC2) soma a ela o **desktop XFCE** com login automático do `user` e 9 atalhos para os componentes (F3.15 e F3.16, [docs/gui.md](docs/gui.md)); a identidade visual, os requisitos com desktop e o congelamento da RC2 ainda não foram feitos.
 
 | Componente | Versão na ISO | Como usar | Smoke test |
 | --- | --- | --- | --- |
@@ -34,10 +34,11 @@ A **RC1** é a primeira ISO integrada: só o núcleo, **sem ambiente gráfico** 
 | VNF: FRRouting | pacote `frr` 10.3-3+deb13u1 | `vtysh` | `frr` |
 | Topologia: Containerlab | 0.81.1 | `containerlab deploy -t ...` | `nfv` |
 | NFVO/VNFM simplificado | script `nfv/nexus-vnf.sh` | `nexus-vnf up\|status\|down` | `orquestracao` |
+| Desktop: XFCE | `xfce4` 4.20.1 com `lightdm` 1.32.0-6+b2, `firefox-esr` e `virt-manager` | login automático do `user`; menu e área de trabalho com os atalhos "Nexus OS" | `desktop` |
 
-Fora da RC1: OpenDaylight (opcional, só depois que o núcleo estiver validado), GNS3 (apenas documentado em [docs/gns3.md](docs/gns3.md), não entra na ISO) e o ambiente gráfico (RC2).
+Fora da ISO: OpenDaylight (opcional, só depois que o núcleo estiver validado) e GNS3 (apenas documentado em [docs/gns3.md](docs/gns3.md)).
 
-O desktop da RC2 já foi escolhido por medição: **XFCE** com `lightdm` e login automático do `user`. Na ISO (F3.15 e F3.16, com os 9 atalhos no menu "Nexus OS" e na área de trabalho) a sessão já estava ativa 25 s depois do boot, com 840 MiB de RAM em repouso e ISO de 1260126208 bytes (com KVM; sem KVM o smoke `desktop` também passa). Comparação dos candidatos, atalhos e medições em [docs/gui.md](docs/gui.md).
+O desktop é o **XFCE** com `lightdm`, escolhido por medição. Na ISO ele sobe sozinho no login do `user`: a sessão já estava ativa 25 s depois do boot, com 840 MiB de RAM em repouso e ISO de 1260126208 bytes (com KVM; sem KVM o smoke `desktop` também passa, mais lento). Comparação dos candidatos, atalhos e medições em [docs/gui.md](docs/gui.md).
 
 ## Arquitetura
 
@@ -93,9 +94,9 @@ Preparo da VM: [docs/ambiente-de-build.md](docs/ambiente-de-build.md). Resultado
 
 ## Usar a ISO integrada
 
-1. Inicie a ISO numa VM (testado: QEMU com KVM; o Hyper-V está descrito em [docs/rc1.md](docs/rc1.md)) com pelo menos **1536 MiB de RAM** e a ISO como CD. Na tela do isolinux, aperte Enter.
-2. Entre com o usuário `user` e a senha `live` (credencial pública da Debian Live, de laboratório). O `sudo` não pede senha.
-3. Use os comandos abaixo.
+1. Inicie a ISO numa VM com vídeo (testado: QEMU com KVM; o Hyper-V está descrito em [docs/rc1.md](docs/rc1.md)) com **2048 MiB de RAM** (valor provisório para uso interativo; o mínimo medido com o desktop é 1024 MiB, veja [docs/gui.md](docs/gui.md)) e a ISO como CD. Na tela do isolinux, aperte Enter. A ISO entra no desktop XFCE já logada como `user`.
+2. Use o menu "Nexus OS" ou os ícones da área de trabalho, ou abra um terminal. Se a sessão pedir login: usuário `user` e senha `live` (credencial pública da Debian Live, de laboratório). O `sudo` não pede senha.
+3. Os atalhos chamam os comandos abaixo; no terminal use os comandos diretamente.
 
 | Comando | O que faz | Guia |
 | --- | --- | --- |
@@ -119,6 +120,8 @@ Medidos com KVM, em boot live com os serviços ativos (método e limitações em
 | Boot até `login:` | 27 s com KVM |
 | Build limpo | 516 s |
 
+Com o desktop (ISO pré-RC2, [docs/gui.md](docs/gui.md)): ISO de 1260126208 bytes, 840 MiB de RAM em repouso com a sessão ativa, `all` de 8 testes em 120 s com KVM. A `docs/requisitos.md` com o desktop ainda será refeita.
+
 ## Testes
 
 Cada script imprime `OK:` ou `FALHA:` e sai com código diferente de zero em falha. Lista completa em [tests/README.md](tests/README.md).
@@ -126,8 +129,8 @@ Cada script imprime `OK:` ou `FALHA:` e sai com código diferente de zero em fal
 | Teste | O que cobre |
 | --- | --- |
 | `tests/lint-repo.sh` | CRLF, travessão, imagens e pacotes versionados, segredos, sintaxe e `shellcheck`. Roda no Git Bash e no Linux |
-| `tests/iso.sh <iso>` | SHA256 da ISO e boot no QEMU até o `login:` |
-| `tests/iso-smoke.sh <iso> <nome>\|all` | Inicia a ISO sem rede e roda dentro dela os 7 smokes: `sdn`, `virtualizacao`, `libvirt`, `containers`, `frr`, `nfv` e `orquestracao` |
+| `tests/iso.sh <iso>` | SHA256 da ISO e boot no QEMU até o `login:` (RAM por `NEXUS_ISO_MEM`, padrão 2048 MiB) |
+| `tests/iso-smoke.sh <iso> <nome>\|all` | Inicia a ISO sem rede e roda dentro dela os 8 smokes: `sdn`, `virtualizacao`, `libvirt`, `containers`, `frr`, `nfv`, `orquestracao` e `desktop` (sessão do XFCE e os 9 atalhos executados). `NEXUS_SMOKE_KVM=0` força a emulação |
 | `tests/run-fase2.sh [iso]` | Verificação do repositório, boot e laboratórios de Open vSwitch, libvirt e FRR com Containerlab, parando no primeiro erro |
 | `tests/requisitos.sh` | Confere a tabela de requisitos e o SHA256 da RC1 |
 | `tests/docs.sh` | Documentos por componente, índice, links e seções do manual e do GNS3. Roda no Git Bash e no Linux |
@@ -164,7 +167,7 @@ nexus-os/
 - Componentes: [SDN](docs/sdn.md), [virtualização](docs/virtualizacao.md), [contêineres](docs/containers.md), [NFV](docs/nfv.md)
 - Integração: [como a ISO é montada](docs/integracao-iso.md), [RC1](docs/rc1.md), [requisitos de hardware](docs/requisitos.md)
 - Uso: [manual v1](docs/manual.md) e [GNS3, só documentado](docs/gns3.md)
-- Ambiente gráfico: [especificação e escolha do desktop](docs/gui.md)
+- Ambiente gráfico: [escolha do desktop, instalação na ISO, atalhos e medições](docs/gui.md)
 
 ## Limitações conhecidas
 
@@ -174,7 +177,7 @@ Acompanhadas como issues no GitHub.
 - Abaixo de cerca de 896 MiB de RAM o Docker não carrega a imagem FRR (issue 31).
 - O `nexus-smoke.service` executa como root o conteúdo de um CD com rótulo `NEXUS_SMOKE`; a decisão de removê-lo ou condicioná-lo fica para o congelamento da ISO (issue 32).
 - A RAM em repouso varia entre execuções (issue 33) e o desligamento da live pede ENTER (issue 34).
-- Sem ambiente gráfico na RC1.
+- Identidade visual, requisitos de hardware com desktop e o congelamento da RC2 ainda não foram feitos; o desktop foi medido só com KVM em um ambiente (Hyper-V) e sem KVM uma vez, e os fluxos interativos (clique nos ícones, terminal esperando Enter) não foram exercitados.
 
 ## Fluxo de trabalho
 
