@@ -16,6 +16,7 @@ O relatório acadêmico do projeto não fica neste repositório.
 - [Requisitos mínimos de hardware da ISO](requisitos.md)
 - [RC1: ISO integrada do núcleo](rc1.md)
 - [Manual v1 (RC1, núcleo)](manual.md)
+- [Ambiente gráfico: especificação e escolha do desktop](gui.md)
 - [Modelo de manual](manual-modelo.md)
 - [Checklist de teste da documentação](checklist-teste-documentacao.md)
 - [Oficina de Git](oficina-git.md)
