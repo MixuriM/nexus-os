@@ -113,7 +113,7 @@ Tempo estimado: 30 min para preparar a máquina e 1 h 30 min para as seções. R
 
 | # | Item | Como conseguir |
 | --- | --- | --- |
-| G0.1 | A ISO `nexus-os-rc1-amd64.iso` e o SHA256 dela | Peça ao Marcos o arquivo. O SHA256 correto está em `docs/rc1.md`, tabela "Identificação", linha "SHA256". Se preferir gerar a ISO, siga as partes B e C (o arquivo sai com o nome `nexus-os-poc-amd64.iso`) |
+| G0.1 | A ISO `nexus-os-rc1-amd64.iso` e o SHA256 dela | Peça o arquivo a quem gerou a ISO (o responsável pelo build). O SHA256 correto está em `docs/rc1.md`, tabela "Identificação", linha "SHA256". Se preferir gerar a ISO, siga as partes B e C (o arquivo sai com o nome `nexus-os-poc-amd64.iso`) |
 | G0.2 | Uma máquina que rode a ISO com **2048 MiB de RAM** livres para a VM | Veja a escolha abaixo |
 | G0.3 | Este repositório aberto no navegador: https://github.com/MixuriM/nexus-os, arquivo `docs/manual.md` | Navegador |
 
@@ -278,11 +278,11 @@ Valem as regras da Parte E. Diferenças para o manual v1:
 | Resultado por seção (passou, passou com ressalvas ou falhou) | |
 | Resultado final | |
 
-### G7: o que devolver ao Marcos
+### G7: o que devolver ao responsável pelo build
 
 1. A ficha G6 preenchida.
 2. As tabelas G2, G3 e G4 com passou ou falhou e o que apareceu.
 3. Os números das issues abertas.
 4. O resultado final: **passou**, **passou com ressalvas** ou **falhou**.
 
-Com isso o Marcos registra a execução do manual v1 por uma segunda pessoa (F3.12).
+Com isso o responsável pelo build registra a execução do manual v1 por uma segunda pessoa (F3.12).
