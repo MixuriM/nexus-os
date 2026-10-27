@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Documentação do Nexus OS
+Comment=Abre a documentação local no gerenciador de arquivos
+Icon=help-browser
+Exec=thunar /usr/share/nexus-os/docs
+Terminal=false
+Categories=X-Nexus-OS;

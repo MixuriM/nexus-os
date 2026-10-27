@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Wrapper dos atalhos do desktop (F3.16): roda o comando, mostra o resultado e grava o código de saída
+# em $XDG_RUNTIME_DIR/nexus-atalho-<nome>.status. Com NEXUS_ATALHO_TESTE=1 não espera tecla (smoke).
+# Uso: nexus-atalho <nome> <comando> [argumentos...]
+set -u
+[ $# -ge 2 ] || { echo "uso: nexus-atalho <nome> <comando> [argumentos...]" >&2; exit 2; }
+nome=$1
+shift
+status=${XDG_RUNTIME_DIR:-/tmp}/nexus-atalho-$nome.status
+rm -f "$status"
+echo "== Nexus OS: $* =="
+"$@"
+codigo=$?
+echo
+echo "Código de saída: $codigo"
+echo "$codigo" >"$status"
+if [ "${NEXUS_ATALHO_TESTE:-}" != 1 ]; then
+    printf 'Pressione Enter para fechar...'
+    read -r _
+fi
+exit "$codigo"

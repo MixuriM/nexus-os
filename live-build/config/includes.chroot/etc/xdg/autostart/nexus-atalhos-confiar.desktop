@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Confiar nos atalhos do Nexus OS
+Exec=/usr/local/bin/nexus-atalhos-confiar
+OnlyShowIn=XFCE;
+NoDisplay=true

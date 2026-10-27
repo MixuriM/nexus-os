@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=VNF FRR: instanciar
+Comment=Instancia a VNF FRR com o Containerlab
+Icon=media-playback-start
+Exec=xfce4-terminal --disable-server "--title=VNF FRR: instanciar" -x nexus-atalho vnf-up sudo nexus-vnf up
+Terminal=false
+Categories=X-Nexus-OS;

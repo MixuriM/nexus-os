@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Gerenciador de máquinas virtuais
+Comment=Abre o virt-manager conectado ao libvirt do sistema (qemu:///system)
+Icon=virt-manager
+Exec=virt-manager --connect qemu:///system
+Terminal=false
+Categories=X-Nexus-OS;
