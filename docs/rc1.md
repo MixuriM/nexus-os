@@ -66,7 +66,7 @@ grep -a -e NEXUS-SMOKE-END -e NEXUS-SMOKE-DONE -e NEXUS-SMOKE-MEMPEAK /tmp/smoke
 free -m
 ```
 
-Resultado da rodada no Hyper-V: **não executado**.
+Resultado da rodada no Hyper-V (executada em 26/10/2026, **sem KVM**: `/dev/kvm` ausente, `virt-type qemu`): a ISO iniciou, o login automático do `user` funcionou e o `nexus-smoke all` terminou com `NEXUS-SMOKE-DONE 7 1`. Seis testes deram `END 0` (`sdn`, `virtualizacao`, `containers`, `frr`, `nfv`, `orquestracao`) e o `libvirt` deu `END 1`, com `FALHA: domínio smoke1 nao existe` logo depois de `OK: VM smoke1 criada e iniciada`. Pico de RAM 790 MiB (`MEMPEAK`), e o `free -m` depois do teste mostrou 3921 MiB de total e 708 MiB usados. A falha é intermitente: 3 ciclos manuais de `nexus-vm criar` e `remover` e 2 execuções de `nexus-smoke libvirt` na mesma VM passaram. Hipótese de causa, não confirmada: SIGPIPE do `grep -q` com `pipefail` em `existe()` (issue #35). Por isso a rodada no Hyper-V **não passa limpa** e não conta como reprodução por segunda pessoa.
 
 ## Riscos conhecidos
 
@@ -76,7 +76,7 @@ Resultado da rodada no Hyper-V: **não executado**.
 ## Limitações
 
 - Medições e testes **com KVM** apenas; a emulação por software não foi repetida nesta parte.
-- O boot em UEFI e em máquina física não foi testado; o Hyper-V ainda não rodou a RC1.
+- O boot em UEFI e em máquina física não foi testado. No Hyper-V (Geração 1, sem KVM) a RC1 iniciou e passou 6 de 7 smokes na primeira execução (veja "Boot no Hyper-V").
 - Os 7 smokes rodam sem rede e dentro do QEMU; a orquestração e o laboratório de rede usam a imagem FRR embutida.
 - A RAM em repouso varia com a RAM do guest e o pico é amostrado a cada 5 s (veja [requisitos.md](requisitos.md)).
 - Sem ambiente gráfico (RC2).
@@ -86,3 +86,4 @@ Resultado da rodada no Hyper-V: **não executado**.
 - Abaixo de cerca de 896 MiB de RAM o `docker load` do `nexus-images.service` falha por falta de espaço no tmpfs do Docker (`size=50%`), e o smoke `containers` dá `FALHA`. Issue #31.
 - Ao desligar, a live pode parar em `Please remove the live-medium, close the tray (if any) and press ENTER to continue:`, visto na serial de um smoke com 896 MiB. Issue #34.
 - Para rodar `tests/run-fase2.sh` na VM de build, instale antes `openvswitch-switch`, `iproute2` e `iputils-ping` ([sdn.md](sdn.md)); sem isso o `tests/sdn.sh` dá `FALHA: ovs-vsctl não instalado`.
+- O smoke `libvirt` falhou uma vez no Hyper-V sem KVM (`FALHA: domínio smoke1 nao existe`), de forma intermitente. Issue #35.
