@@ -35,7 +35,7 @@ A **RC1** é a primeira ISO integrada: só o núcleo, **sem ambiente gráfico** 
 | Topologia: Containerlab | 0.81.1 | `containerlab deploy -t ...` | `nfv` |
 | NFVO/VNFM simplificado | script `nfv/nexus-vnf.sh` | `nexus-vnf up\|status\|down` | `orquestracao` |
 
-Fora da RC1: OpenDaylight (opcional, só depois que o núcleo estiver validado), GNS3 (apenas documentado, não entra na ISO) e o ambiente gráfico (RC2).
+Fora da RC1: OpenDaylight (opcional, só depois que o núcleo estiver validado), GNS3 (apenas documentado em [docs/gns3.md](docs/gns3.md), não entra na ISO) e o ambiente gráfico (RC2).
 
 ## Arquitetura
 
@@ -128,6 +128,9 @@ Cada script imprime `OK:` ou `FALHA:` e sai com código diferente de zero em fal
 | `tests/iso-smoke.sh <iso> <nome>\|all` | Inicia a ISO sem rede e roda dentro dela os 7 smokes: `sdn`, `virtualizacao`, `libvirt`, `containers`, `frr`, `nfv` e `orquestracao` |
 | `tests/run-fase2.sh [iso]` | Verificação do repositório, boot e laboratórios de Open vSwitch, libvirt e FRR com Containerlab, parando no primeiro erro |
 | `tests/requisitos.sh` | Confere a tabela de requisitos e o SHA256 da RC1 |
+| `tests/docs.sh` | Documentos por componente, índice, links e seções do manual e do GNS3. Roda no Git Bash e no Linux |
+| `tests/manual.sh <iso>` | Executa os blocos do [manual](docs/manual.md) dentro da ISO, sem rede |
+| `tests/run-fase3.sh [iso]` | `lint-repo`, `docs`, `iso`, `iso-smoke all`, `requisitos` e `manual`, parando no primeiro erro |
 
 Validação da RC1 (com KVM): `all` com 7 de 7 testes em 69 s (4096 MiB) e 73 s (1536 MiB). Numa VM do Hyper-V sem KVM, 6 de 7 na primeira execução, com uma falha intermitente do `libvirt` ([issue 35](https://github.com/MixuriM/nexus-os/issues/35)).
 Para testar a documentação do zero: [checklist](docs/checklist-teste-documentacao.md).
@@ -143,7 +146,7 @@ nexus-os/
 ├── nfv/             libvirt (nexus-vm), FRR de exemplo e orquestração (nexus-vnf.sh)
 ├── labs/
 │   ├── containerlab/  topologias frr-duo (dois nós FRR e OSPF) e vnf-frr (uma VNF)
-│   └── gns3/          sem conteúdo ainda
+│   └── gns3/          só documentado (docs/gns3.md), sem topologia
 ├── ansible/         sem conteúdo ainda
 ├── scripts/         build-iso.sh, prepare-offline.sh, stage-iso-files.sh e sync-branches.sh
 └── tests/           testes da ISO e dos componentes
@@ -156,6 +159,7 @@ nexus-os/
 - Ambiente: [build](docs/ambiente-de-build.md), [VM no Hyper-V com KVM](docs/hyperv.md), [ISO da prova de conceito](docs/iso-poc.md)
 - Componentes: [SDN](docs/sdn.md), [virtualização](docs/virtualizacao.md), [contêineres](docs/containers.md), [NFV](docs/nfv.md)
 - Integração: [como a ISO é montada](docs/integracao-iso.md), [RC1](docs/rc1.md), [requisitos de hardware](docs/requisitos.md)
+- Uso: [manual v1](docs/manual.md) e [GNS3, só documentado](docs/gns3.md)
 
 ## Limitações conhecidas
 
