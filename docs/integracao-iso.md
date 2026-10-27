@@ -12,6 +12,8 @@ Contrato entre a receita do live-build e os componentes da Fase 3. Cada componen
 | `/usr/local/bin/nexus-sdn` | link para `/usr/share/nexus-os/sdn/lab-ovs.sh` | hook `0500-nexus-servicos.hook.chroot` |
 | `/usr/local/bin/nexus-vm` | link para `/usr/share/nexus-os/nfv/libvirt/nexus-vm.sh` | hook `0500-nexus-servicos.hook.chroot` |
 | `/usr/local/bin/nexus-vnf` | link para `/usr/share/nexus-os/nfv/nexus-vnf.sh` | hook `0500-nexus-servicos.hook.chroot` |
+| `/usr/local/bin/nexus-atalho` e `/usr/local/bin/nexus-atalhos-confiar` | `live-build/config/includes.chroot/usr/local/bin/` | `includes.chroot`; o hook dá `chmod 0755` (F3.16, veja [gui.md](gui.md)) |
+| `/usr/share/applications/nexus-*.desktop` e `/etc/skel/Desktop/nexus-*.desktop` | `live-build/config/includes.chroot/` | `includes.chroot` (9 atalhos, menu "Nexus OS" e área de trabalho do `user`) |
 | `/etc/live/config.conf.d/nexus.conf` | `live-build/config/includes.chroot/etc/live/config.conf.d/nexus.conf` | `includes.chroot` (grupos do usuário `user`, lidos pelo live-config) |
 | `/usr/share/nexus-os/tests/smoke.list` | `tests/smoke.list` | cópia de `tests/` |
 
@@ -57,7 +59,7 @@ Habilitado em `multi-user.target`. A condição `ExecCondition=/usr/sbin/blkid -
 Com o CD, `nexus-smoke --cd` monta o CD em leitura, lê `testes.txt` (nomes ou `all`), copia `extra/*.sh` do CD para `/usr/share/nexus-os/tests/` (sobrescreve), roda os testes, imprime `DONE` e executa `systemctl --no-block poweroff`.
 A saída vai para a serial: o último `console=` da linha de comando do kernel é `console=ttyS0,115200n8`.
 
-Ordenação: o `After=` lista só os serviços de componente existentes (hoje `openvswitch-switch.service`, `libvirtd.service`, `nexus-images.service` e `frr.service`). Não há `After=multi-user.target`, para não criar ciclo com o `WantedBy=`.
+Ordenação: o `After=` lista só os serviços de componente existentes (hoje `openvswitch-switch.service`, `libvirtd.service`, `nexus-images.service` e `frr.service`). Não há `After=multi-user.target`, para não criar ciclo com o `WantedBy=`. O desktop (F3.15) não entra no `After=`: o teste `desktop` espera por laço o `lightdm`, a sessão e os processos (veja [gui.md](gui.md)).
 
 ## Como rodar no host (VM de build)
 
@@ -67,7 +69,7 @@ tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso sdn
 ```
 
 O script cria um CD com `xorriso` (rótulo `NEXUS_SMOKE`, `testes.txt` e `extra/`) em diretório temporário e inicia o QEMU sem interface e sem rede (`-nic none`), com 4096 MiB (`NEXUS_SMOKE_MEM`), 2 vCPU (`NEXUS_SMOKE_SMP`), a ISO e o CD como dois CD-ROMs e a serial em arquivo. Envia Enter pelo monitor (FIFO, sem porta TCP) nos primeiros 60 s, por causa do menu do isolinux. Usa KVM só se `/dev/kvm` for acessível.
-Limite de tempo `NEXUS_SMOKE_LIMIT`: 900 s com KVM, 2400 s sem.
+Limite de tempo `NEXUS_SMOKE_LIMIT`: 900 s com KVM, 2400 s sem. `NEXUS_SMOKE_KVM=0` força a emulação mesmo com `/dev/kvm` (usado para o teste sem KVM). O QEMU recebe `-vga std` (F3.15), para a sessão gráfica do XFCE subir.
 Sai com 0 só se o `DONE` apareceu com 0 falhas, todos os `END` têm código 0 e cada teste pedido tem `END <nome> 0`. Senão imprime `FALHA:` e as últimas 15 linhas da serial. Em sucesso imprime `OK:` com o tempo total e o tempo de cada teste.
 `--extra` leva um script para dentro do CD (útil para provar que uma falha é detectada). `NEXUS_SMOKE_SERIAL=<arquivo>` guarda a serial inteira, para diagnóstico: sem isso o script mostra só as últimas 15 linhas.
 
@@ -91,6 +93,7 @@ Sai com 0 só se o `DONE` apareceu com 0 falhas, todos os `END` têm código 0 e
 | F3.5 FRRouting | `frr` 10.3-3+deb13u1 (Debian main; a imagem de contêiner é 10.7.1), configuração de exemplo em `nfv/frr/exemplo/` | `frr` | ✅ `iso-smoke` OK com KVM no Hyper-V (1 s, sem rede); reprodução por segunda pessoa pendente (veja [nfv.md](nfv.md)) |
 | F3.7 Containerlab | `containerlab` 0.81.1 (`.deb` oficial em `live-build/config/packages.chroot/`, SHA256 em `live-build/offline/containerlab.sha256`) | `nfv` (o `tests/nfv.sh` da F2.7, sem alteração) | ✅ `iso-smoke` OK com KVM no Hyper-V (18 s, sem rede, OSPF convergiu em 12 s); reprodução por segunda pessoa pendente |
 | F3.6 Orquestração NFVO/VNFM | nenhum (usa Docker, Containerlab e a imagem FRR já na ISO), script `nfv/nexus-vnf.sh` e topologia `labs/containerlab/vnf-frr.clab.yml` | `orquestracao` | ✅ `iso-smoke` OK com KVM no Hyper-V (9 s, sem rede); `all` com 7 testes OK em 75 s; reprodução por segunda pessoa pendente (veja [nfv.md](nfv.md)) |
+| F3.15 e F3.16 Desktop e atalhos | `xfce4`, `lightdm`, `xorg`, `firefox-esr`, `virt-manager` e os demais de `nexus-desktop.list.chroot` (veja [gui.md](gui.md)); 9 atalhos `nexus-*.desktop`, `nexus-atalho` | `desktop` (por último em `smoke.list`) | ✅ `iso-smoke ... all` (8 testes) OK com KVM em 120 s e `desktop` OK sem KVM (477 s com `ram`); ISO de 1260126208 bytes, build de 457 s; reprodução por segunda pessoa pendente |
 | F3.9 a F3.11 RC1 | todos os acima | `all` (os 7 testes) | ✅ build limpo em 516 s, 921698304 bytes; `all` OK com KVM em 69 s (4096 MiB) e 73 s (1536 MiB, RAM recomendada); reprodução por segunda pessoa e boot no Hyper-V pendentes (veja [rc1.md](rc1.md) e [requisitos.md](requisitos.md)) |
 
 ## Medições (23/10/2026, VM de build sem KVM)

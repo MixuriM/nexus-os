@@ -3,7 +3,7 @@
 Testes e validações do Nexus OS. Cada script imprime `OK:` ou `FALHA:` e sai com código diferente de zero em falha.
 
 - `lint-repo.sh`: verificação estática (CRLF, travessão, ISO ou `.img` versionados, padrões de segredo, sintaxe e `shellcheck`). Roda no Git Bash do Windows e em Linux.
-- `iso.sh <iso>`: confere o SHA256 da ISO e inicia a ISO no QEMU até aparecer `login:`. Precisa de Linux com `qemu-system-x86`.
+- `iso.sh <iso>`: confere o SHA256 da ISO e inicia a ISO no QEMU até aparecer `login:`. Precisa de Linux com `qemu-system-x86`. A RAM vem de `NEXUS_ISO_MEM` (padrão 2048 MiB).
 - `sdn.sh`: laboratório Open vSwitch (bridge `br-nexus` em modo `secure`, namespaces `h1` e `h2`): ping com as regras de `sdn/flows/basico.flows` e sem ping sem elas. Roda com `sudo` na VM Debian.
 - `virtualizacao.sh`: registra `vmx/svm` e `/dev/kvm`, define e inicia a VM de `nfv/libvirt/vm-teste.xml` via `virsh` e confirma `running`. Usa emulação por software sem `/dev/kvm`. Roda com `sudo` na VM Debian.
 - `nfv.sh`: implanta `labs/containerlab/frr-duo.clab.yml` (dois nós FRR, OSPF área 0), espera até 90 s pela convergência e confere a rota OSPF nos dois nós. Precisa de Docker e Containerlab. Roda com `sudo` na VM Debian.
@@ -16,6 +16,8 @@ Testes e validações do Nexus OS. Cada script imprime `OK:` ou `FALHA:` e sai c
 - `smoke.list`: nomes dos testes que o `nexus-smoke all` roda dentro da ISO, um por linha, em ordem.
 - `docs.sh`: estático (roda no Git Bash e em Linux): confere que os documentos por componente, `gns3.md` e `manual.md` existem e estão no índice `docs/README.md`, que os links locais resolvem, que `gns3.md` e `manual.md` têm as seções exigidas e que não sobrou `TODO`.
 - `manual.sh <iso>`: extrai os blocos `bash nexus-exec` de `docs/manual.md`, em ordem, para um script com `set -e` e o roda dentro da ISO, sem rede, como o teste `manual` do `iso-smoke.sh` (`--extra`; fora do `smoke.list`). Sai com 0 só se todos os blocos passarem e o script chegar ao fim. Precisa de `qemu-system-x86` e `xorriso`.
+- `atalhos.sh`: estático (roda no Git Bash e em Linux): os 9 atalhos `nexus-*.desktop` (F3.16) existem no menu e na área de trabalho com conteúdo igual, passam no `desktop-file-validate` (sem a ferramenta, termina em `AVISO:`), têm chaves obrigatórias, `Comment` em português e `Exec` com comando existente, e nenhum está ignorado pelo `.gitignore`.
+- `desktop.sh`: só dentro da ISO (`nexus-smoke desktop`, último de `smoke.list`): `lightdm` ativo, sessão do `user` ativa com `xfce4-session`, `xfce4-panel` e `xfwm4`, sem rota padrão e sem erro do `lightdm`, atalhos válidos e cópias confiáveis na área de trabalho, e cada atalho executado como o `user` (código 0 pelo `nexus-atalho` ou janela aberta). Veja [gui.md](../docs/gui.md).
 - `gui-spec.sh`: estático (roda no Git Bash e em Linux): confere `docs/gui.md` (F3.14): no índice, com as seções exigidas, os 5 candidatos com versão, pacotes e tamanhos numéricos, os 3 finalistas medidos com KVM (duas leituras cada) e o desktop escolhido entre os finalistas.
 - `run-fase3.sh [iso]`: roda em ordem `lint-repo`, `docs`, `iso`, `iso-smoke all`, `requisitos` e `manual`, para no primeiro erro com `FALHA:` e imprime um resumo `OK:`/`FALHA:` por teste. A ISO é o argumento ou `dist/nexus-os-poc-amd64.iso`.
 - `run-fase2.sh [iso]`: roda em ordem `lint-repo`, `iso`, `sdn`, `virtualizacao` e `nfv`, para no primeiro erro com `FALHA:` e imprime um resumo `OK:`/`FALHA:` por teste. A ISO é o argumento ou `dist/nexus-os-poc-amd64.iso`. Usa `sudo` nos três últimos.

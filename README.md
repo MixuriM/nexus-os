@@ -37,7 +37,7 @@ A **RC1** é a primeira ISO integrada: só o núcleo, **sem ambiente gráfico** 
 
 Fora da RC1: OpenDaylight (opcional, só depois que o núcleo estiver validado), GNS3 (apenas documentado em [docs/gns3.md](docs/gns3.md), não entra na ISO) e o ambiente gráfico (RC2).
 
-O desktop da RC2 já foi escolhido por medição: **XFCE** com `lightdm` e login automático do `user`. Na ISO de teste ele chegou à sessão em 25 a 28 s, com 852 MiB de RAM em repouso e ISO de 1252147200 bytes (com KVM). Comparação dos candidatos e método em [docs/gui.md](docs/gui.md); a instalação na ISO ainda não foi feita.
+O desktop da RC2 já foi escolhido por medição: **XFCE** com `lightdm` e login automático do `user`. Na ISO (F3.15 e F3.16, com os 9 atalhos no menu "Nexus OS" e na área de trabalho) a sessão já estava ativa 25 s depois do boot, com 840 MiB de RAM em repouso e ISO de 1260126208 bytes (com KVM; sem KVM o smoke `desktop` também passa). Comparação dos candidatos, atalhos e medições em [docs/gui.md](docs/gui.md).
 
 ## Arquitetura
 
@@ -132,6 +132,7 @@ Cada script imprime `OK:` ou `FALHA:` e sai com código diferente de zero em fal
 | `tests/requisitos.sh` | Confere a tabela de requisitos e o SHA256 da RC1 |
 | `tests/docs.sh` | Documentos por componente, índice, links e seções do manual e do GNS3. Roda no Git Bash e no Linux |
 | `tests/manual.sh <iso>` | Executa os blocos do [manual](docs/manual.md) dentro da ISO, sem rede |
+| `tests/atalhos.sh` | Confere os 9 atalhos `nexus-*.desktop` do desktop (menu, área de trabalho, validação). Roda no Git Bash e no Linux |
 | `tests/gui-spec.sh` | Confere `docs/gui.md`: candidatos, finalistas medidos com KVM e desktop escolhido. Roda no Git Bash e no Linux |
 | `tests/run-fase3.sh [iso]` | `lint-repo`, `docs`, `iso`, `iso-smoke all`, `requisitos` e `manual`, parando no primeiro erro |
 
