@@ -2,7 +2,7 @@
 Type=Application
 Name=VNF FRR: estado
 Comment=Mostra o estado da VNF FRR
-Icon=dialog-information
+Icon=nexus-vnf-status
 Exec=xfce4-terminal --disable-server "--title=VNF FRR: estado" -x nexus-atalho vnf-status sudo nexus-vnf status
 Terminal=false
 Categories=X-Nexus-OS;

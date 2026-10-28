@@ -1,0 +1,135 @@
+/* Nexus-Dark: Adwaita escuro recolorido com a paleta da logo do Nexus OS (F3.17).
+   Azul-escuro #23253e, azul #2b66a8 e magenta #8d2c79; texto em lavanda clara. */
+@import url("resource:///org/gtk/libgtk/theme/Adwaita/gtk-contained-dark.css");
+
+@define-color nexus_bg #23253e;
+@define-color nexus_bg_deep #1b1c36;
+@define-color nexus_panel #14152a;
+@define-color nexus_surface #2b2d52;
+@define-color nexus_border #3d4075;
+@define-color nexus_text #e4e6fb;
+@define-color nexus_muted #9ea3cf;
+@define-color nexus_blue #2b66a8;
+@define-color nexus_blue_bright #4a8fe0;
+@define-color nexus_magenta #8d2c79;
+@define-color nexus_magenta_bright #c04aa3;
+
+@define-color theme_bg_color @nexus_bg;
+@define-color theme_fg_color @nexus_text;
+@define-color theme_base_color @nexus_bg_deep;
+@define-color theme_text_color @nexus_text;
+@define-color theme_selected_bg_color @nexus_blue;
+@define-color theme_selected_fg_color #ffffff;
+@define-color theme_unfocused_bg_color @nexus_bg;
+@define-color theme_unfocused_fg_color @nexus_muted;
+@define-color theme_unfocused_base_color @nexus_bg_deep;
+@define-color theme_unfocused_text_color @nexus_muted;
+@define-color theme_unfocused_selected_bg_color #35507f;
+@define-color theme_unfocused_selected_fg_color #ffffff;
+@define-color bg_color @nexus_bg;
+@define-color fg_color @nexus_text;
+@define-color base_color @nexus_bg_deep;
+@define-color text_color @nexus_text;
+@define-color selected_bg_color @nexus_blue;
+@define-color selected_fg_color #ffffff;
+@define-color unfocused_selected_bg_color #35507f;
+@define-color unfocused_selected_fg_color #ffffff;
+@define-color insensitive_bg_color #2a2c4b;
+@define-color insensitive_fg_color @nexus_muted;
+@define-color insensitive_base_color @nexus_bg;
+@define-color borders @nexus_border;
+@define-color unfocused_borders #323558;
+@define-color tooltip_bg_color @nexus_panel;
+@define-color tooltip_fg_color @nexus_text;
+@define-color link_color @nexus_blue_bright;
+@define-color link_visited_color @nexus_magenta_bright;
+@define-color content_view_bg @nexus_bg_deep;
+@define-color placeholder_text_color @nexus_muted;
+@define-color warning_color #e6a23c;
+@define-color error_color #e2506a;
+@define-color success_color #4fc9a0;
+
+/* Barra do XFCE */
+.xfce4-panel, .xfce4-panel.background {
+    background-color: alpha(@nexus_panel, 0.94);
+    background-image: none;
+    color: @nexus_text;
+    border-bottom: 1px solid @nexus_border;
+}
+.xfce4-panel button {
+    background-image: none;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    box-shadow: none;
+    color: @nexus_text;
+    padding: 2px 8px;
+}
+.xfce4-panel button:hover { background-color: alpha(@nexus_blue_bright, 0.20); border-color: alpha(@nexus_blue_bright, 0.35); }
+.xfce4-panel button:active, .xfce4-panel button:checked { background-color: alpha(@nexus_magenta, 0.45); border-color: @nexus_magenta_bright; }
+.xfce4-panel label { color: @nexus_text; }
+
+/* Menus, botões e seleção */
+menu, .menu, .popup { background-color: @nexus_bg; border: 1px solid @nexus_border; border-radius: 8px; }
+menuitem:hover { background-color: @nexus_blue; color: #ffffff; }
+button { border-radius: 7px; }
+button.suggested-action, button.suggested-action:hover {
+    background-image: linear-gradient(to right, @nexus_blue, @nexus_magenta);
+    border-color: @nexus_magenta;
+    color: #ffffff;
+}
+entry:focus, spinbutton:focus { border-color: @nexus_blue_bright; box-shadow: 0 0 0 1px alpha(@nexus_blue_bright, 0.5); }
+progressbar progress, scale highlight, scale fill { background-image: linear-gradient(to right, @nexus_blue, @nexus_magenta); }
+tooltip { border-radius: 8px; border: 1px solid @nexus_border; }
+scrollbar slider { background-color: alpha(@nexus_blue_bright, 0.45); border-radius: 8px; min-width: 7px; min-height: 7px; }
+scrollbar slider:hover { background-color: @nexus_blue_bright; }
+notebook > header.top > tabs > tab:checked { box-shadow: inset 0 -2px @nexus_magenta_bright; }
+
+/* Áreas de conteúdo e barras laterais (gerenciador de arquivos, listas, texto) na paleta da logo */
+.view, iconview, treeview.view, textview text, list, .content-view, .view:not(:selected) {
+    background-color: @nexus_bg_deep;
+    color: @nexus_text;
+}
+.sidebar, .sidebar .view, placessidebar, placessidebar list, placessidebar .view, .thunar .sidebar {
+    background-color: @nexus_panel;
+    color: @nexus_text;
+}
+.view:selected, iconview:selected, treeview.view:selected, row:selected {
+    background-color: @nexus_blue;
+    color: #ffffff;
+}
+toolbar, .toolbar, .inline-toolbar, headerbar, .titlebar { background-color: @nexus_bg; background-image: none; }
+statusbar, .statusbar { background-color: @nexus_panel; }
+
+/* Ícones e rótulos da área de trabalho: sem caixa branca */
+XfdesktopIconView.view {
+    background-color: transparent;
+    background-image: none;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
+    -XfdesktopIconView-label-alpha: 0;
+    -XfdesktopIconView-selected-label-alpha: 70;
+}
+XfdesktopIconView.view:active { background-color: alpha(@nexus_blue_bright, 0.35); color: #ffffff; }
+
+/* Tela de login (lightdm-gtk-greeter) */
+#login_window {
+    background-color: alpha(@nexus_bg, 0.93);
+    background-image: none;
+    border: 1px solid @nexus_border;
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+    padding: 12px;
+}
+#login_window entry { background-color: @nexus_bg_deep; border: 1px solid @nexus_border; border-radius: 8px; padding: 6px 10px; }
+#login_window button {
+    background-image: none;
+    background-color: @nexus_surface;
+    border: 1px solid @nexus_border;
+    border-radius: 8px;
+    color: @nexus_text;
+    padding: 6px 16px;
+}
+#login_window button:hover { background-color: @nexus_blue; border-color: @nexus_blue_bright; color: #ffffff; }
+#panel_window { background-color: alpha(@nexus_panel, 0.9); background-image: none; color: @nexus_text; }
+#panel_window label, #panel_window button { color: @nexus_text; }
