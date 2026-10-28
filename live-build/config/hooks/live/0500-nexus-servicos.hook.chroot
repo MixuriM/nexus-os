@@ -39,3 +39,8 @@ systemctl enable nexus-smoke.service
 # automático do user) e atalhos do menu e da área de trabalho. O xfdesktop só confia em atalho executável.
 chmod 0755 /usr/local/bin/nexus-atalho /usr/local/bin/nexus-atalhos-confiar
 chmod 0755 /etc/skel/Desktop/nexus-*.desktop
+
+# F3.17: a documentação em HTML (Markdown de /usr/share/nexus-os/docs convertido) para o atalho abrir no navegador, sem internet
+chmod 0755 /usr/local/bin/nexus-docs-html
+/usr/local/bin/nexus-docs-html /usr/share/nexus-os/docs /usr/share/nexus-os/docs-html
+test -f /usr/share/nexus-os/docs-html/index.html

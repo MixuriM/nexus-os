@@ -54,7 +54,7 @@
     background-color: alpha(@nexus_panel, 0.94);
     background-image: none;
     color: @nexus_text;
-    border-bottom: 1px solid @nexus_border;
+    border-top: 1px solid @nexus_border;
 }
 .xfce4-panel button {
     background-image: none;
@@ -66,7 +66,9 @@
     padding: 2px 8px;
 }
 .xfce4-panel button:hover { background-color: alpha(@nexus_blue_bright, 0.20); border-color: alpha(@nexus_blue_bright, 0.35); }
-.xfce4-panel button:active, .xfce4-panel button:checked { background-color: alpha(@nexus_magenta, 0.45); border-color: @nexus_magenta_bright; }
+.xfce4-panel button:active { background-color: alpha(@nexus_magenta, 0.45); border-color: @nexus_magenta_bright; }
+/* Janela aberta: botão apagado; a janela em foco ganha fundo azul e linha magenta embaixo, como a barra do Windows */
+.xfce4-panel button:checked { background-color: alpha(@nexus_blue_bright, 0.28); border-color: alpha(@nexus_blue_bright, 0.45); border-bottom: 2px solid @nexus_magenta_bright; }
 .xfce4-panel label { color: @nexus_text; }
 
 /* Menus, botões e seleção */
@@ -102,11 +104,14 @@ toolbar, .toolbar, .inline-toolbar, headerbar, .titlebar { background-color: @ne
 statusbar, .statusbar { background-color: @nexus_panel; }
 
 /* Ícones e rótulos da área de trabalho: sem caixa branca */
-XfdesktopIconView.view {
+XfdesktopIconView.view, XfdesktopIconView.view:not(:selected),
+XfdesktopIconView.view:backdrop, XfdesktopIconView.view:backdrop:not(:selected) {
     background-color: transparent;
     background-image: none;
     color: #ffffff;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 2px rgba(0, 0, 0, 0.8);
+    -gtk-icon-effect: none;
+    -gtk-icon-shadow: none;
     -XfdesktopIconView-label-alpha: 0;
     -XfdesktopIconView-selected-label-alpha: 70;
 }

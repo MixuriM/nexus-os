@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Configurações
+Comment=Abre as configurações do sistema: rede, aparência, teclado e vídeo
+Icon=nexus-configuracoes
+Exec=xfce4-settings-manager
+Terminal=false
+Categories=X-Nexus-OS;

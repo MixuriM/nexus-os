@@ -1,8 +1,8 @@
 [Desktop Entry]
 Type=Application
 Name=Documentação do Nexus OS
-Comment=Abre a documentação local no gerenciador de arquivos
+Comment=Abre a documentação local no navegador, sem internet
 Icon=nexus-docs
-Exec=thunar /usr/share/nexus-os/docs
+Exec=firefox-esr /usr/share/nexus-os/docs-html/index.html
 Terminal=false
 Categories=X-Nexus-OS;

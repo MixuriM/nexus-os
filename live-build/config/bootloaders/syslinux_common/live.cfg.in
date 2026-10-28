@@ -1,0 +1,12 @@
+label live-@FLAVOUR@
+	menu label ^Iniciar o Nexus OS
+	menu default
+	linux @LINUX@
+	initrd @INITRD@
+	append @APPEND_LIVE@
+
+label live-@FLAVOUR@-failsafe
+	menu label Nexus OS (modo de compatibilidade)
+	linux @LINUX@
+	initrd @INITRD@
+	append @APPEND_LIVE_FAILSAFE@
