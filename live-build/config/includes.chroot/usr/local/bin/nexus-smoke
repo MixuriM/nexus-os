@@ -4,6 +4,8 @@
 # Veja docs/integracao-iso.md.
 # Uso (root): nexus-smoke [nome...|all]
 # O serviço nexus-smoke.service chama "nexus-smoke --cd": lê o CD de rótulo NEXUS_SMOKE, roda e desliga.
+# O idioma do sistema é pt_BR (F3.17): os testes comparam saídas em inglês, então rodam em C.
+export LC_ALL=C.UTF-8
 set -u
 
 dir=/usr/share/nexus-os/tests

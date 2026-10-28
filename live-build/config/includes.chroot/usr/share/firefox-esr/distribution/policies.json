@@ -1,0 +1,14 @@
+{
+  "policies": {
+    "OverrideFirstRunPage": "",
+    "OverridePostUpdatePage": "",
+    "DontCheckDefaultBrowser": true,
+    "DisableTelemetry": true,
+    "DisableAppUpdate": true,
+    "NoDefaultBookmarks": true,
+    "Homepage": {
+      "URL": "file:///usr/share/nexus-os/docs-html/index.html",
+      "StartPage": "homepage"
+    }
+  }
+}

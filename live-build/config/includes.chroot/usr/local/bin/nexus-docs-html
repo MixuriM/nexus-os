@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
+"""Converte a documentação do Nexus OS (Markdown) em HTML para ler no navegador, sem internet.
+
+O build da ISO roda este script no chroot (hook 0500); o atalho "Documentação" abre o index.html no Firefox.
+Também serve na VM de desenvolvimento: nexus-docs-html docs /tmp/docs-html
+
+Uso: nexus-docs-html [pasta-origem] [pasta-destino]
+     padrão: /usr/share/nexus-os/docs  /usr/share/nexus-os/docs-html
+"""
+import html
+import pathlib
+import re
+import shutil
+import sys
+
+import markdown
+
+ORIGEM_PADRAO = "/usr/share/nexus-os/docs"
+DESTINO_PADRAO = "/usr/share/nexus-os/docs-html"
+LOGO = pathlib.Path("/usr/share/pixmaps/nexus-os-logo.svg")
+
+# Paleta da logo do Nexus OS (azul-escuro, azul e magenta).
+CSS = """
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #14152a; color: #e4e6fb; font: 16px/1.65 Inter, "DejaVu Sans", sans-serif; }
+header { background: linear-gradient(90deg, #23253e, #2b2d52); border-bottom: 2px solid #8d2c79; padding: 10px 24px;
+         display: flex; align-items: center; gap: 14px; }
+header img { height: 44px; border-radius: 8px; }
+header a { color: #e4e6fb; text-decoration: none; font-weight: 700; }
+main { max-width: 960px; margin: 0 auto; padding: 24px; }
+h1, h2, h3, h4 { line-height: 1.25; color: #ffffff; }
+h1 { border-bottom: 2px solid #2b66a8; padding-bottom: 6px; }
+h2 { border-bottom: 1px solid #3d4075; padding-bottom: 4px; margin-top: 2em; }
+a { color: #4a8fe0; }
+a:visited { color: #c04aa3; }
+code { background: #23253e; border-radius: 4px; padding: 1px 5px; font: 14px "DejaVu Sans Mono", monospace; }
+pre { background: #1b1c36; border: 1px solid #3d4075; border-left: 4px solid #2b66a8; border-radius: 8px; padding: 12px 14px;
+      overflow-x: auto; }
+pre code { background: none; padding: 0; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; display: block; overflow-x: auto; }
+th, td { border: 1px solid #3d4075; padding: 6px 10px; text-align: left; vertical-align: top; }
+th { background: #23253e; }
+tr:nth-child(even) td { background: #1b1c36; }
+blockquote { margin: 1em 0; padding: 4px 16px; border-left: 4px solid #8d2c79; background: #1b1c36; }
+img { max-width: 100%; height: auto; border-radius: 8px; }
+ul.indice { list-style: none; padding: 0; }
+ul.indice li { padding: 8px 0; border-bottom: 1px solid #3d4075; }
+ul.indice small { color: #9ea3cf; }
+"""
+
+PAGINA = """<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{titulo} | Nexus OS</title>
+<style>{css}</style>
+</head>
+<body>
+<header>{logo}<a href="{raiz}index.html">Documentação do Nexus OS</a></header>
+<main>
+{corpo}
+</main>
+</body>
+</html>
+"""
+
+
+def titulo_de(texto, padrao):
+    achado = re.search(r"^#\s+(.+?)\s*$", texto, re.MULTILINE)
+    return achado.group(1) if achado else padrao
+
+
+def converte(texto):
+    corpo = markdown.markdown(texto, extensions=["tables", "fenced_code", "sane_lists"])
+    # Links entre documentos: x.md e x.md#ancora viram x.html (links com esquema, como https:, ficam como estão).
+    return re.sub(r'href="([^":]+?)\.md(#[^"]*)?"', r'href="\1.html\2"', corpo)
+
+
+def main():
+    origem = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else ORIGEM_PADRAO)
+    destino = pathlib.Path(sys.argv[2] if len(sys.argv) > 2 else DESTINO_PADRAO)
+    if not origem.is_dir():
+        sys.exit(f"FALHA: pasta de origem não existe: {origem}")
+    if destino.exists():
+        shutil.rmtree(destino)
+    destino.mkdir(parents=True)
+
+    logo_html = ""
+    if LOGO.is_file():
+        shutil.copyfile(LOGO, destino / "nexus-os-logo.svg")
+        logo_html = '<img src="{raiz}nexus-os-logo.svg" alt="Nexus OS">'
+
+    itens = []
+    for arq in sorted(origem.rglob("*")):
+        rel = arq.relative_to(origem)
+        if arq.is_dir() or any(parte.startswith(".") for parte in rel.parts):
+            continue
+        if arq.suffix != ".md":
+            (destino / rel).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(arq, destino / rel)
+            continue
+        texto = arq.read_text(encoding="utf-8")
+        titulo = titulo_de(texto, rel.stem)
+        saida = (destino / rel).with_suffix(".html")
+        saida.parent.mkdir(parents=True, exist_ok=True)
+        raiz = "../" * (len(rel.parts) - 1)
+        saida.write_text(
+            PAGINA.format(titulo=html.escape(titulo), css=CSS, raiz=raiz, logo=logo_html.format(raiz=raiz), corpo=converte(texto)),
+            encoding="utf-8", newline="\n")
+        itens.append((titulo, str(rel.with_suffix(".html")), str(rel)))
+
+    lista = "\n".join(
+        f'<li><a href="{html.escape(h)}">{html.escape(t)}</a><br><small>{html.escape(m)}</small></li>' for t, h, m in itens)
+    corpo = f'<h1>Documentação do Nexus OS</h1>\n<p>Os mesmos arquivos Markdown da pasta <code>docs</code>, em HTML, para ler sem internet.</p>\n<ul class="indice">\n{lista}\n</ul>'
+    (destino / "index.html").write_text(
+        PAGINA.format(titulo="Índice", css=CSS, raiz="", logo=logo_html.format(raiz=""), corpo=corpo), encoding="utf-8", newline="\n")
+    print(f"OK: {len(itens)} documentos em {destino}")
+
+
+if __name__ == "__main__":
+    main()

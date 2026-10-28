@@ -1,0 +1,26 @@
+[Icon Theme]
+Name=Nexus
+Comment=Icones do Nexus OS (pasta pessoal, lixeira, unidades e gerenciador de arquivos) sobre o Papirus-Dark
+Inherits=Papirus-Dark,hicolor
+Directories=scalable/places,scalable/devices,scalable/apps
+
+[scalable/places]
+Size=64
+MinSize=16
+MaxSize=512
+Type=Scalable
+Context=Places
+
+[scalable/devices]
+Size=64
+MinSize=16
+MaxSize=512
+Type=Scalable
+Context=Devices
+
+[scalable/apps]
+Size=64
+MinSize=16
+MaxSize=512
+Type=Scalable
+Context=Applications
