@@ -165,7 +165,7 @@ F3.15 e F3.16, medidos em 27/10/2026 na VM de build do Hyper-V, **com KVM** (e u
 
 ## Atalhos
 
-Nove arquivos `nexus-*.desktop`, em `/usr/share/applications/` (menu "Nexus OS") e em `~/Desktop/` do `user`. Fonte: `live-build/config/includes.chroot/usr/share/applications/` e `live-build/config/includes.chroot/etc/skel/Desktop/`. Os atalhos de terminal usam `xfce4-terminal --disable-server` (sem o servidor, a janela não abre dentro de uma instância já existente, que perderia o ambiente do chamador) e o wrapper `/usr/local/bin/nexus-atalho <nome> <comando>`: roda o comando, mostra a saída e o código, grava o código em `$XDG_RUNTIME_DIR/nexus-atalho-<nome>.status` e espera Enter, exceto com `NEXUS_ATALHO_TESTE=1`.
+Dez arquivos `nexus-*.desktop`, em `/usr/share/applications/` (menu "Nexus OS") e em `~/Desktop/` do `user`. Fonte: `live-build/config/includes.chroot/usr/share/applications/` e `live-build/config/includes.chroot/etc/skel/Desktop/`. Os atalhos de terminal usam `xfce4-terminal --disable-server` (sem o servidor, a janela não abre dentro de uma instância já existente, que perderia o ambiente do chamador) e o wrapper `/usr/local/bin/nexus-atalho <nome> <comando>`: roda o comando, mostra a saída e o código, grava o código em `$XDG_RUNTIME_DIR/nexus-atalho-<nome>.status` e espera Enter, exceto com `NEXUS_ATALHO_TESTE=1`.
 
 | Atalho | Comando | Onde aparece |
 | --- | --- | --- |
@@ -177,12 +177,46 @@ Nove arquivos `nexus-*.desktop`, em `/usr/share/applications/` (menu "Nexus OS")
 | VNF FRR: remover | `sudo nexus-vnf down` | menu e área de trabalho |
 | Topologia Containerlab: criar | `sudo containerlab deploy -t /usr/share/nexus-os/labs/containerlab/frr-duo.clab.yml` | menu e área de trabalho |
 | Topologia Containerlab: remover | `sudo containerlab destroy -t /usr/share/nexus-os/labs/containerlab/frr-duo.clab.yml --cleanup` | menu e área de trabalho |
-| Documentação do Nexus OS | `thunar /usr/share/nexus-os/docs` | menu e área de trabalho |
+| Documentação do Nexus OS | `firefox-esr /usr/share/nexus-os/docs-html/index.html` (a documentação em HTML, sem internet) | menu e área de trabalho |
+| Configurações | `xfce4-settings-manager` (rede, aparência, teclado, vídeo) | menu, área de trabalho e barra |
 
 Testes:
 
-- `tests/atalhos.sh` (estático, roda no Git Bash e na VM): os 9 arquivos existem no menu e na área de trabalho com conteúdo igual, passam no `desktop-file-validate` (se instalado; senão o teste termina em `AVISO:`), têm as chaves `Type`, `Name`, `Exec`, `Icon` e `Categories`, `Comment` em português e `Exec` apontando para comando versionado ou do pacote; confere também `libvirt.conf`, o menu e que nenhum arquivo está ignorado pelo `.gitignore`.
-- Smoke `desktop` (`tests/desktop.sh`, dentro da ISO): `lightdm` ativo; sessão do `user` `active` e `x11` com `xfce4-session`, `xfce4-panel` e `xfwm4` no ar (espera por laço, limite de 120 s); sem rota padrão e sem erro do `lightdm` no journal (`journalctl -b -u lightdm -p err`); os 9 atalhos válidos no `desktop-file-validate` e com o comando existente; cópias na área de trabalho executáveis e com o checksum do xfdesktop. Cada atalho é lançado como o `user` por `gtk-launch <id>` (funcionou, sem precisar do `Exec` à mão), com `DISPLAY`, `XAUTHORITY`, `XDG_RUNTIME_DIR` e `DBUS_SESSION_BUS_ADDRESS` lidos do processo `xfce4-session`. Terminal, documentação e `virt-manager` são conferidos por janela no `xwininfo -root -tree` (o padrão não pode casar antes de abrir, porque o `Thunar --daemon` mantém janelas ocultas) e por processo vivo depois de 3 s (15 s no `virt-manager`); os seis atalhos de terminal, pelo arquivo de status com código 0. A limpeza (`nexus-sdn down`, `nexus-vnf down`, `containerlab destroy`, `thunar -q`) roda no `trap`, e o teste confere que nenhum contêiner nem a bridge `br-nexus` sobrou.
+- `tests/atalhos.sh` (estático, roda no Git Bash e na VM): os 10 arquivos existem no menu e na área de trabalho com conteúdo igual, passam no `desktop-file-validate` (se instalado; senão o teste termina em `AVISO:`), têm as chaves `Type`, `Name`, `Exec`, `Icon` e `Categories`, `Comment` em português e `Exec` apontando para comando versionado ou do pacote; confere também `libvirt.conf`, o menu, o `mimeapps.list`, o gerador `nexus-docs-html`, que os pacotes dos programas estão na lista (e que Thunderbird e GParted não estão) e que nenhum arquivo está ignorado pelo `.gitignore`.
+- Smoke `desktop` (`tests/desktop.sh`, dentro da ISO): `lightdm` ativo; sessão do `user` `active` e `x11` com `xfce4-session`, `xfce4-panel` e `xfwm4` no ar (espera por laço, limite de 120 s); sem rota padrão e sem erro do `lightdm` no journal (`journalctl -b -u lightdm -p err`); os 10 atalhos válidos no `desktop-file-validate` e com o comando existente; cópias na área de trabalho executáveis e com o checksum do xfdesktop. Cada atalho é lançado como o `user` por `gtk-launch <id>` (funcionou, sem precisar do `Exec` à mão), com `DISPLAY`, `XAUTHORITY`, `XDG_RUNTIME_DIR` e `DBUS_SESSION_BUS_ADDRESS` lidos do processo `xfce4-session`. Terminal, documentação (Firefox), configurações e `virt-manager` são conferidos por janela no `xwininfo -root -tree` (o padrão não pode casar antes de abrir) e por processo vivo depois de 3 s (15 s no `virt-manager`); os seis atalhos de terminal, pelo arquivo de status com código 0. A espera por janela é de 150 s, por causa do Firefox sem KVM. O teste confere ainda a barra (um painel só, embaixo, com `tasklist` e sem `pager`; uma área de trabalho), o idioma, o fuso, o teclado, o nome da máquina, a tela sem bloqueio, o programa padrão de cada tipo de arquivo, a presença dos programas, o `docs-html`, o grupo `wireshark` e o `dumpcap`. A limpeza (`nexus-sdn down`, `nexus-vnf down`, `containerlab destroy`, `thunar -q`) roda no `trap`, e o teste confere que nenhum contêiner nem a bridge `br-nexus` sobrou.
+
+## Barra, tema de ícones e idioma
+
+Rodada 3 da RC2 (F3.17), feita depois de a ISO ser testada no Hyper-V Geração 1.
+
+- **Barra única embaixo, como a do Windows** (`etc/xdg/xfce4/panel/default.xml`, 46 px, de ponta a ponta): botão "Nexus OS" (menu), lançadores (Terminal, Arquivos, Firefox, Gerenciador de máquinas virtuais, Configurações), lista das janelas abertas (`tasklist`, ocupa o espaço livre), bandeja (rede), som, relógio, usuário e "mostrar a área de trabalho". Não há painel em cima, e o seletor de áreas de trabalho (`pager`) saiu: o `xfwm4.xml` tem `workspace_count` 1.
+- **Ícones padrão no tema do Nexus OS:** o tema `Nexus` (`usr/share/icons/Nexus`, herda do `Papirus-Dark` e do `hicolor`) redesenha pasta pessoal, lixeira (vazia e cheia), disquete, mídia óptica, unidades, computador e gerenciador de arquivos no estilo dos ícones dos atalhos. É o `IconThemeName` do `user` e do login. O disquete que a máquina virtual do Hyper-V mostra é hardware da VM, não do Nexus OS; ele só ganhou o ícone do tema.
+- **Rótulos dos ícones da área de trabalho:** sem caixa, branco com sombra (`XfdesktopIconView` no `gtk.css` do `Nexus-Dark`).
+- **Fundos sem faixas:** os gradientes dos fundos recebem ruído fino (`feTurbulence`), que esconde as faixas que 8 bits por canal deixam em gradiente suave.
+- **Menu de boot (isolinux na BIOS e GRUB na UEFI):** título "Nexus OS", entradas "Iniciar o Nexus OS" e "Nexus OS (modo de compatibilidade)", fundo e cores da paleta, sem o capacete do live-build e sem o texto "Debian GNU/Linux", e **contagem de 5 s** (o Nexus OS inicia sozinho; Enter adianta). Arquivos em `live-build/config/bootloaders/`.
+- **Idioma e região:** português do Brasil (`LIVE_LOCALES="pt_BR.UTF-8"`), fuso `America/Sao_Paulo`, teclado ABNT2 (`LIVE_KEYBOARD_MODEL="abnt2"`, layout `br`, e o `00-nexus-teclado.conf` para o X) e nome da máquina `nexus-os` (no lugar de `debian`, issue 57), tudo em `etc/live/config.conf.d/nexus.conf`. O `nexus-smoke` roda com `LC_ALL=C.UTF-8`: os testes comparam saídas em inglês.
+- **Tela sem bloqueio:** `xfce4-screensaver` e `light-locker` não estão instalados e o `10-nexus-sem-bloqueio.conf` zera o `BlankTime` do Xorg: a tela não apaga nem pede senha.
+- **Programa padrão por tipo de arquivo:** `etc/xdg/mimeapps.list`. `.md`, `.txt` e outros textos abrem no Mousepad, PDF no Evince, imagens no Ristretto, HTML e links no Firefox, `.zip` e `.tar` no File Roller, vídeo e áudio no VLC, documentos do Office no LibreOffice.
+- **Print Screen:** o `xfce4-screenshooter` está instalado e a tecla Print já vem ligada a ele pelo `xfce4-settings`.
+
+## Programas incluídos
+
+Lista da `nexus-desktop.list.chroot`. Os tamanhos são o download extra de cada grupo sobre a ISO da RC2 anterior, medido com `apt-get --print-uris` contra o `dpkg status` da própria ISO; o aumento real da ISO está em "Medições da ISO".
+
+| Grupo | Programas (pacotes) | Download estimado |
+| --- | --- | --- |
+| Texto, PDF, imagens e arquivos | Mousepad (`mousepad`, editor e leitor de `.md`), Evince (`evince`, PDF), Ristretto (`ristretto`, imagens), File Roller (`file-roller`, zip e tar), Calculadora (`galculator`), Captura de tela (`xfce4-screenshooter`), `python3-markdown` | 27 MB |
+| Rede e laboratório | `tcpdump`, `iperf3`, `mtr-tiny`, `nmap`, `traceroute`, `dnsutils` (`dig`), `netcat-openbsd`, `curl`, `wget`, `tmux`, `htop`, `vim`, `git`, Remmina (`remmina`, acesso remoto) | 63 MB |
+| Idioma | `locales`, `console-setup`, `keyboard-configuration`, `firefox-esr-l10n-pt-br`, `libreoffice-l10n-pt-br`, `libreoffice-help-pt-br` | 7 MB |
+| Escritório | LibreOffice (`libreoffice-writer`, `libreoffice-calc`, `libreoffice-impress`, `libreoffice-gtk3`) | 105 MB |
+| Mídia, imagem e senhas | VLC (`vlc`), GIMP (`gimp`), Inkscape (`inkscape`), KeePassXC (`keepassxc`) | 95 MB |
+| Captura de pacotes | Wireshark (`wireshark`), com o `dumpcap` liberado para o grupo `wireshark` (o `user` está nele): captura sem `sudo` | 43 MB |
+
+Ficaram de fora, por decisão do grupo: Thunderbird (81 MB) e GParted (5 MB). O Evince entrou no lugar do Atril porque o Atril puxa 59 MB de dependências e o Evince 20 MB.
+
+**Documentação em HTML:** o hook `0500-nexus-servicos` roda `/usr/local/bin/nexus-docs-html` no build e converte `docs/*.md` (já copiados para `/usr/share/nexus-os/docs`) em HTML em `/usr/share/nexus-os/docs-html`, com a paleta da logo. O atalho "Documentação do Nexus OS" abre o `index.html` no Firefox, sem internet. Os links entre documentos viram `.html`; links para arquivos fora de `docs/` (por exemplo `../README.md`) não resolvem lá. A política do Firefox (`policies.json`) tira a página de boas-vindas e define a documentação como página inicial. Para usar o conversor na VM de desenvolvimento: `nexus-docs-html docs /tmp/docs-html` (precisa de `python3-markdown`).
+
+**Internet:** a ISO não traz rede configurada; com a VM conectada a uma rede, o NetworkManager (ícone na barra) conecta sozinho por DHCP. No Hyper-V, a VM criada sem placa de rede não tem onde conectar: `Connect-VMNetworkAdapter -VMName <vm> -SwitchName "Default Switch"` (veja [manual.md](manual.md)). Os smokes rodam sempre sem rede (`-nic none`).
 
 ## Medições da ISO
 
@@ -197,7 +231,7 @@ Testes:
 | RAM em repouso, sessão ativa (`free -m`, `used`, 3 leituras 30 s depois) | 840,3 MiB com KVM e 4096 MiB (837, 842 e 842); 748 MiB sem KVM, 2048 MiB e 1 vCPU |
 | Sessão do `user` ativa, com KVM | já ativa quando o teste começou, com uptime do guest de 25,0 s |
 | Sessão do `user` ativa, sem KVM | já ativa quando o teste começou, com uptime de 258,8 s |
-| Smoke `desktop` sem KVM (`NEXUS_SMOKE_KVM=0 NEXUS_SMOKE_SMP=1 NEXUS_SMOKE_MEM=2048`) | `OK: 2 teste(s) sem falha em 477 s`, `desktop=161s`: os 9 atalhos executam sem KVM |
+| Smoke `desktop` sem KVM (`NEXUS_SMOKE_KVM=0 NEXUS_SMOKE_SMP=1 NEXUS_SMOKE_MEM=2048`) | `OK: 2 teste(s) sem falha em 477 s`, `desktop=161s`: os 9 atalhos da época executavam sem KVM |
 
 O uptime da sessão é um limite superior: a sessão pode ter ficado ativa antes do início do teste, porque o `nexus-smoke.service` só começa depois dos serviços dos componentes. A medição de repouso e do uptime vem de um script fora do repositório (`--extra`: espera a sessão, lê `free -m` 3 vezes com 30 s de atraso).
 

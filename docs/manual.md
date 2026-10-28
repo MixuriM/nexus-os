@@ -238,7 +238,7 @@ Use pelo menos a RAM recomendada com o desktop em [requisitos.md](requisitos.md)
 qemu-system-x86_64 -enable-kvm -cpu host -m 2048 -smp 2 -vga std -cdrom dist/nexus-os-rc2-amd64.iso -boot d
 ```
 
-Na tela do isolinux, aperte Enter. A janela do QEMU em si não foi exercitada pelos testes (eles usam `-display none` e a captura de tela do monitor do QEMU); a sessão foi verificada por `loginctl` e pelas capturas de `docs/img/`.
+O menu de boot do Nexus OS inicia sozinho em 5 segundos (Enter adianta). A janela do QEMU em si não foi exercitada pelos testes (eles usam `-display none` e a captura de tela do monitor do QEMU); a sessão foi verificada por `loginctl` e pelas capturas de `docs/img/`.
 
 **Hyper-V no Windows** (PowerShell como administrador; ISO em `C:\HyperV`). Mesmo procedimento da seção "Iniciar a ISO", com a ISO da RC2 e pelo menos 2048 MB de memória estática:
 
@@ -248,18 +248,24 @@ New-VM -Name $vm -Generation 1 -MemoryStartupBytes 2048MB -BootDevice CD -NoVHD
 Set-VMProcessor -VMName $vm -Count 2
 Set-VMMemory -VMName $vm -DynamicMemoryEnabled $false -StartupBytes 2048MB
 Add-VMDvdDrive -VMName $vm -Path "C:\HyperV\nexus-os-rc2-amd64.iso"
+Connect-VMNetworkAdapter -VMName $vm -SwitchName "Default Switch"
 Start-VM -Name $vm
 vmconnect.exe localhost $vm
 ```
 
-A ISO tem boot BIOS e UEFI (`xorriso -indev <iso> -report_el_torito plain`), então a Geração 2 deveria servir; só a Geração 1 foi validada na RC1 (sem desktop). O desktop não foi iniciado no Hyper-V até esta versão: o roteiro humano da parte H do [checklist](checklist-teste-documentacao.md) é quem confirma. Sem KVM a sessão leva alguns minutos para aparecer.
+**Internet na VM do Hyper-V:** o `New-VM` com `-NoVHD` cria a VM sem placa de rede conectada, e sem ela o Firefox acusa `NS_ERROR_OFFLINE` e a barra não oferece rede nenhuma. O `Connect-VMNetworkAdapter` acima liga a VM ao `Default Switch` (NAT do Windows, com DHCP e internet); se a VM já existe, rode só essa linha com a VM desligada ou ligada. Se o comando acusar que a VM não tem adaptador de rede, use antes `Add-VMNetworkAdapter -VMName $vm`. No QEMU, sem rede por padrão no `-nic none` dos testes, use `-nic user` para ter internet.
+
+A ISO tem boot BIOS e UEFI (`xorriso -indev <iso> -report_el_torito plain`), então a Geração 2 deveria servir; só a Geração 1 foi validada. Uma versão anterior da RC2 subiu sozinha no Hyper-V Geração 1, a 1080p em tela cheia e em janela de 1024x768 (conferido por um integrante do grupo em 28/10/2026, a partir de capturas de tela); a versão atual ainda precisa dessa conferência: o roteiro humano da parte H do [checklist](checklist-teste-documentacao.md) é quem confirma. Sem KVM a sessão leva alguns minutos para aparecer.
 
 ### O que há no desktop
 
-- Barra no alto: menu "Nexus OS" (ícone da marca) com todos os aplicativos, lista de janelas, relógio e a bandeja com o applet de rede.
+- Barra única embaixo, como a do Windows: botão "Nexus OS" (menu com todos os aplicativos), lançadores (terminal, arquivos, Firefox, máquinas virtuais, configurações), a lista das janelas abertas, a bandeja com o applet de rede, o som, o relógio e o usuário. Não há barra em cima nem seletor de áreas de trabalho.
 - Gerenciador de arquivos (Thunar), terminal gráfico (Xfce Terminal), navegador (Firefox ESR), configuração de rede (NetworkManager) e de vídeo (Configurações do Xfce).
-- Menu "Nexus OS" e nove atalhos na área de trabalho, descritos abaixo.
-- Papel de parede, tema escuro Nexus-Dark (na paleta da logo), ícones Papirus-Dark, fonte Inter e tela de login com a logo original do Nexus OS. O sistema continua sendo o Debian: `/etc/os-release` não muda.
+- Programas prontos para uso, sem instalar nada: LibreOffice (Writer, Calc e Impress), Mousepad (texto e `.md`), Evince (PDF), Ristretto (imagens), File Roller (zip e tar), Calculadora, VLC, GIMP, Inkscape, KeePassXC, Wireshark (captura sem `sudo`, o `user` está no grupo `wireshark`), Remmina, e no terminal `tcpdump`, `iperf3`, `mtr`, `nmap`, `traceroute`, `dig`, `nc`, `curl`, `wget`, `tmux`, `htop`, `vim` e `git`. A lista completa e o tamanho de cada grupo estão em [gui.md](gui.md), seção "Programas incluídos".
+- Português do Brasil, teclado ABNT2, horário de Brasília (`America/Sao_Paulo`) e nome de máquina `nexus-os`. A tela não apaga nem bloqueia.
+- Tecla Print: captura de tela (`xfce4-screenshooter`).
+- Menu "Nexus OS" e dez atalhos na área de trabalho, descritos abaixo.
+- Papel de parede, tema escuro Nexus-Dark (na paleta da logo), ícones do tema Nexus (sobre o Papirus-Dark, com pasta pessoal, lixeira e unidades no estilo do projeto), fonte Inter e tela de login com a logo original do Nexus OS. O sistema continua sendo o Debian: `/etc/os-release` não muda.
 
 ### Atalhos
 
@@ -273,7 +279,8 @@ A ISO tem boot BIOS e UEFI (`xorriso -indev <iso> -report_el_torito plain`), ent
 | VNF FRR: remover | Executa `sudo nexus-vnf down` |
 | Topologia Containerlab: criar | Executa `containerlab deploy` da topologia de dois nós FRR |
 | Topologia Containerlab: remover | Executa `containerlab destroy --cleanup` da mesma topologia |
-| Documentação do Nexus OS | Abre `/usr/share/nexus-os/docs` no gerenciador de arquivos |
+| Documentação do Nexus OS | Abre a documentação em HTML (`/usr/share/nexus-os/docs-html/index.html`) no Firefox, sem internet |
+| Configurações | Abre o gerenciador de configurações do Xfce (rede, aparência, teclado, vídeo) |
 
 Os atalhos de terminal mostram a saída, o código de saída e esperam Enter para fechar a janela. Tudo o que um atalho cria vive na RAM e some ao desligar a ISO.
 
@@ -319,11 +326,28 @@ imagem=$(como_user xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/w
 grep -qx 'ID=debian' /etc/os-release
 ```
 
-Atalhos: os nove existem no menu e na área de trabalho, são idênticos e válidos.
+Barra inferior, idioma e programas (a barra tem a lista de janelas e não tem o seletor de áreas de trabalho; o sistema está em português do Brasil, com o nome de máquina `nexus-os`; os programas e a documentação em HTML existem):
 
 ```bash nexus-exec
-[ "$(ls /usr/share/applications/nexus-*.desktop | wc -l)" -eq 9 ]
-[ "$(ls /home/user/Desktop/nexus-*.desktop | wc -l)" -eq 9 ]
+plugins=$(como_user xfconf-query -c xfce4-panel -lv | awk '$1 ~ /^\/plugins\/plugin-[0-9]+$/ {print $2}')
+grep -qx tasklist <<<"$plugins"
+[ -z "$(grep -x pager <<<"$plugins")" ]
+[ "$(hostname)" = nexus-os ]
+grep -qx 'LANG=pt_BR.UTF-8' /etc/default/locale
+for c in soffice mousepad evince ristretto vlc wireshark gimp inkscape keepassxc xfce4-screenshooter; do
+    command -v "$c" >/dev/null
+done
+test -f /usr/share/nexus-os/docs-html/index.html
+echo "barra, idioma e programas ok"
+```
+
+Saída esperada: `barra, idioma e programas ok`.
+
+Atalhos: os dez existem no menu e na área de trabalho, são idênticos e válidos.
+
+```bash nexus-exec
+[ "$(ls /usr/share/applications/nexus-*.desktop | wc -l)" -eq 10 ]
+[ "$(ls /home/user/Desktop/nexus-*.desktop | wc -l)" -eq 10 ]
 for a in /usr/share/applications/nexus-*.desktop; do
     desktop-file-validate "$a"
     cmp "$a" "/home/user/Desktop/$(basename "$a")"
@@ -331,7 +355,7 @@ for a in /usr/share/applications/nexus-*.desktop; do
 done
 ```
 
-Saída esperada: nove linhas `Name=`, sem mensagem de erro.
+Saída esperada: dez linhas `Name=`, sem mensagem de erro.
 
 Os seis atalhos de terminal, lançados como o `user` dentro da sessão com `NEXUS_ATALHO_TESTE=1` (o `nexus-atalho` não espera Enter), cada um com código de saída 0, e a limpeza de tudo o que criaram:
 
@@ -362,12 +386,14 @@ Saída esperada: seis linhas `<atalho>: código 0`.
 | Sintoma | Causa | Correção |
 | --- | --- | --- |
 | Tela preta ou sem janela do QEMU | O QEMU foi iniciado com `-display none` | Tire o `-display none` (a janela abre sozinha) e use `-vga std` |
-| Fica no menu do isolinux | O menu espera uma tecla | Aperte Enter |
+| Demora a sair do menu de boot | O menu tem contagem de 5 segundos | Aperte Enter para adiantar |
 | A sessão demora muito para aparecer | Sem KVM a emulação é lenta (cerca de 259 s medidos com 1 vCPU, [gui.md](gui.md)) | Use um host com KVM ou espere |
 | Docker não carrega a imagem FRR | O tmpfs do Docker é 50% da RAM | Dê pelo menos a RAM recomendada ([requisitos.md](requisitos.md)) |
 | Atalho de terminal fecha a janela sem mostrar nada | O comando terminou com erro antes da saída | Rode o mesmo comando no Terminal do Nexus OS e veja a mensagem |
 | Atalho do laboratório Open vSwitch cria, mas não remove | O atalho só faz `nexus-sdn up` | No terminal, `sudo nexus-sdn down` |
 | Ícone de rede não aparece na barra | Sem rede, o applet fica sem ícone ativo | Confira por `pgrep -u user nm-applet` |
+| Firefox diz que está offline e a barra não lista redes | A VM do Hyper-V foi criada sem placa de rede conectada | Com o PowerShell como administrador: `Connect-VMNetworkAdapter -VMName <vm> -SwitchName "Default Switch"` |
+| Tecla Print não faz nada | Versões antes da rodada 3 da RC2 não tinham o `xfce4-screenshooter` | Use a ISO atual |
 | O papel de parede mudou | O `user` trocou nas configurações | Reinicie a ISO: a sessão volta ao padrão do Nexus OS |
 
 ## Requisitos

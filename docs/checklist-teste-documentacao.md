@@ -323,11 +323,12 @@ Escolha **um** ambiente e anote qual na ficha H8: Hyper-V no Windows 11 Pro (sig
    Set-VMProcessor -VMName $vm -Count 2
    Set-VMMemory -VMName $vm -DynamicMemoryEnabled $false -StartupBytes 2048MB
    Add-VMDvdDrive -VMName $vm -Path "C:\HyperV\nexus-os-rc2-amd64.iso"
+   Connect-VMNetworkAdapter -VMName $vm -SwitchName "Default Switch"
    Start-VM -Name $vm
    vmconnect.exe localhost $vm
    ```
 
-   Deve abrir uma janela com a tela do isolinux. Se algum comando der erro, copie a mensagem e abra uma issue (H7). Se preferir a Geração 2, anote na ficha H8 que usou a Geração 2: ela não foi validada pelo projeto.
+   O `Connect-VMNetworkAdapter` liga a VM à internet do Windows (`Default Switch`); sem ele o Firefox acusa `NS_ERROR_OFFLINE`. Se o comando acusar que a VM não tem adaptador de rede, rode antes `Add-VMNetworkAdapter -VMName $vm`. Deve abrir uma janela com o menu de boot do Nexus OS. Se algum comando der erro, copie a mensagem e abra uma issue (H7). Se preferir a Geração 2, anote na ficha H8 que usou a Geração 2: ela não foi validada pelo projeto.
 4. Ao terminar tudo, apague a VM (PowerShell): `Stop-VM -Name nexus-rc2-lab -TurnOff` e depois `Remove-VM -Name nexus-rc2-lab -Force`.
 
 ### H1-B: Linux com QEMU
@@ -340,16 +341,16 @@ Escolha **um** ambiente e anote qual na ficha H8: Hyper-V no Windows 11 Pro (sig
    qemu-system-x86_64 -enable-kvm -cpu host -m 2048 -smp 2 -vga std -cdrom nexus-os-rc2-amd64.iso -boot d
    ```
 
-   Deve abrir uma janela do QEMU com a tela do isolinux.
+   Para ter internet na VM, acrescente `-nic user` ao comando. Deve abrir uma janela do QEMU com o menu de boot do Nexus OS.
 
 ### H2: esperar o desktop
 
 | # | O que fazer | O que deve aparecer | Passou ou falhou | O que aconteceu e saída |
 | --- | --- | --- | --- | --- |
-| H2.1 | Na tela do isolinux (fundo escuro com um menu), aperte **Enter** | Mensagens de boot e, depois, uma tela azul-escura com linhas finas ligando pontos e o texto "Nexus OS" no canto inferior direito (o papel de parede). Com KVM leva cerca de 40 s; sem KVM, vários minutos | | |
-| H2.2 | Não digite nada: espere até a barra aparecer no alto da tela | Uma barra cinza no alto com o botão **Nexus OS** (e o ícone da marca) à esquerda e o relógio à direita. **Não** deve pedir usuário nem senha (o login é automático) | | |
+| H2.1 | No menu de boot (fundo azul-escuro com a logo do Nexus OS e a entrada **Iniciar o Nexus OS**), aperte **Enter** ou espere os 5 s da contagem. O menu **não** deve mostrar o texto "Debian GNU/Linux" nem o capacete do live-build | Mensagens de boot e, depois, uma tela azul-escura com losangos finos e a logo do Nexus OS no centro (o papel de parede). Com KVM leva cerca de 40 s; sem KVM, vários minutos | | |
+| H2.2 | Não digite nada: espere até a barra aparecer na **parte de baixo** da tela | Uma barra escura de ponta a ponta embaixo, como a do Windows: o botão **Nexus OS** (com o ícone da marca) à esquerda, ícones de lançamento (terminal, arquivos, Firefox, máquinas virtuais, configurações), o relógio e o usuário à direita. Nada de barra em cima e nada de quatro quadradinhos de áreas de trabalho. **Não** deve pedir usuário nem senha (o login é automático) | | |
 | H2.3 | Se aparecer uma tela de login em vez do desktop, entre com usuário `user` e senha `live` e anote | O desktop abre. Marque "falhou" no H2.2, porque o login devia ser automático | | |
-| H2.4 | Olhe a área de trabalho (o fundo) | Nove ícones com os nomes dos atalhos, sem aviso de "atalho não confiável" e sem ponto de exclamação. Ícones de unidades da máquina virtual (por exemplo um disco com o nome da ISO, ou "Floppy Disk") podem aparecer junto: não contam | | |
+| H2.4 | Olhe a área de trabalho (o fundo) | Dez ícones com os nomes dos atalhos, sem aviso de "atalho não confiável" e sem ponto de exclamação, e os ícones **Pasta pessoal**, **Lixeira** e, na VM, o disco da ISO e o "Disquete" (se a VM tiver um), todos no mesmo estilo (quadrado azul-escuro com contorno colorido). Os nomes ficam sobre o fundo, sem caixa escura. Os ícones de unidades da máquina virtual não contam como atalhos | | |
 | H2.5 | Cronometre: quantos segundos do Enter do H2.1 até a barra aparecer | Um número. Anote em H8 | | |
 
 ### H3: itens da definição de `docs/gui.md`
@@ -360,11 +361,11 @@ Para cada linha: faça o que está escrito, compare com "O que deve aparecer" e 
 | --- | --- | --- | --- | --- | --- |
 | H3.1 | 1. Login automático | Já visto no H2.2 | Nenhuma tela de login | | |
 | H3.2 | 2. Sessão gráfica ativa | No terminal: `loginctl list-sessions` | Uma linha com `user` e `seat0`. Depois `loginctl show-session $(loginctl list-sessions --no-legend \| awk '$3=="user"{print $1;exit}') -p Type -p State` imprime `Type=x11` e `State=active` | | |
-| H3.3 | 3. Barra e menu de aplicativos | Clique no botão **Nexus OS** no canto superior esquerdo | Um menu em inglês com **Terminal Emulator**, **File Manager**, **Web Browser**, **Settings**, **Accessories**, **Internet**, **Multimedia**, **Nexus OS** e **System**. Passe o mouse em **Nexus OS**: aparecem os nove atalhos | | |
+| H3.3 | 3. Barra e menu de aplicativos | Clique no botão **Nexus OS** no canto inferior esquerdo | Um menu em português com as categorias de aplicativos (por exemplo **Escritório**, **Internet**, **Multimídia**, **Acessórios** e **Sistema**) e **Nexus OS**. Passe o mouse em **Nexus OS**: aparecem os dez atalhos. Abra o terminal e outro aplicativo: cada janela aberta ganha um botão na barra de baixo, como no Windows | | |
 | H3.4 | 4. Gerenciador de janelas | Abra o terminal, arraste a barra de título para outro lugar, clique em minimizar (botão da esquerda no título), reabra pela barra e clique em maximizar | A janela se move, some, volta e ocupa a tela inteira | | |
 | H3.5 | 5. Gerenciador de arquivos | No menu **Nexus OS**, clique em **File Manager** | Uma janela (Thunar) com as pastas do `user` | | |
 | H3.6 | 6. Terminal gráfico | No terminal: `echo ok` | `ok` | | |
-| H3.7 | 7. Navegador | No menu **Nexus OS**, clique em **Web Browser** (ou em **Internet** e **Firefox ESR**) | A janela do Firefox abre (sem internet, ela mostra uma página de erro de conexão: isso é esperado). Feche a janela | | |
+| H3.7 | 7. Navegador | Clique no ícone do Firefox na barra de baixo | A janela do Firefox abre em português, com a documentação do Nexus OS como página inicial. Com a VM conectada à rede (H1-A, `Connect-VMNetworkAdapter`), abra `https://www.debian.org` e confirme que a página carrega; sem rede, o erro de conexão é esperado. Feche a janela | | |
 | H3.8 | 8. Rede e vídeo | No terminal: `nm-connection-editor`. Depois, no menu, **Settings** e **Display** | O editor de conexões de rede abre (feche-o); a janela de configuração de vídeo mostra a resolução. O ícone de rede na bandeja pode não aparecer sem rede: anote | | |
 | H3.9 | 9. Sem erro de login | No terminal: `journalctl -b -u lightdm -p err --no-pager` | Nenhuma linha de erro (a saída termina logo depois de `-- No entries --` ou fica vazia) | | |
 
@@ -372,10 +373,12 @@ Para cada linha: faça o que está escrito, compare com "O que deve aparecer" e 
 
 | # | O que fazer | O que deve aparecer | Passou ou falhou | O que aconteceu e saída |
 | --- | --- | --- | --- | --- |
-| H4.1 | Olhe o papel de parede | Fundo azul-escuro com pontos ligados por linhas e a marca (triângulo de três pontos com um ponto branco no centro) com o texto "Nexus OS" | | |
+| H4.1 | Olhe o papel de parede | Fundo azul-escuro com reflexos azul e magenta, losangos finos e a **logo original do Nexus OS** (o losango com o N e o texto "NEXUS OS") no centro, sem faixas visíveis nos degradês | | |
 | H4.2 | Olhe o botão do menu na barra | O texto **Nexus OS** e o ícone da marca | | |
-| H4.3 | Olhe a aparência das janelas | Tema escuro azul-marinho (Nexus-Dark): barra de título, menus e janelas na cor da logo, com ícones Papirus-Dark | | |
+| H4.3 | Olhe a aparência das janelas | Tema escuro azul-marinho (Nexus-Dark): barra de título, menus e janelas na cor da logo, com os ícones do tema Nexus (sobre o Papirus-Dark) | | |
 | H4.4 | No terminal: `head -n 3 /etc/os-release` | `PRETTY_NAME` e `NAME` com **Debian** (o sistema continua Debian; só a identidade visual é do Nexus OS) | | |
+| H4.5 | No terminal: `hostname`, `date` e `locale \| head -n 1` | `nexus-os`, a data e a hora de Brasília (UTC-3) e `LANG=pt_BR.UTF-8`. Digite `ç` e `~a` no teclado do computador e confira o teclado ABNT2 | | |
+| H4.6 | Deixe a tela parada por 15 minutos | A tela não apaga e não pede senha | | |
 
 ### H5: abrir cada atalho
 
@@ -384,7 +387,7 @@ Na área de trabalho, dê **duplo clique** em cada ícone, na ordem. Para os de 
 | # | Atalho | O que deve aparecer | Passou ou falhou | O que aconteceu e saída |
 | --- | --- | --- | --- | --- |
 | H5.1 | Terminal do Nexus OS | Uma janela de terminal | | |
-| H5.2 | Documentação do Nexus OS | O gerenciador de arquivos abre em `/usr/share/nexus-os/docs` e lista `manual.md`, `requisitos.md` e outros | | |
+| H5.2 | Documentação do Nexus OS | O Firefox abre uma página escura "Documentação do Nexus OS" com a lista dos documentos; clique em **Manual v1 do Nexus OS** e confirme que a página abre, com tabelas e blocos de código legíveis. Funciona sem internet | | |
 | H5.3 | Gerenciador de máquinas virtuais | A janela **Gerenciador de máquinas virtuais** abre (pode levar 15 s) e lista uma conexão **QEMU/KVM**. Não crie nenhuma VM. Feche a janela | | |
 | H5.4 | Laboratório Open vSwitch | Terminal com `== Nexus OS: sudo nexus-sdn up ==` e `Código de saída: 0` | | |
 | H5.5 | VNF FRR: instanciar | Terminal com `OK:` e `Código de saída: 0` | | |
@@ -392,6 +395,17 @@ Na área de trabalho, dê **duplo clique** em cada ícone, na ordem. Para os de 
 | H5.7 | VNF FRR: remover | Terminal com `OK:` e `Código de saída: 0` | | |
 | H5.8 | Topologia Containerlab: criar | Terminal com a tabela de contêineres `clab-frr-duo-r1` e `clab-frr-duo-r2` em `running` e `Código de saída: 0` (leva até 1 min) | | |
 | H5.9 | Topologia Containerlab: remover | Terminal com `Código de saída: 0`. Depois, no terminal, `sudo docker ps -a` não lista nenhum contêiner | | |
+| H5.10 | Configurações | A janela de configurações do Xfce abre (rede, aparência, teclado, vídeo). Feche a janela | | |
+
+### H5b: programas e teclas
+
+| # | O que fazer | O que deve aparecer | Passou ou falhou | O que aconteceu e saída |
+| --- | --- | --- | --- | --- |
+| H5b.1 | No terminal: `echo "# teste" > ~/teste.md`. Depois, no gerenciador de arquivos (pasta pessoal), dê duplo clique em `teste.md` | O **Mousepad** abre o arquivo (arquivos `.md` e `.txt` abrem nele) | | |
+| H5b.2 | Aperte a tecla **Print Screen** | A janela do **Captura de tela** (Screenshooter) abre, sem mensagem de erro | | |
+| H5b.3 | No menu **Nexus OS** (ou no menu de aplicativos), abra o **LibreOffice Writer**, escreva uma linha e feche sem salvar | O Writer abre em português | | |
+| H5b.4 | Abra o **Wireshark**, escolha a interface `any` ou `eth0` e inicie a captura, sem `sudo` | A captura começa sem aviso de permissão. Feche o Wireshark | | |
+| H5b.5 | Abra o **VLC**, o **GIMP**, o **Inkscape** e o **KeePassXC** (um por vez) | Cada um abre em janela própria. Feche-os. Não precisa criar arquivos | | |
 
 ### H6: desligar
 

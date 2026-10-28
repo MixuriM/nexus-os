@@ -77,6 +77,8 @@ O que cada comando faz:
 - `Set-VMFirmware ... -EnableSecureBoot Off`: o instalador do Debian não inicia com a Secure Boot padrão do Hyper-V.
 - `Add-VMDvdDrive` e `-FirstBootDevice`: colocam a ISO e a fazem iniciar primeiro.
 
+Para uma VM que só **testa a ISO do Nexus OS** (sem disco, Geração 1, como no [manual](manual.md)), a rede não vem pronta: o `New-VM` sem `-SwitchName` deixa a VM sem rede, e o Firefox da ISO acusa `NS_ERROR_OFFLINE`. Para dar internet a ela (PowerShell como administrador): `Connect-VMNetworkAdapter -VMName <nome-da-vm> -SwitchName "Default Switch"`.
+
 Confira a configuração:
 
 ```powershell
