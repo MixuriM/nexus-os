@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Teste estático da documentação (F3.12): os documentos por componente existem, estão no índice
-# docs/README.md, os links locais resolvem, gns3.md e manual.md têm as seções exigidas e não sobrou "TODO".
+# Teste estático da documentação (F3.12 e F3.18): os documentos por componente, do desktop (gui, branding) e da
+# RC2 existem, estão no índice docs/README.md, os links locais resolvem, gns3.md e manual.md têm as seções
+# exigidas (inclusive "Ambiente gráfico" com blocos executáveis) e não sobrou "TODO".
 # Roda no Git Bash do Windows e em Linux. Uso: tests/docs.sh
 set -uo pipefail
 
@@ -11,7 +12,7 @@ export LC_ALL=C.UTF-8
 erros=0
 fail() { echo "FALHA: $*" >&2; erros=$((erros + 1)); }
 
-docs=(sdn virtualizacao nfv containers integracao-iso requisitos rc1 gns3 manual)
+docs=(sdn virtualizacao nfv containers integracao-iso requisitos rc1 gns3 manual gui branding rc2)
 indice=docs/README.md
 [ -f "$indice" ] || fail "índice ausente: $indice"
 
@@ -55,6 +56,7 @@ secoes_manual=(
     '## Containerlab'
     '## Orquestração (nexus-vnf)'
     '## Testes (nexus-smoke)'
+    '## Ambiente gráfico'
     '## Requisitos'
     '## Solução de problemas'
 )
@@ -64,8 +66,17 @@ if [ -f docs/manual.md ]; then
     done
 fi
 
+# A seção do desktop precisa de blocos que a máquina executa e do roteiro humano (checklist, parte H).
+if [ -f docs/manual.md ]; then
+    blocos_gui=$(awk '/^## /{dentro = ($0 == "## Ambiente gráfico")} dentro && /^```bash nexus-exec/{n++} END{print n+0}' docs/manual.md)
+    [ "$blocos_gui" -ge 1 ] || fail "docs/manual.md: a seção '## Ambiente gráfico' não tem bloco 'bash nexus-exec'"
+fi
+if [ -f docs/checklist-teste-documentacao.md ]; then
+    grep -q '^## Parte H' docs/checklist-teste-documentacao.md || fail "docs/checklist-teste-documentacao.md sem a '## Parte H' (ambiente gráfico)"
+fi
+
 if [ "$erros" -ne 0 ]; then
     echo "FALHA: tests/docs.sh com $erros erro(s)" >&2
     exit 1
 fi
-echo "OK: tests/docs.sh (${#docs[@]} documentos, índice, links, seções do gns3.md e do manual.md)"
+echo "OK: tests/docs.sh (${#docs[@]} documentos, índice, links, seções do gns3.md e do manual.md, blocos do desktop)"
