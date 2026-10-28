@@ -158,7 +158,7 @@ for c in mousepad evince ristretto file-roller galculator xfce4-screenshooter vl
     command -v "$c" >/dev/null || fail "programa padrão ausente: $c"
 done
 [ "$(como_user xfconf-query -c xfce4-keyboard-shortcuts -p /commands/default/Print)" = xfce4-screenshooter ]     || fail "a tecla Print não chama o xfce4-screenshooter"
-[ -f /usr/share/nexus-os/docs-html/index.html ] && [ -f /usr/share/nexus-os/docs-html/manual.html ]     || fail "documentação em HTML ausente em /usr/share/nexus-os/docs-html"
+for h in index manual; do [ -f "/usr/share/nexus-os/docs-html/$h.html" ] || fail "documentação em HTML ausente em /usr/share/nexus-os/docs-html"; done
 id -nG "$usuario" | tr ' ' '\n' | grep -qx wireshark || fail "$usuario fora do grupo wireshark (captura sem root)"
 { [ -n "$(getcap /usr/bin/dumpcap 2>/dev/null)" ] || [ -u /usr/bin/dumpcap ]; } || fail "dumpcap sem permissão de captura para o grupo wireshark"
 echo "sistema: pt_BR, fuso America/Sao_Paulo, teclado br, máquina nexus-os, sem bloqueio de tela, programas padrão e documentação em HTML"
