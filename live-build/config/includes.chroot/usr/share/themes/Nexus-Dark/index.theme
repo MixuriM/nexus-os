@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=Nexus-Dark
+Comment=Tema escuro do Nexus OS, na paleta da logo
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=Nexus-Dark
+MetacityTheme=Nexus-Dark
+IconTheme=Papirus-Dark

@@ -2,7 +2,7 @@
 Type=Application
 Name=Laboratório Open vSwitch
 Comment=Cria o laboratório de rede com Open vSwitch (use sudo nexus-sdn down para remover)
-Icon=network-wired
+Icon=nexus-sdn
 Exec=xfce4-terminal --disable-server "--title=Laboratório Open vSwitch" -x nexus-atalho sdn sudo nexus-sdn up
 Terminal=false
 Categories=X-Nexus-OS;

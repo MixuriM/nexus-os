@@ -2,7 +2,7 @@
 Type=Application
 Name=Documentação do Nexus OS
 Comment=Abre a documentação local no gerenciador de arquivos
-Icon=help-browser
+Icon=nexus-docs
 Exec=thunar /usr/share/nexus-os/docs
 Terminal=false
 Categories=X-Nexus-OS;

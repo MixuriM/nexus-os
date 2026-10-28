@@ -2,7 +2,7 @@
 Type=Application
 Name=VNF FRR: remover
 Comment=Remove a VNF FRR do Containerlab e limpa o que sobrou
-Icon=media-playback-stop
+Icon=nexus-vnf-down
 Exec=xfce4-terminal --disable-server "--title=VNF FRR: remover" -x nexus-atalho vnf-down sudo nexus-vnf down
 Terminal=false
 Categories=X-Nexus-OS;
