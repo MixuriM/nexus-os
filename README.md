@@ -24,7 +24,7 @@ Projeto Integrador acadêmico, em desenvolvimento.
 
 ## Estado atual
 
-A **RC1** é a primeira ISO integrada, só com o núcleo e sem ambiente gráfico ([docs/rc1.md](docs/rc1.md)). A **RC2** soma a ela o **desktop XFCE** com login automático do `user`, 9 atalhos para os componentes (F3.15 e F3.16, [docs/gui.md](docs/gui.md)) e a identidade visual do Nexus OS (F3.17, [docs/branding.md](docs/branding.md)); identificação, SHA256 e testes em [docs/rc2.md](docs/rc2.md), requisitos com desktop em [docs/requisitos.md](docs/requisitos.md). O congelamento da ISO e a tag são da Fase 4.
+A **RC1** é a primeira ISO integrada, só com o núcleo e sem ambiente gráfico ([docs/rc1.md](docs/rc1.md)). A **RC2** soma a ela o **desktop XFCE** com login automático do `user`, 10 atalhos para os componentes (F3.15 e F3.16, [docs/gui.md](docs/gui.md)), a identidade visual do Nexus OS (F3.17, [docs/branding.md](docs/branding.md)), barra única embaixo como a do Windows, em português do Brasil, e programas prontos para uso (LibreOffice, Wireshark, VLC, GIMP, Inkscape, KeePassXC e mais); identificação, SHA256 e testes em [docs/rc2.md](docs/rc2.md), requisitos com desktop em [docs/requisitos.md](docs/requisitos.md). O congelamento da ISO e a tag são da Fase 4.
 
 | Componente | Versão na ISO | Como usar | Smoke test |
 | --- | --- | --- | --- |
@@ -94,7 +94,7 @@ Preparo da VM: [docs/ambiente-de-build.md](docs/ambiente-de-build.md). Resultado
 
 ## Usar a ISO integrada
 
-1. Inicie a ISO numa VM com vídeo (testado: QEMU com KVM; o Hyper-V está descrito em [docs/rc1.md](docs/rc1.md)) com **2048 MiB de RAM** (a recomendada com o desktop; o mínimo medido é 1536 MiB, veja [docs/requisitos.md](docs/requisitos.md)) e a ISO como CD. Na tela do isolinux, aperte Enter. A ISO entra no desktop XFCE já logada como `user`.
+1. Inicie a ISO numa VM com vídeo (testado: QEMU com KVM; o Hyper-V está descrito em [docs/rc1.md](docs/rc1.md)) com **2048 MiB de RAM** (a recomendada com o desktop; o mínimo medido é 1536 MiB, veja [docs/requisitos.md](docs/requisitos.md)) e a ISO como CD. O menu de boot inicia sozinho em 5 segundos (Enter adianta). A ISO entra no desktop XFCE já logada como `user`. **Internet:** no QEMU use `-nic user`; no Hyper-V, a VM criada sem rede precisa de `Connect-VMNetworkAdapter -VMName <vm> -SwitchName "Default Switch"` (comandos completos em [docs/manual.md](docs/manual.md), seção "Ambiente gráfico").
 2. Use o menu "Nexus OS" ou os ícones da área de trabalho, ou abra um terminal. Se a sessão pedir login: usuário `user` e senha `live` (credencial pública da Debian Live, de laboratório). O `sudo` não pede senha.
 3. Os atalhos chamam os comandos abaixo; no terminal use os comandos diretamente.
 
@@ -141,12 +141,12 @@ Cada script imprime `OK:` ou `FALHA:` e sai com código diferente de zero em fal
 | --- | --- |
 | `tests/lint-repo.sh` | CRLF, travessão, imagens e pacotes versionados, segredos, sintaxe e `shellcheck`. Roda no Git Bash e no Linux |
 | `tests/iso.sh <iso>` | SHA256 da ISO e boot no QEMU até o `login:` (RAM por `NEXUS_ISO_MEM`, padrão 2048 MiB) |
-| `tests/iso-smoke.sh <iso> <nome>\|all` | Inicia a ISO sem rede e roda dentro dela os 8 smokes: `sdn`, `virtualizacao`, `libvirt`, `containers`, `frr`, `nfv`, `orquestracao` e `desktop` (sessão do XFCE e os 9 atalhos executados). `NEXUS_SMOKE_KVM=0` força a emulação |
+| `tests/iso-smoke.sh <iso> <nome>\|all` | Inicia a ISO sem rede e roda dentro dela os 8 smokes: `sdn`, `virtualizacao`, `libvirt`, `containers`, `frr`, `nfv`, `orquestracao` e `desktop` (sessão do XFCE, a barra, o idioma, os programas e os 10 atalhos executados). `NEXUS_SMOKE_KVM=0` força a emulação |
 | `tests/run-fase2.sh [iso]` | Verificação do repositório, boot e laboratórios de Open vSwitch, libvirt e FRR com Containerlab, parando no primeiro erro |
 | `tests/requisitos.sh` | Confere as tabelas de requisitos (núcleo e com desktop) e o SHA256 da RC1 e da RC2 |
 | `tests/docs.sh` | Documentos por componente, do desktop e da RC2, índice, links e seções do manual (com blocos do desktop) e do GNS3. Roda no Git Bash e no Linux |
 | `tests/manual.sh <iso>` | Executa os blocos do [manual](docs/manual.md) dentro da ISO, sem rede |
-| `tests/atalhos.sh` | Confere os 9 atalhos `nexus-*.desktop` do desktop (menu, área de trabalho, validação). Roda no Git Bash e no Linux |
+| `tests/atalhos.sh` | Confere os 10 atalhos `nexus-*.desktop` do desktop (menu, área de trabalho, validação), o `mimeapps.list` e a lista de programas. Roda no Git Bash e no Linux |
 | `tests/gui-spec.sh` | Confere `docs/gui.md`: candidatos, finalistas medidos com KVM e desktop escolhido. Roda no Git Bash e no Linux |
 | `tests/identidade.sh` | Confere a identidade visual: SVG, PNG, capturas, licenças em `docs/branding.md` e o nome "Nexus OS". Roda no Git Bash e no Linux |
 | `tests/run-fase3.sh [iso]` | `lint-repo`, `docs`, `gui-spec`, `atalhos`, `identidade`, `iso`, `iso-smoke all`, `requisitos` e `manual`, parando no primeiro erro |
