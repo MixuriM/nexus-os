@@ -15,7 +15,7 @@ usuario=user
 login=lightdm
 processos="xfce4-session xfce4-panel xfwm4"
 espera_sessao=120
-espera_atalho=150
+espera_atalho=300
 menu=/usr/share/applications
 atalhos="nexus-terminal nexus-virt-manager nexus-docs nexus-sdn-lab nexus-vnf-up nexus-vnf-status nexus-vnf-down nexus-clab-deploy nexus-clab-destroy nexus-configuracoes"
 
