@@ -1,6 +1,6 @@
-# Manual v1 do Nexus OS (RC1, núcleo sem desktop)
+# Manual v1 do Nexus OS (RC2, núcleo e ambiente gráfico)
 
-Manual de instalação, boot e uso de cada componente da ISO. Cobre o núcleo da RC1; a seção do ambiente gráfico entra com a RC2.
+Manual de instalação, boot e uso de cada componente da ISO. Cobre o núcleo (RC1) e, a partir da RC2, o ambiente gráfico.
 Os blocos marcados `bash nexus-exec` são executados por `tests/manual.sh` dentro da ISO, sem rede, em ordem, e cada um limpa o que criou. Os demais blocos são exemplos que o teste não executa.
 Roteiro para quem vai executar o manual do zero: [checklist-teste-documentacao.md](checklist-teste-documentacao.md), parte "Manual v1 por componente".
 
@@ -17,8 +17,9 @@ O Nexus OS é uma remasterização do Debian 13 (trixie) gerada com live-build. 
 | Containerlab | `containerlab deploy\|destroy` | Containerlab |
 | Orquestração NFVO/VNFM simplificada | `nexus-vnf up\|status\|down` | Orquestração (nexus-vnf) |
 | Testes dentro da ISO | `nexus-smoke <nome>\|all` | Testes (nexus-smoke) |
+| Desktop XFCE e atalhos | login automático do `user` | Ambiente gráfico |
 
-Fora da RC1: ambiente gráfico (RC2), OpenDaylight (opcional, trabalho futuro) e GNS3, que só é documentado e não entra na ISO ([gns3.md](gns3.md)). Arquitetura: [README.md](../README.md).
+O ambiente gráfico entra na RC2. Fora da ISO: OpenDaylight (opcional, trabalho futuro) e GNS3, que só é documentado e não entra na ISO ([gns3.md](gns3.md)). Arquitetura: [README.md](../README.md).
 
 ## Gerar a ISO
 
@@ -219,6 +220,154 @@ grep -qx orquestracao /usr/share/nexus-os/tests/smoke.list
 ```
 
 Para rodar os smokes de fora, na VM de build, sem rede: `tests/iso-smoke.sh dist/nexus-os-rc1-amd64.iso all` ([integracao-iso.md](integracao-iso.md)).
+
+## Ambiente gráfico
+
+A RC2 inicia direto no desktop XFCE: o `lightdm` abre a sessão do usuário `user` sozinho (login automático), sem pedir senha. O console serial e os testes sem janela continuam funcionando. Escolha do desktop, medições e limitações: [gui.md](gui.md). Nome, marca, papel de parede e licenças: [branding.md](branding.md).
+
+![Sessão do Nexus OS no XFCE](img/sessao.png)
+
+### Iniciar com vídeo
+
+Use pelo menos a RAM recomendada com o desktop em [requisitos.md](requisitos.md), seção "Com ambiente gráfico". A ISO da RC2 se chama `nexus-os-rc2-amd64.iso` ([rc2.md](rc2.md)).
+
+**QEMU no Linux, com janela** (`-vga std` é o vídeo que os testes usam; sem `-enable-kvm -cpu host` a emulação por software leva minutos até a sessão):
+
+```bash
+qemu-system-x86_64 -enable-kvm -cpu host -m 2048 -smp 2 -vga std -cdrom dist/nexus-os-rc2-amd64.iso -boot d
+```
+
+Na tela do isolinux, aperte Enter. A janela do QEMU em si não foi exercitada pelos testes (eles usam `-display none` e a captura de tela do monitor do QEMU); a sessão foi verificada por `loginctl` e pelas capturas de `docs/img/`.
+
+**Hyper-V no Windows** (PowerShell como administrador; ISO em `C:\HyperV`). Mesmo procedimento da seção "Iniciar a ISO", com a ISO da RC2 e pelo menos 2048 MB de memória estática:
+
+```powershell
+$vm = "nexus-rc2-lab"
+New-VM -Name $vm -Generation 1 -MemoryStartupBytes 2048MB -BootDevice CD -NoVHD
+Set-VMProcessor -VMName $vm -Count 2
+Set-VMMemory -VMName $vm -DynamicMemoryEnabled $false -StartupBytes 2048MB
+Add-VMDvdDrive -VMName $vm -Path "C:\HyperV\nexus-os-rc2-amd64.iso"
+Start-VM -Name $vm
+vmconnect.exe localhost $vm
+```
+
+A ISO tem boot BIOS e UEFI (`xorriso -indev <iso> -report_el_torito plain`), então a Geração 2 deveria servir; só a Geração 1 foi validada na RC1 (sem desktop). O desktop não foi iniciado no Hyper-V até esta versão: o roteiro humano da parte H do [checklist](checklist-teste-documentacao.md) é quem confirma. Sem KVM a sessão leva alguns minutos para aparecer.
+
+### O que há no desktop
+
+- Barra no alto: menu "Nexus OS" (ícone da marca) com todos os aplicativos, lista de janelas, relógio e a bandeja com o applet de rede.
+- Gerenciador de arquivos (Thunar), terminal gráfico (Xfce Terminal), navegador (Firefox ESR), configuração de rede (NetworkManager) e de vídeo (Configurações do Xfce).
+- Menu "Nexus OS" e nove atalhos na área de trabalho, descritos abaixo.
+- Papel de parede, tema Greybird e tela de login com a marca do Nexus OS. O sistema continua sendo o Debian: `/etc/os-release` não muda.
+
+### Atalhos
+
+| Atalho | O que faz |
+| --- | --- |
+| Terminal do Nexus OS | Abre o terminal gráfico |
+| Gerenciador de máquinas virtuais | Abre o `virt-manager` conectado ao `qemu:///system` |
+| Laboratório Open vSwitch | Executa `sudo nexus-sdn up` em um terminal (a remoção é `sudo nexus-sdn down`) |
+| VNF FRR: instanciar | Executa `sudo nexus-vnf up` |
+| VNF FRR: estado | Executa `sudo nexus-vnf status` |
+| VNF FRR: remover | Executa `sudo nexus-vnf down` |
+| Topologia Containerlab: criar | Executa `containerlab deploy` da topologia de dois nós FRR |
+| Topologia Containerlab: remover | Executa `containerlab destroy --cleanup` da mesma topologia |
+| Documentação do Nexus OS | Abre `/usr/share/nexus-os/docs` no gerenciador de arquivos |
+
+Os atalhos de terminal mostram a saída, o código de saída e esperam Enter para fechar a janela. Tudo o que um atalho cria vive na RAM e some ao desligar a ISO.
+
+### Verificar a sessão
+
+Os blocos abaixo rodam dentro da ISO como `root` (o `tests/manual.sh` os executa com a sessão do `user` já ativa). O primeiro define a função `como_user`, que os seguintes usam: execute-os em ordem, no mesmo terminal.
+
+```bash nexus-exec
+systemctl is-active lightdm
+for i in $(seq 1 60); do
+    pgrep -u user -x xfce4-panel >/dev/null && pgrep -u user -x xfwm4 >/dev/null && break
+    sleep 2
+done
+sessao=$(loginctl list-sessions --no-legend | awk '$3 == "user" {print $1; exit}')
+[ "$(loginctl show-session "$sessao" -p Type --value)" = x11 ]
+[ "$(loginctl show-session "$sessao" -p State --value)" = active ]
+for p in xfce4-session xfce4-panel xfwm4 xfdesktop; do
+    pgrep -u user -x "$p" >/dev/null
+done
+uid=$(id -u user)
+pid=$(pgrep -u user -x xfce4-session | head -n 1)
+amb() { tr '\0' '\n' <"/proc/$pid/environ" | sed -n "s/^$1=//p" | head -n 1; }
+tela=$(amb DISPLAY)
+xauth=$(amb XAUTHORITY)
+bus=$(amb DBUS_SESSION_BUS_ADDRESS)
+como_user() {
+    runuser -u user -- env HOME=/home/user DISPLAY="$tela" ${xauth:+XAUTHORITY="$xauth"} \
+        XDG_RUNTIME_DIR="/run/user/$uid" DBUS_SESSION_BUS_ADDRESS="$bus" NEXUS_ATALHO_TESTE=1 "$@"
+}
+echo "sessão $sessao de user ativa, tela $tela"
+```
+
+Saída esperada: `active` do `lightdm` e `sessão <n> de user ativa, tela :0`.
+
+Identidade visual e base Debian:
+
+```bash nexus-exec
+test -f /usr/share/backgrounds/nexus-os/papel-de-parede.png
+imagem=$(como_user xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image)
+[ "$(readlink -f "$imagem")" = /usr/share/backgrounds/nexus-os/papel-de-parede.png ]
+[ "$(como_user xfconf-query -c xsettings -p /Net/ThemeName)" = Greybird ]
+[ "$(como_user xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-title)" = "Nexus OS" ]
+grep -qx 'ID=debian' /etc/os-release
+```
+
+Atalhos: os nove existem no menu e na área de trabalho, são idênticos e válidos.
+
+```bash nexus-exec
+[ "$(ls /usr/share/applications/nexus-*.desktop | wc -l)" -eq 9 ]
+[ "$(ls /home/user/Desktop/nexus-*.desktop | wc -l)" -eq 9 ]
+for a in /usr/share/applications/nexus-*.desktop; do
+    desktop-file-validate "$a"
+    cmp "$a" "/home/user/Desktop/$(basename "$a")"
+    grep -m1 '^Name=' "$a"
+done
+```
+
+Saída esperada: nove linhas `Name=`, sem mensagem de erro.
+
+Os seis atalhos de terminal, lançados como o `user` dentro da sessão com `NEXUS_ATALHO_TESTE=1` (o `nexus-atalho` não espera Enter), cada um com código de saída 0, e a limpeza de tudo o que criaram:
+
+```bash nexus-exec
+for id in nexus-sdn-lab nexus-vnf-up nexus-vnf-status nexus-vnf-down nexus-clab-deploy nexus-clab-destroy; do
+    nome=$(grep -m1 '^Exec=' "/usr/share/applications/$id.desktop" \
+        | awk '{for (i = 1; i < NF; i++) if ($i == "nexus-atalho") {print $(i + 1); exit}}')
+    estado="/run/user/$uid/nexus-atalho-$nome.status"
+    rm -f "$estado"
+    como_user gtk-launch "$id"
+    for i in $(seq 1 90); do
+        [ -s "$estado" ] && break
+        sleep 1
+    done
+    [ "$(cat "$estado")" = 0 ]
+    echo "$id: código 0"
+    [ "$id" != nexus-sdn-lab ] || sudo nexus-sdn down >/dev/null
+done
+sudo nexus-vnf down >/dev/null
+sudo containerlab destroy -t /usr/share/nexus-os/labs/containerlab/frr-duo.clab.yml --cleanup >/dev/null 2>&1 || true
+[ -z "$(docker ps -aq)" ]
+```
+
+Saída esperada: seis linhas `<atalho>: código 0`.
+
+### Problemas no desktop
+
+| Sintoma | Causa | Correção |
+| --- | --- | --- |
+| Tela preta ou sem janela do QEMU | O QEMU foi iniciado com `-display none` | Tire o `-display none` (a janela abre sozinha) e use `-vga std` |
+| Fica no menu do isolinux | O menu espera uma tecla | Aperte Enter |
+| A sessão demora muito para aparecer | Sem KVM a emulação é lenta (cerca de 259 s medidos com 1 vCPU, [gui.md](gui.md)) | Use um host com KVM ou espere |
+| Docker não carrega a imagem FRR | O tmpfs do Docker é 50% da RAM | Dê pelo menos a RAM recomendada ([requisitos.md](requisitos.md)) |
+| Atalho de terminal fecha a janela sem mostrar nada | O comando terminou com erro antes da saída | Rode o mesmo comando no Terminal do Nexus OS e veja a mensagem |
+| Atalho do laboratório Open vSwitch cria, mas não remove | O atalho só faz `nexus-sdn up` | No terminal, `sudo nexus-sdn down` |
+| Ícone de rede não aparece na barra | Sem rede, o applet fica sem ícone ativo | Confira por `pgrep -u user nm-applet` |
+| O papel de parede mudou | O `user` trocou nas configurações | Reinicie a ISO: a sessão volta ao padrão do Nexus OS |
 
 ## Requisitos
 
