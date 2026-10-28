@@ -65,6 +65,15 @@ O que vem de pacote do Debian 13 `main` mantém a licença do pacote (lida em `/
 | `lightdm-gtk-greeter` | 2.0.9-1 | veja `/usr/share/doc/lightdm-gtk-greeter/copyright` | a tela de login em si |
 | `xfce4-panel`, `xfdesktop4`, `xfwm4` | 4.20.4-1, 4.20.1-1, 4.20.0-1 | veja `/usr/share/doc/<pacote>/copyright` | barra, área de trabalho e janelas |
 
+## Tamanho
+
+| Item | Valor |
+| --- | --- |
+| ISO sem a identidade (parte 9, F3.15 e F3.16) | 1260126208 bytes |
+| ISO com a identidade (RC2) | 1295843328 bytes |
+| Diferença | +35717120 bytes (34,1 MiB), dentro do limite de 40 MB para tema e ícones |
+| Origem da diferença | `papirus-icon-theme` (22,6 MB no `.deb`, 187 MB instalados), `fonts-inter` (4,6 MB no `.deb`) e as imagens do Nexus OS |
+
 ## Como a identidade é aplicada
 
 - **Login:** `/etc/lightdm/lightdm-gtk-greeter.conf` aponta `background` para `tela-de-login.png` (a logo original), `theme-name` para Nexus-Dark, `icon-theme-name` para Papirus-Dark e `default-user-image` para a marca. O `gtk.css` estiliza a janela de login (`#login_window`). Com o login automático (padrão da ISO) a tela de login não aparece; para vê-la, inicie com o parâmetro de boot `live-config.noautologin`.
