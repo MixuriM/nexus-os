@@ -1,4 +1,4 @@
-# Checklist de teste da documentação (F2.8 e F3.12)
+# Checklist de teste da documentação (F2.8, F3.12 e F3.18)
 
 Roteiro para quem nunca viu o projeto. O objetivo é descobrir se o `README.md` e os documentos de `docs/` bastam para gerar e testar a ISO do zero, **sem ajuda e sem conhecimento prévio**.
 
@@ -286,3 +286,145 @@ Valem as regras da Parte E. Diferenças para o manual v1:
 4. O resultado final: **passou**, **passou com ressalvas** ou **falhou**.
 
 Com isso o responsável pelo build registra a execução do manual v1 por uma segunda pessoa (F3.12).
+
+## Parte H: Ambiente gráfico (F3.18)
+
+Roteiro para executar a seção "Ambiente gráfico" do [manual](manual.md) do zero, numa ISO limpa, **sem conhecimento prévio do projeto**. Você vai iniciar a ISO com vídeo, esperar a área de trabalho, conferir cada item da definição de [gui.md](gui.md) e abrir cada atalho. O objetivo é descobrir se o manual basta para usar o desktop sem ajuda.
+
+Regra principal: digite e clique somente no que está escrito aqui e no manual. Se precisar de algo que não está escrito (um pacote, um comando, uma explicação, um clique), isso é uma falha da documentação: anote e abra uma issue. Não conserte em silêncio. Se um item falhar, siga para o próximo e registre o que apareceu.
+
+Tempo estimado: 20 min para preparar a máquina e 1 h para os itens. Reserve a tarde.
+
+### H0: o que você precisa ter antes
+
+| # | Item | Como conseguir |
+| --- | --- | --- |
+| H0.1 | A ISO `nexus-os-rc2-amd64.iso` e o SHA256 dela | Peça o arquivo a quem gerou a ISO (o responsável pelo build). O SHA256 correto está em `docs/rc2.md`, tabela "Identificação", linha "SHA256" |
+| H0.2 | Uma máquina que rode a ISO com a RAM recomendada para a VM | O valor está em `docs/requisitos.md`, seção "Com ambiente gráfico", linha "Desktop: RAM recomendada" (em MiB). Se faltar RAM, use 4096 MiB e anote |
+| H0.3 | O repositório aberto no navegador, arquivo `docs/manual.md`, seção "Ambiente gráfico" | Navegador, na página do repositório no GitHub |
+
+Escolha **um** ambiente e anote qual na ficha H8: Hyper-V no Windows 11 Pro (siga H1-A), Linux com QEMU e `/dev/kvm` (siga H1-B) ou VirtualBox (só sem KVM, o mais lento: crie uma VM Linux de 64 bits com a RAM acima, 2 CPUs, sem disco, vídeo com 16 MB ou mais, a ISO no leitor óptico, e siga H2).
+
+### H1-A: Hyper-V no Windows (PowerShell como administrador)
+
+1. Copie a ISO para `C:\HyperV` (crie a pasta se não existir). Onde: Explorador de Arquivos.
+2. Confira o SHA256. Onde: PowerShell:
+
+   ```powershell
+   Get-FileHash C:\HyperV\nexus-os-rc2-amd64.iso -Algorithm SHA256
+   ```
+
+   O valor `Hash` deve ser igual ao de `docs/rc2.md` (maiúsculas e minúsculas não importam). Se for diferente, pare e anote como falha de H0.1.
+3. Crie e inicie a VM. Onde: PowerShell como administrador, um comando por vez (o bloco do manual, seção "Ambiente gráfico", "Iniciar com vídeo"). Troque `2048MB` pela RAM de H0.2 se ela for maior:
+
+   ```powershell
+   $vm = "nexus-rc2-lab"
+   New-VM -Name $vm -Generation 1 -MemoryStartupBytes 2048MB -BootDevice CD -NoVHD
+   Set-VMProcessor -VMName $vm -Count 2
+   Set-VMMemory -VMName $vm -DynamicMemoryEnabled $false -StartupBytes 2048MB
+   Add-VMDvdDrive -VMName $vm -Path "C:\HyperV\nexus-os-rc2-amd64.iso"
+   Start-VM -Name $vm
+   vmconnect.exe localhost $vm
+   ```
+
+   Deve abrir uma janela com a tela do isolinux. Se algum comando der erro, copie a mensagem e abra uma issue (H7). Se preferir a Geração 2, anote na ficha H8 que usou a Geração 2: ela não foi validada pelo projeto.
+4. Ao terminar tudo, apague a VM (PowerShell): `Stop-VM -Name nexus-rc2-lab -TurnOff` e depois `Remove-VM -Name nexus-rc2-lab -Force`.
+
+### H1-B: Linux com QEMU
+
+1. Confira o SHA256 (terminal), na pasta da ISO: `sha256sum nexus-os-rc2-amd64.iso`. Compare com `docs/rc2.md`.
+2. Confira o KVM: `ls -l /dev/kvm`. Se existir, use o comando com KVM; se não, tire `-enable-kvm -cpu host` e anote "sem KVM".
+3. Inicie a ISO com janela (terminal):
+
+   ```bash
+   qemu-system-x86_64 -enable-kvm -cpu host -m 2048 -smp 2 -vga std -cdrom nexus-os-rc2-amd64.iso -boot d
+   ```
+
+   Deve abrir uma janela do QEMU com a tela do isolinux.
+
+### H2: esperar o desktop
+
+| # | O que fazer | O que deve aparecer | Passou ou falhou | O que aconteceu e saída |
+| --- | --- | --- | --- | --- |
+| H2.1 | Na tela do isolinux (fundo escuro com um menu), aperte **Enter** | Mensagens de boot e, depois, uma tela azul-escura com linhas finas ligando pontos e o texto "Nexus OS" no canto inferior direito (o papel de parede). Com KVM leva cerca de 40 s; sem KVM, vários minutos | | |
+| H2.2 | Não digite nada: espere até a barra aparecer no alto da tela | Uma barra cinza no alto com o botão **Nexus OS** (e o ícone da marca) à esquerda e o relógio à direita. **Não** deve pedir usuário nem senha (o login é automático) | | |
+| H2.3 | Se aparecer uma tela de login em vez do desktop, entre com usuário `user` e senha `live` e anote | O desktop abre. Marque "falhou" no H2.2, porque o login devia ser automático | | |
+| H2.4 | Olhe a área de trabalho (o fundo) | Nove ícones com os nomes dos atalhos, sem aviso de "atalho não confiável" e sem ponto de exclamação. Ícones de unidades da máquina virtual (por exemplo um disco com o nome da ISO, ou "Floppy Disk") podem aparecer junto: não contam | | |
+| H2.5 | Cronometre: quantos segundos do Enter do H2.1 até a barra aparecer | Um número. Anote em H8 | | |
+
+### H3: itens da definição de `docs/gui.md`
+
+Para cada linha: faça o que está escrito, compare com "O que deve aparecer" e marque. Para abrir o **terminal**, dê duplo clique no ícone **Terminal do Nexus OS** na área de trabalho. Nas linhas com comando, digite o comando e aperte Enter.
+
+| # | Item da definição | O que fazer | O que deve aparecer | Passou ou falhou | O que aconteceu e saída |
+| --- | --- | --- | --- | --- | --- |
+| H3.1 | 1. Login automático | Já visto no H2.2 | Nenhuma tela de login | | |
+| H3.2 | 2. Sessão gráfica ativa | No terminal: `loginctl list-sessions` | Uma linha com `user` e `seat0`. Depois `loginctl show-session $(loginctl list-sessions --no-legend \| awk '$3=="user"{print $1;exit}') -p Type -p State` imprime `Type=x11` e `State=active` | | |
+| H3.3 | 3. Barra e menu de aplicativos | Clique no botão **Nexus OS** no canto superior esquerdo | Um menu em inglês com **Terminal Emulator**, **File Manager**, **Web Browser**, **Settings**, **Accessories**, **Internet**, **Multimedia**, **Nexus OS** e **System**. Passe o mouse em **Nexus OS**: aparecem os nove atalhos | | |
+| H3.4 | 4. Gerenciador de janelas | Abra o terminal, arraste a barra de título para outro lugar, clique em minimizar (botão da esquerda no título), reabra pela barra e clique em maximizar | A janela se move, some, volta e ocupa a tela inteira | | |
+| H3.5 | 5. Gerenciador de arquivos | No menu **Nexus OS**, clique em **File Manager** | Uma janela (Thunar) com as pastas do `user` | | |
+| H3.6 | 6. Terminal gráfico | No terminal: `echo ok` | `ok` | | |
+| H3.7 | 7. Navegador | No menu **Nexus OS**, clique em **Web Browser** (ou em **Internet** e **Firefox ESR**) | A janela do Firefox abre (sem internet, ela mostra uma página de erro de conexão: isso é esperado). Feche a janela | | |
+| H3.8 | 8. Rede e vídeo | No terminal: `nm-connection-editor`. Depois, no menu, **Settings** e **Display** | O editor de conexões de rede abre (feche-o); a janela de configuração de vídeo mostra a resolução. O ícone de rede na bandeja pode não aparecer sem rede: anote | | |
+| H3.9 | 9. Sem erro de login | No terminal: `journalctl -b -u lightdm -p err --no-pager` | Nenhuma linha de erro (a saída termina logo depois de `-- No entries --` ou fica vazia) | | |
+
+### H4: identidade visual
+
+| # | O que fazer | O que deve aparecer | Passou ou falhou | O que aconteceu e saída |
+| --- | --- | --- | --- | --- |
+| H4.1 | Olhe o papel de parede | Fundo azul-escuro com pontos ligados por linhas e a marca (triângulo de três pontos com um ponto branco no centro) com o texto "Nexus OS" | | |
+| H4.2 | Olhe o botão do menu na barra | O texto **Nexus OS** e o ícone da marca | | |
+| H4.3 | Olhe a aparência das janelas | Tema claro (Greybird: barra de título cinza-clara) | | |
+| H4.4 | No terminal: `head -n 3 /etc/os-release` | `PRETTY_NAME` e `NAME` com **Debian** (o sistema continua Debian; só a identidade visual é do Nexus OS) | | |
+
+### H5: abrir cada atalho
+
+Na área de trabalho, dê **duplo clique** em cada ícone, na ordem. Para os de terminal, a janela mostra a saída, a linha `Código de saída: 0` e `Pressione Enter para fechar...`: aperte Enter para fechar. Depois do atalho **Laboratório Open vSwitch**, abra o terminal e rode `sudo nexus-sdn down` (o atalho só cria o laboratório).
+
+| # | Atalho | O que deve aparecer | Passou ou falhou | O que aconteceu e saída |
+| --- | --- | --- | --- | --- |
+| H5.1 | Terminal do Nexus OS | Uma janela de terminal | | |
+| H5.2 | Documentação do Nexus OS | O gerenciador de arquivos abre em `/usr/share/nexus-os/docs` e lista `manual.md`, `requisitos.md` e outros | | |
+| H5.3 | Gerenciador de máquinas virtuais | A janela **Gerenciador de máquinas virtuais** abre (pode levar 15 s) e lista uma conexão **QEMU/KVM**. Não crie nenhuma VM. Feche a janela | | |
+| H5.4 | Laboratório Open vSwitch | Terminal com `== Nexus OS: sudo nexus-sdn up ==` e `Código de saída: 0` | | |
+| H5.5 | VNF FRR: instanciar | Terminal com `OK:` e `Código de saída: 0` | | |
+| H5.6 | VNF FRR: estado | Terminal com `OK: VNF vnf1 rodando` e `Código de saída: 0` | | |
+| H5.7 | VNF FRR: remover | Terminal com `OK:` e `Código de saída: 0` | | |
+| H5.8 | Topologia Containerlab: criar | Terminal com a tabela de contêineres `clab-frr-duo-r1` e `clab-frr-duo-r2` em `running` e `Código de saída: 0` (leva até 1 min) | | |
+| H5.9 | Topologia Containerlab: remover | Terminal com `Código de saída: 0`. Depois, no terminal, `sudo docker ps -a` não lista nenhum contêiner | | |
+
+### H6: desligar
+
+No terminal: `sudo poweroff`. Se a tela parar pedindo ENTER, aperte Enter (comportamento conhecido da live, issue 34). Depois apague a VM (H1-A, passo 4) ou feche a janela do QEMU.
+
+### H7: como abrir uma issue de falha
+
+Valem as regras da Parte E. Diferenças para o desktop:
+
+- **Título:** `F3.18: <item do roteiro>: <resumo curto>`, por exemplo `F3.18: H5.3: virt-manager não abre`.
+- **Corpo:** os quatro blocos (Passos, Saída, Esperado, Ambiente). Em "Ambiente" informe: o ambiente escolhido em H0 (Hyper-V com a geração, QEMU ou VirtualBox), se tinha KVM, a RAM e os vCPU da VM, o SHA256 da ISO e o commit de `docs/manual.md`. Se puder, anexe uma captura de tela da janela com o problema (sem dado pessoal).
+- Uma issue por falha. Falha intermitente também vira issue, com o número de tentativas.
+- Antes de colar a saída, apague qualquer senha pessoal, chave, token, nome de usuário pessoal ou e-mail. O repositório é público.
+
+### H8: ficha do teste do desktop
+
+| Campo | Valor |
+| --- | --- |
+| Data do teste (DD/MM/AAAA) | |
+| Ambiente (Hyper-V com a geração, QEMU ou VirtualBox) e versão | |
+| Com KVM ou sem KVM (`ls -l /dev/kvm` no host) | |
+| RAM e vCPU da VM | |
+| SHA256 da ISO conferido (sim ou não) | |
+| Segundos até a barra aparecer (H2.5) | |
+| Commit de `docs/manual.md` (campo "Commit" da página no GitHub) | |
+| Resultado por parte (H2, H3, H4, H5: passou, passou com ressalvas ou falhou) | |
+| Resultado final | |
+
+### H9: o que devolver ao responsável pelo build
+
+1. A ficha H8 preenchida.
+2. As tabelas H2, H3, H4 e H5 com passou ou falhou e o que apareceu.
+3. Os números das issues abertas.
+4. O resultado final: **passou**, **passou com ressalvas** ou **falhou**.
+
+Com isso o responsável pelo build registra a execução do manual do desktop por uma segunda pessoa (F3.18).
