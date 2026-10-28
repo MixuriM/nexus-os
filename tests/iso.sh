@@ -55,7 +55,7 @@ qemu-system-x86_64 "${accel[@]}" -m "${NEXUS_ISO_MEM:-2048}" -smp 2 -cdrom "$iso
     -chardev "pipe,id=mon,path=$tmp/mon" -mon chardev=mon,mode=readline 2>"$tmp/qemu.err" &
 qpid=$!
 
-# O menu do isolinux espera uma tecla (timeout 0): manda Enter nos primeiros 60 s.
+# O menu do isolinux tem contagem de 5 s (timeout 50): manda Enter nos primeiros 60 s para adiantar o boot.
 start=$SECONDS
 while [ $((SECONDS - start)) -lt "$limit" ]; do
     kill -0 "$qpid" 2>/dev/null || fail "QEMU terminou antes do login: $(tail -n 3 "$tmp/qemu.err")"

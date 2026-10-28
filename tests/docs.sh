@@ -75,6 +75,19 @@ if [ -f docs/checklist-teste-documentacao.md ]; then
     grep -q '^## Parte H' docs/checklist-teste-documentacao.md || fail "docs/checklist-teste-documentacao.md sem a '## Parte H' (ambiente gráfico)"
 fi
 
+# Rodada 3 da RC2 (F3.17): programas incluídos, internet na VM do Hyper-V e documentação em HTML.
+if [ -f docs/gui.md ]; then
+    grep -qxF '## Programas incluídos' docs/gui.md || fail "docs/gui.md sem a seção '## Programas incluídos'"
+    for prog in LibreOffice Wireshark VLC GIMP Inkscape KeePassXC Mousepad Evince Ristretto Remmina; do
+        grep -qF "$prog" docs/gui.md || fail "docs/gui.md não cita o programa $prog"
+    done
+    grep -qF 'nexus-docs-html' docs/gui.md || fail "docs/gui.md não descreve a documentação em HTML (nexus-docs-html)"
+fi
+for arq in docs/manual.md docs/checklist-teste-documentacao.md README.md docs/hyperv.md; do
+    [ -f "$arq" ] || continue
+    grep -qF 'Connect-VMNetworkAdapter' "$arq" || fail "$arq sem o comando Connect-VMNetworkAdapter (internet na VM do Hyper-V)"
+done
+
 if [ "$erros" -ne 0 ]; then
     echo "FALHA: tests/docs.sh com $erros erro(s)" >&2
     exit 1

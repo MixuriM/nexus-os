@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Teste estático dos atalhos do desktop (F3.16): os 9 arquivos nexus-*.desktop existem no menu e na
+# Teste estático dos atalhos do desktop (F3.16): os 10 arquivos nexus-*.desktop existem no menu e na
 # área de trabalho (cópias iguais), passam em desktop-file-validate, têm chaves obrigatórias, texto em
 # português, Exec que aponta para um comando versionado ou do pacote, e nenhum fica ignorado pelo git.
 # Roda no Git Bash do Windows e em Linux. Uso: tests/atalhos.sh
@@ -18,7 +18,7 @@ area=$inc/etc/skel/Desktop
 esperados=(
     nexus-terminal nexus-virt-manager nexus-sdn-lab
     nexus-vnf-up nexus-vnf-status nexus-vnf-down
-    nexus-clab-deploy nexus-clab-destroy nexus-docs
+    nexus-clab-deploy nexus-clab-destroy nexus-docs nexus-configuracoes
 )
 
 valor() { grep -m1 "^$2=" "$1" | cut -d= -f2- | tr -d '\r'; }
@@ -52,8 +52,8 @@ for n in "${esperados[@]}"; do
             nexus-vnf) [ -f nfv/nexus-vnf.sh ] || fail "$f: nfv/nexus-vnf.sh ausente" ;;
             nexus-sdn) [ -f sdn/lab-ovs.sh ] || fail "$f: sdn/lab-ovs.sh ausente" ;;
             /usr/share/nexus-os/labs/*) [ -f "${w#/usr/share/nexus-os/}" ] || fail "$f: ${w#/usr/share/nexus-os/} ausente" ;;
-            /usr/share/nexus-os/docs) [ -d docs ] || fail "$f: pasta docs ausente" ;;
-            xfce4-terminal | virt-manager | thunar | containerlab | sudo) ;;
+            /usr/share/nexus-os/docs-html/*) [ -f "$inc/usr/local/bin/nexus-docs-html" ] || fail "$f: gerador nexus-docs-html não versionado" ;;
+            xfce4-terminal | virt-manager | thunar | firefox-esr | xfce4-settings-manager | containerlab | sudo) ;;
         esac
     done
 done
@@ -62,6 +62,24 @@ grep -qE '^\s*uri_default\s*=\s*"qemu:///system"' "$inc/etc/libvirt/libvirt.conf
     || fail "$inc/etc/libvirt/libvirt.conf sem uri_default = \"qemu:///system\""
 [ -f "$inc/etc/xdg/menus/applications-merged/nexus-os.menu" ] || fail "menu Nexus OS ausente (nexus-os.menu)"
 [ -f "$inc/usr/share/desktop-directories/nexus-os.directory" ] || fail "nexus-os.directory ausente"
+
+# Programas padrão por tipo de arquivo (mimeapps.list) e documentação em HTML offline.
+mime=$inc/etc/xdg/mimeapps.list
+if [ -f "$mime" ]; then
+    for par in text/markdown=org.xfce.mousepad.desktop text/plain=org.xfce.mousepad.desktop         application/pdf=org.gnome.Evince.desktop image/png=org.xfce.ristretto.desktop text/html=firefox-esr.desktop; do
+        grep -qxF "$par" "$mime" || fail "$mime sem $par"
+    done
+else
+    fail "mimeapps.list ausente: $mime"
+fi
+[ -f "$inc/usr/local/bin/nexus-docs-html" ] || fail "gerador da documentação em HTML ausente (nexus-docs-html)"
+lista=live-build/config/package-lists/nexus-desktop.list.chroot
+for pacote in mousepad evince ristretto file-roller galculator xfce4-screenshooter python3-markdown     libreoffice-writer libreoffice-calc libreoffice-impress vlc wireshark gimp inkscape keepassxc remmina     tcpdump iperf3 nmap firefox-esr-l10n-pt-br libreoffice-l10n-pt-br locales; do
+    grep -qxF "$pacote" "$lista" || fail "$pacote fora de $lista"
+done
+for pacote in thunderbird gparted; do
+    ! grep -qxF "$pacote" "$lista" || fail "$pacote não deveria estar em $lista (fora do escopo decidido)"
+done
 
 # Nenhum .desktop (nem o wrapper) pode estar ignorado pelo .gitignore.
 while IFS= read -r a; do
