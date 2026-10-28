@@ -20,6 +20,10 @@ svgs=(
     "$inc/usr/share/icons/hicolor/scalable/apps/nexus-os.svg"
     "$inc/usr/share/pixmaps/nexus-os-logo.svg"
 )
+# Ícones próprios dos 9 atalhos (um por atalho do menu e da área de trabalho).
+for i in terminal vm sdn vnf-up vnf-status vnf-down clab-up clab-down docs; do
+    svgs+=("$inc/usr/share/icons/hicolor/scalable/apps/nexus-$i.svg")
+done
 fundos=(
     "$inc/usr/share/backgrounds/nexus-os/papel-de-parede.png"
     "$inc/usr/share/backgrounds/nexus-os/tela-de-login.png"
@@ -30,8 +34,18 @@ configs=(
     "$inc/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml"
     "$inc/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml"
 )
-gerador=scripts/gerar-identidade.py
-todos=("${svgs[@]}" "${fundos[@]}" "${capturas[@]}" "${configs[@]}" "$gerador")
+# Arquivos que não são XML: tema GTK e das janelas, terminal, vídeo do Hyper-V, hooks e geradores.
+extras=(
+    "$inc/usr/share/themes/Nexus-Dark/index.theme"
+    "$inc/usr/share/themes/Nexus-Dark/gtk-3.0/gtk.css"
+    "$inc/usr/share/themes/Nexus-Dark/xfwm4/themerc"
+    "$inc/etc/xdg/xfce4/terminal/terminalrc"
+    "$inc/etc/X11/xorg.conf.d/20-hyperv.conf"
+    live-build/config/hooks/live/0600-nexus-identidade.hook.chroot
+    scripts/gerar-identidade.py
+    scripts/gerar-tema-xfwm4.py
+)
+todos=("${svgs[@]}" "${fundos[@]}" "${capturas[@]}" "${configs[@]}" "${extras[@]}")
 
 for f in "${todos[@]}" "$doc"; do
     [ -f "$f" ] || fail "arquivo ausente: $f"
@@ -48,7 +62,7 @@ if [ -f "$doc" ]; then
         lic=$(awk -F'|' '{ v = $5; gsub(/^[ \t`]+|[ \t`]+$/, "", v); print v }' <<<"$linha")
         [ "${#lic}" -ge 3 ] || fail "$f sem licença na tabela de $doc"
     done
-    for termo in Debian "Nexus OS" greybird-gtk-theme fonts-dejavu-core tango-icon-theme os-release; do
+    for termo in Debian "Nexus OS" greybird-gtk-theme papirus-icon-theme fonts-inter os-release; do
         grep -qF -- "$termo" "$doc" || fail "$doc não menciona '$termo'"
     done
 fi
@@ -96,16 +110,21 @@ greeter=${configs[0]}
 if [ -f "$greeter" ]; then
     grep -qF 'tela-de-login.png' "$greeter" || fail "$greeter não aponta para tela-de-login.png"
 fi
-grep -qF 'Nexus OS' "$inc/usr/share/backgrounds/nexus-os/tela-de-login.svg" 2>/dev/null || fail "tela-de-login.svg sem o texto 'Nexus OS'"
-grep -qF 'Nexus OS' "$inc/usr/share/pixmaps/nexus-os-logo.svg" 2>/dev/null || fail "nexus-os-logo.svg sem o texto 'Nexus OS'"
+grep -qF 'Nexus OS' "$inc/usr/share/backgrounds/nexus-os/tela-de-login.svg" 2>/dev/null || fail "tela-de-login.svg sem o nome 'Nexus OS'"
+# A logo dentro da ISO é a original do projeto, sem redesenho.
+cmp -s assets/logo-nexus-os.svg "$inc/usr/share/pixmaps/nexus-os-logo.svg" || fail "nexus-os-logo.svg difere de assets/logo-nexus-os.svg (a logo original)"
 grep -qF 'papel-de-parede.png' "${configs[1]}" 2>/dev/null || fail "${configs[1]} não aponta para papel-de-parede.png"
-grep -qF 'Greybird' "${configs[2]}" 2>/dev/null || fail "${configs[2]} sem o tema Greybird"
-hook=live-build/config/hooks/live/0500-nexus-servicos.hook.chroot
+grep -qF 'Nexus-Dark' "${configs[2]}" 2>/dev/null || fail "${configs[2]} sem o tema Nexus-Dark"
+grep -qF 'theme-name=Nexus-Dark' "$greeter" 2>/dev/null || fail "$greeter sem theme-name=Nexus-Dark"
+grep -qF 'kmsdev' "$inc/etc/X11/xorg.conf.d/20-hyperv.conf" 2>/dev/null || fail "20-hyperv.conf sem a opção kmsdev"
+hook=live-build/config/hooks/live/0600-nexus-identidade.hook.chroot
 grep -qF 'F3.17' "$hook" || fail "$hook sem as linhas da F3.17"
 grep -qF 'button-title' "$hook" || fail "$hook não define o título do botão do menu (Nexus OS)"
 grep -qx 'LIVE_USER_FULLNAME="Nexus OS"' "$inc/etc/live/config.conf.d/nexus.conf" || fail "nexus.conf sem LIVE_USER_FULLNAME=\"Nexus OS\""
 [ ! -e "$inc/etc/os-release" ] || fail "$inc/etc/os-release existe: a base continua Debian, o arquivo não pode mudar"
-grep -qxF greybird-gtk-theme live-build/config/package-lists/nexus-desktop.list.chroot || fail "greybird-gtk-theme fora de nexus-desktop.list.chroot"
+for pacote in papirus-icon-theme fonts-inter; do
+    grep -qxF "$pacote" live-build/config/package-lists/nexus-desktop.list.chroot || fail "$pacote fora de nexus-desktop.list.chroot"
+done
 
 # 5. Nada de identidade ignorado pelo .gitignore.
 for f in "${todos[@]}"; do
