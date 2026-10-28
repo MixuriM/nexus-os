@@ -21,34 +21,35 @@ Recomendação: **1536 MiB de RAM** e uma mídia (CD, DVD, pendrive ou ISO anexa
 
 ## Com ambiente gráfico
 
-Medido em 2026-10-27, **com KVM**, na ISO da RC2 (commit `7ddf021`, [rc2.md](rc2.md)), guest QEMU com 2 vCPU, `-vga std` e sem rede. As duas execuções completas do `nexus-smoke all` (8 testes, o último é o `desktop`) seguem o método abaixo: a primeira com 4096 MiB coleta o pico e a segunda, com a RAM recomendada, valida.
+Medido em 2026-10-28, **com KVM**, na ISO da RC2 (commit `007f7ba`, [rc2.md](rc2.md)), guest QEMU com 2 vCPU, `-vga std` e sem rede. As duas execuções completas do `nexus-smoke all` (8 testes, o último é o `desktop`) seguem o método abaixo: a primeira com 4096 MiB coleta o pico e a segunda, com a RAM recomendada, valida.
 
 | Item | Valor | Unidade | Como foi medido |
 | --- | --- | --- | --- |
-| Desktop: RAM em repouso | 854 | MiB | média de duas execuções, cada uma com 3 leituras de `free -m` (`used`) a partir de 30 s depois de a sessão ficar ativa: 848 e 859 MiB |
-| Desktop: RAM de pico | 1045 | MiB | maior `used` durante `nexus-smoke all` com 4096 MiB (8 testes, amostrado a cada 5 s) |
+| Desktop: RAM em repouso | 1044 | MiB | média de duas execuções, cada uma com 3 leituras de `free -m` (`used`) a partir de 30 s depois de a sessão ficar ativa: 1043 e 1045 MiB |
+| Desktop: RAM de pico | 1439 | MiB | maior `used` durante `nexus-smoke all` com 4096 MiB (8 testes, amostrado a cada 5 s) |
 | Desktop: RAM recomendada | 2048 | MiB | `ceil((pico + 512) / 512) * 512`, validada com `NEXUS_SMOKE_MEM=2048` (abaixo) |
 | Desktop: disco do root em memória | 27 | MiB | `df -m /` (overlay sobre tmpfs; a live não usa disco do guest); o Docker segue com 193 MiB |
-| Desktop: ISO (bytes) | 1268842496 | bytes | tamanho do arquivo (1210 MiB) |
-| Desktop: diferença da ISO para a RC1 (bytes) | 347144192 | bytes | 1268842496 menos 921698304 (+37,7%) |
+| Desktop: ISO (bytes) | 1295843328 | bytes | tamanho do arquivo (1236 MiB) |
+| Desktop: diferença da ISO para a RC1 (bytes) | 374145024 | bytes | 1295843328 menos 921698304 (+40,6%) |
 | Desktop: tempo até a sessão (s) | 20 | s | início do último processo do desktop (`xfce4-session`, `xfce4-panel`, `xfwm4`, `xfdesktop`) em segundos de uptime do guest: 20,4 e 20,1 |
 | Desktop: mínimo de RAM do tests/iso.sh (MiB) | 512 | MiB | `NEXUS_ISO_MEM`: 1024, 768 e 512 chegam ao `login:` em 33 s; valores abaixo de 512 não foram testados |
-| Desktop: mínimo de RAM dos smokes (MiB) | 1024 | MiB | `NEXUS_SMOKE_MEM` com o `all`: 1280 e 1024 passam, 768 falha |
-| Desktop: SHA256 | `0692c04a9d17a42b6d94c9591ea42b1c367ecd702f06552262d9eee9839c5520` | | `sha256sum` da ISO, o mesmo de [rc2.md](rc2.md) |
+| Desktop: mínimo de RAM dos smokes (MiB) | 1536 | MiB | `NEXUS_SMOKE_MEM` com o `all`: 1536 passa; 1280, 1024 e 768 falham |
+| Desktop: SHA256 | `a21a7eb9506646ad567c6c92a6bac0c32153be247face0a5a41839ddc319913c` | | `sha256sum` da ISO, o mesmo de [rc2.md](rc2.md) |
 
-Recomendação com o desktop: **2048 MiB de RAM** para a VM e uma mídia de pelo menos 1210 MiB. O desktop soma cerca de 58 MiB ao repouso medido na RC1 e 232 MiB ao pico (veja "Resultado").
+Recomendação com o desktop: **2048 MiB de RAM** para a VM e uma mídia de pelo menos 1236 MiB. O desktop soma 248 MiB ao repouso medido na RC1 (796 MiB) e 626 MiB ao pico (813 MiB), por causa do XFCE, do tema de ícones Papirus-Dark e da fonte Inter (veja "Resultado").
 
 ### Execuções completas do `all`
 
 | RAM do guest (MiB) | Resultado | Repouso | Pico |
 | --- | --- | --- | --- |
-| 4096 (coleta do pico) | `OK: 8 teste(s) sem falha em 126 s`, `desktop=42s` | 993 MiB | 1045 MiB |
-| 2048 (recomendada) | `OK: 8 teste(s) sem falha em 117 s`, `desktop=41s` | 756 MiB | 936 MiB |
-| 1280 | `OK` em 133 s, `desktop=45s` | 733 MiB | 932 MiB |
-| 1024 | `OK` em 228 s, `desktop=107s` | 732 MiB | 902 MiB |
+| 4096 (coleta do pico) | `OK: 8 teste(s) sem falha em 141 s`, `desktop=53s` | 1140 MiB | 1439 MiB |
+| 2048 (recomendada) | `OK: 8 teste(s) sem falha em 129 s`, `desktop=51s` | 867 MiB | 1296 MiB |
+| 1536 | `OK` em 165 s, `desktop=82s` | 835 MiB | 1319 MiB |
+| 1280 | `FALHA: NEXUS-SMOKE-DONE não apareceu em 400 s`; com limite de 900 s terminou com `DONE 8 1` e o teste `desktop` com erro | | |
+| 1024 | `FALHA: NEXUS-SMOKE-DONE não apareceu em 400 s` | | |
 | 768 | `FALHA: NEXUS-SMOKE-DONE não apareceu em 400 s` | | |
 
-Uma execução por valor. Com 1024 MiB o `all` passa, mas o `desktop` leva mais que o dobro do tempo (107 s contra 42 s com 4096 MiB): é o mínimo, não um valor confortável. O repouso de 993 MiB do primeiro `all` é lido ainda no fim do boot, com o desktop subindo; os 854 MiB acima são lidos com a sessão estável.
+Uma execução por valor. Com 1536 MiB o `all` passa, mas o `desktop` leva 82 s contra 51 s com 2048 MiB: é o mínimo, não um valor confortável. O repouso de 1140 MiB do primeiro `all` é lido ainda no fim do boot, com o desktop subindo; os 1044 MiB acima são lidos com a sessão estável. Na RC2 anterior (só com o tema Greybird e os ícones Tango) o `all` ainda passava com 1024 MiB; o tema de ícones e a fonte novos subiram o mínimo.
 
 ### Mínimo do `tests/iso.sh`
 
@@ -56,9 +57,9 @@ O `tests/iso.sh` só espera o `login:` na serial. Medido com `NEXUS_ISO_MEM`, um
 
 ### Limitações com o desktop
 
-- Medido só com KVM, em um ambiente (VM de build no Hyper-V). Sem KVM, o `desktop` do `all` passou uma vez na F3.15 (477 s no total, 1 vCPU, 2048 MiB), veja [gui.md](gui.md); o resto não foi repetido sem KVM.
+- Medido só com KVM, em um ambiente (VM de build no Hyper-V). Sem KVM, o smoke `desktop` passou uma vez na RC2 anterior (442 s no total, 1 vCPU, 2048 MiB), veja [rc2.md](rc2.md); o resto não foi repetido sem KVM.
 - Uma execução por valor de RAM; a RAM em repouso varia entre execuções (veja a issue 33).
-- O `tests/iso.sh` só chega ao `login:` na serial: não prova que a sessão gráfica sobe com 512 MiB. O mínimo que cobre a sessão e todos os componentes é o dos smokes, 1024 MiB.
+- O `tests/iso.sh` só chega ao `login:` na serial: não prova que a sessão gráfica sobe com 512 MiB. O mínimo que cobre a sessão e todos os componentes é o dos smokes, 1536 MiB.
 - Hyper-V (Geração 1 e 2), VirtualBox e vídeo real não foram medidos com o desktop.
 
 ## Método
