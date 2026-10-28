@@ -238,7 +238,7 @@ Para cada linha: digite o comando na ISO, compare com "O que deve aparecer" e ma
 | # | Comando | O que deve aparecer | Passou ou falhou | O que aconteceu e saída |
 | --- | --- | --- | --- | --- |
 | G3.29 | `sudo nexus-smoke all > /tmp/smoke.txt 2>&1; echo $?` (leva cerca de 70 s com KVM e vários minutos sem) | O `echo` imprime `0` | | |
-| G3.30 | `grep -a -e NEXUS-SMOKE-END -e NEXUS-SMOKE-DONE /tmp/smoke.txt` | Sete linhas `NEXUS-SMOKE-END <nome> 0` e `NEXUS-SMOKE-DONE 7 0` | | |
+| G3.30 | `grep -a -e NEXUS-SMOKE-END -e NEXUS-SMOKE-DONE /tmp/smoke.txt` | Oito linhas `NEXUS-SMOKE-END <nome> 0` e `NEXUS-SMOKE-DONE 8 0` | | |
 
 **Seção "Requisitos"**
 

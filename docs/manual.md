@@ -34,7 +34,7 @@ O build gera `dist/nexus-os-poc-amd64.iso` e o `.sha256`. A RC1 validada é a c�
 
 ## Iniciar a ISO
 
-Use pelo menos **1536 MiB de RAM** ([requisitos.md](requisitos.md)). A ISO tem boot BIOS (isolinux), então no Hyper-V use VM de Geração 1. Na tela do isolinux, aperte Enter.
+Use pelo menos **1536 MiB de RAM** com a ISO da RC1 e **2048 MiB** com a da RC2, que tem o desktop ([requisitos.md](requisitos.md)). A ISO tem boot BIOS (isolinux), então no Hyper-V use VM de Geração 1. Na tela do isolinux, aperte Enter.
 
 **QEMU no Linux** (com KVM se `/dev/kvm` existir; sem `-enable-kvm -cpu host` a emulação por software é bem mais lenta):
 
@@ -211,12 +211,13 @@ sudo nexus-smoke all > /tmp/smoke.txt 2>&1
 grep -a -e NEXUS-SMOKE-END -e NEXUS-SMOKE-DONE -e NEXUS-SMOKE-MEMPEAK /tmp/smoke.txt
 ```
 
-Saída esperada: sete linhas `NEXUS-SMOKE-END <nome> 0` e `NEXUS-SMOKE-DONE 7 0`. Este bloco não é executado por `tests/manual.sh`, porque o teste do manual já roda dentro do `nexus-smoke`. O bloco abaixo confere que o runner e a lista existem:
+Saída esperada: oito linhas `NEXUS-SMOKE-END <nome> 0` e `NEXUS-SMOKE-DONE 8 0`. Este bloco não é executado por `tests/manual.sh`, porque o teste do manual já roda dentro do `nexus-smoke`. O bloco abaixo confere que o runner e a lista existem:
 
 ```bash nexus-exec
 test -x /usr/local/bin/nexus-smoke
-[ "$(wc -l < /usr/share/nexus-os/tests/smoke.list)" -eq 7 ]
+[ "$(wc -l < /usr/share/nexus-os/tests/smoke.list)" -eq 8 ]
 grep -qx orquestracao /usr/share/nexus-os/tests/smoke.list
+grep -qx desktop /usr/share/nexus-os/tests/smoke.list
 ```
 
 Para rodar os smokes de fora, na VM de build, sem rede: `tests/iso-smoke.sh dist/nexus-os-rc1-amd64.iso all` ([integracao-iso.md](integracao-iso.md)).
@@ -371,7 +372,7 @@ Saída esperada: seis linhas `<atalho>: código 0`.
 
 ## Requisitos
 
-RAM recomendada 1536 MiB, mínimo de 896 MiB para o Docker carregar a imagem FRR; disco do guest não é usado (a live roda na memória). Tabela medida e método: [requisitos.md](requisitos.md).
+RAM recomendada 1536 MiB para o núcleo (RC1) e **2048 MiB com o desktop (RC2)**; o mínimo medido é 896 MiB sem desktop (o Docker precisa carregar a imagem FRR) e 1024 MiB com desktop (menos que isso o `all` falha). Disco do guest não é usado (a live roda na memória); a ISO da RC2 ocupa 1210 MiB de mídia. Tabelas medidas e método: [requisitos.md](requisitos.md).
 
 ## Solução de problemas
 

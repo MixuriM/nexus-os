@@ -131,7 +131,7 @@ RAM mínima medida com o XFCE (com KVM, 2 vCPU, uma execução por valor): o smo
 
 O mínimo medido com o desktop é **1024 MiB**; em 768 MiB o `containers` falha (como na ISO do núcleo, veja [requisitos.md](requisitos.md)). O `tests/iso.sh` com a ISO do XFCE passou com os 1024 MiB que ele usa: `OK: ISO chegou ao login` em 33 s, com KVM.
 
-Recomendação: manter `NEXUS_SMOKE_MEM=4096` (padrão). Para uso interativo, 2048 MiB como valor provisório; a RAM recomendada definitiva fica para a F3.18, que refaz `requisitos.md` com o `all` e o desktop ativo (os picos medidos na F3.15 e na F3.16 estão em "Medições da ISO"). O `tests/iso.sh` ganhou a variável `NEXUS_ISO_MEM` na F3.15 (padrão 2048 MiB).
+Recomendação: manter `NEXUS_SMOKE_MEM=4096` (padrão). Para uso interativo, 2048 MiB como valor provisório; a RAM recomendada definitiva é a da F3.18, medida na ISO da RC2 com o `all` e o desktop ativo: 2048 MiB ([requisitos.md](requisitos.md), seção "Com ambiente gráfico"; os picos da F3.15 e da F3.16 estão em "Medições da ISO"). O `tests/iso.sh` ganhou a variável `NEXUS_ISO_MEM` na F3.15 (padrão 2048 MiB).
 
 VMs de build:
 

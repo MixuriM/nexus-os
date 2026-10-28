@@ -55,7 +55,7 @@ O ícone de barra (`nexus-os`) e o tema Greybird foram a escolha mínima: o tema
 
 - **Login:** `/etc/lightdm/lightdm-gtk-greeter.conf` aponta `background` para `tela-de-login.png`, `theme-name` para Greybird e `default-user-image` para o ícone da marca. O nome "Nexus OS" está na própria imagem de fundo. Com o login automático (padrão da ISO) a tela de login não aparece; para vê-la, inicie com o parâmetro de boot `live-config.noautologin`.
 - **Sessão:** o `xfce4-desktop.xml` do `/etc/xdg` é o padrão do XFCE para qualquer usuário novo, inclusive o `user` que o live-config cria no boot; o `xsettings.xml` e o painel são ajustados no hook; o `xfwm4.xml` define o tema das janelas. O live-config só cria o usuário a partir do `/etc/skel` e não toca nesses arquivos de `/etc/xdg`: o smoke `desktop` confirma em boot limpo, como o `user` recém-criado, que o papel de parede, o tema Greybird, o título do menu e o nome completo são os do Nexus OS.
-- **Papel de parede em outros monitores:** o xfdesktop guarda uma configuração por monitor. O padrão cobre o monitor `Virtual-1` (o vídeo das VMs do QEMU) e os blocos `monitor0` e `monitor1`; o hook também registra o papel de parede como alternativa `desktop-background` do Debian, o que cobre o caminho padrão `/usr/share/images/desktop-base/default`.
+- **Papel de parede em outros monitores:** o xfdesktop guarda uma configuração por monitor. O padrão cobre o monitor `Virtual-1` (o vídeo das VMs do QEMU) e os blocos `monitor0` e `monitor1`; o hook também registra o papel de parede como alternativa `desktop-background` do Debian, o que cobre o caminho padrão `/usr/share/images/desktop-base/default` (conferido na ISO: `readlink -f` desse caminho dá o PNG do Nexus OS).
 - **Debian:** `/etc/os-release` não tem arquivo em `includes.chroot` (o `tests/identidade.sh` confere). O que o sistema mostra como "Debian" fora da barra e do login (por exemplo `/etc/os-release`, `hostname` e a barra do greeter) continua sendo o do pacote.
 
 ## Como regenerar as imagens
@@ -64,7 +64,7 @@ O `scripts/gerar-identidade.py` escreve os quatro SVG e converte os dois fundos 
 
 ```bash
 sudo apt-get install -y librsvg2-bin
-scripts/gerar-identidade.py
+python3 scripts/gerar-identidade.py
 ```
 
 A saída é determinística (a rede de pontos do fundo usa semente fixa). Depois de gerar, rode `tests/identidade.sh` e refaça a ISO.
