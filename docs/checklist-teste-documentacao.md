@@ -374,7 +374,7 @@ Para cada linha: faça o que está escrito, compare com "O que deve aparecer" e 
 | --- | --- | --- | --- | --- |
 | H4.1 | Olhe o papel de parede | Fundo azul-escuro com pontos ligados por linhas e a marca (triângulo de três pontos com um ponto branco no centro) com o texto "Nexus OS" | | |
 | H4.2 | Olhe o botão do menu na barra | O texto **Nexus OS** e o ícone da marca | | |
-| H4.3 | Olhe a aparência das janelas | Tema claro (Greybird: barra de título cinza-clara) | | |
+| H4.3 | Olhe a aparência das janelas | Tema escuro azul-marinho (Nexus-Dark): barra de título, menus e janelas na cor da logo, com ícones Papirus-Dark | | |
 | H4.4 | No terminal: `head -n 3 /etc/os-release` | `PRETTY_NAME` e `NAME` com **Debian** (o sistema continua Debian; só a identidade visual é do Nexus OS) | | |
 
 ### H5: abrir cada atalho

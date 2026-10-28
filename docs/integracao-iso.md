@@ -154,7 +154,7 @@ O nome `nexus-os-poc-amd64.iso` fica até o congelamento da RC1.
 
 Detalhes e problemas conhecidos em [nfv.md](nfv.md).
 
-RC2 (F3.17 e F3.18): identificação, build limpo e resultado do `tests/run-fase3.sh` em [rc2.md](rc2.md); requisitos com o desktop em [requisitos.md](requisitos.md). O smoke `desktop` foi estendido na F3.17: confere que o papel de parede do monitor ativo (`xfconf-query -c xfce4-desktop`, chave `workspace0/last-image`) aponta para `/usr/share/backgrounds/nexus-os/papel-de-parede.png`, que o tema GTK é Greybird, que o botão do menu da barra se chama "Nexus OS" e que o nome completo do `user` é "Nexus OS".
+RC2 (F3.17 e F3.18): identificação, build limpo e resultado do `tests/run-fase3.sh` em [rc2.md](rc2.md); requisitos com o desktop em [requisitos.md](requisitos.md). O smoke `desktop` foi estendido na F3.17: confere que o papel de parede do monitor ativo (`xfconf-query -c xfce4-desktop`, chave `workspace0/last-image`) aponta para `/usr/share/backgrounds/nexus-os/papel-de-parede.png`, que o tema GTK é Nexus-Dark (ícones Papirus-Dark e janelas Nexus-Dark), que o botão do menu da barra se chama "Nexus OS" e que o nome completo do `user` é "Nexus OS".
 
 ## Problemas conhecidos
 

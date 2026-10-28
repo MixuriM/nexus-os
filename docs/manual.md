@@ -259,7 +259,7 @@ A ISO tem boot BIOS e UEFI (`xorriso -indev <iso> -report_el_torito plain`), ent
 - Barra no alto: menu "Nexus OS" (ícone da marca) com todos os aplicativos, lista de janelas, relógio e a bandeja com o applet de rede.
 - Gerenciador de arquivos (Thunar), terminal gráfico (Xfce Terminal), navegador (Firefox ESR), configuração de rede (NetworkManager) e de vídeo (Configurações do Xfce).
 - Menu "Nexus OS" e nove atalhos na área de trabalho, descritos abaixo.
-- Papel de parede, tema Greybird e tela de login com a marca do Nexus OS. O sistema continua sendo o Debian: `/etc/os-release` não muda.
+- Papel de parede, tema escuro Nexus-Dark (na paleta da logo), ícones Papirus-Dark, fonte Inter e tela de login com a logo original do Nexus OS. O sistema continua sendo o Debian: `/etc/os-release` não muda.
 
 ### Atalhos
 
@@ -314,7 +314,7 @@ Identidade visual e base Debian:
 test -f /usr/share/backgrounds/nexus-os/papel-de-parede.png
 imagem=$(como_user xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image)
 [ "$(readlink -f "$imagem")" = /usr/share/backgrounds/nexus-os/papel-de-parede.png ]
-[ "$(como_user xfconf-query -c xsettings -p /Net/ThemeName)" = Greybird ]
+[ "$(como_user xfconf-query -c xsettings -p /Net/ThemeName)" = Nexus-Dark ]
 [ "$(como_user xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-title)" = "Nexus OS" ]
 grep -qx 'ID=debian' /etc/os-release
 ```
