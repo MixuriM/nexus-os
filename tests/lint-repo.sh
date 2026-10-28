@@ -62,7 +62,7 @@ done < <(grep -IliE -- "$padrao" "${alvo[@]}" || true)
 # 5. Sintaxe e shellcheck dos scripts (por extensão .sh ou por shebang)
 scripts=()
 for f in "${arquivos[@]}"; do
-    if [[ $f == *.sh ]] || [ "$(head -c 2 "$f")" = '#!' ]; then
+    if [[ $f == *.sh ]] || head -n 1 "$f" | grep -qE '^#!.*(^|/| )(ba)?sh( |$)'; then
         scripts+=("$f")
     fi
 done

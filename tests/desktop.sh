@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Teste do desktop dentro da ISO (F3.15 e F3.16): sem internet, o gerenciador de login está ativo, a
 # sessão gráfica do usuário "user" fica ativa, o desktop escolhido (XFCE) está rodando, os atalhos do
-# menu existem, são válidos e cada um abre e executa de verdade na sessão. Só para a ISO (nexus-smoke).
+# menu existem, são válidos e cada um abre e executa de verdade na sessão, e a identidade visual (papel de
+# parede, tema e título do menu do Nexus OS, F3.17) é a padrão do user. Só para a ISO (nexus-smoke).
 # Uso: sudo nexus-smoke desktop
 set -uo pipefail
 
@@ -99,6 +100,26 @@ done
 echo "área de trabalho: 9 atalhos executáveis e confiáveis"
 command -v gtk-launch >/dev/null || fail "gtk-launch não instalado"
 command -v xwininfo >/dev/null || fail "xwininfo não instalado (pacote x11-utils)"
+
+# Identidade visual (F3.17): a configuração padrão do user aponta para os arquivos do Nexus OS.
+papel=/usr/share/backgrounds/nexus-os/papel-de-parede.png
+[ -f "$papel" ] || fail "papel de parede do Nexus OS ausente: $papel"
+imagens=$(como_user xfconf-query -c xfce4-desktop -l | grep '/last-image$' || true)
+[ -n "$imagens" ] || fail "xfce4-desktop sem nenhuma propriedade last-image para $usuario"
+for p in $imagens; do
+    img=$(como_user xfconf-query -c xfce4-desktop -p "$p")
+    [ "$(readlink -f "$img")" = "$papel" ] || fail "$p aponta para '$img', esperado $papel"
+done
+mon=$(como_user xrandr --listmonitors | awk 'NR == 2 {print $NF}')
+img=$(como_user xfconf-query -c xfce4-desktop -p "/backdrop/screen0/monitor$mon/workspace0/last-image")
+[ "$(readlink -f "$img")" = "$papel" ] || fail "monitor $mon sem o papel de parede do Nexus OS (workspace0/last-image '$img')"
+tema=$(como_user xfconf-query -c xsettings -p /Net/ThemeName)
+[ "$tema" = Greybird ] || fail "tema GTK do $usuario é '$tema', esperado Greybird"
+titulo=$(como_user xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-title)
+[ "$titulo" = "Nexus OS" ] || fail "título do botão do menu é '$titulo', esperado Nexus OS"
+nome=$(getent passwd "$usuario" | cut -d: -f5 | cut -d, -f1)
+[ "$nome" = "Nexus OS" ] || fail "nome completo do $usuario é '$nome', esperado Nexus OS"
+echo "identidade: papel de parede $papel, tema $tema, menu '$titulo', nome '$nome'"
 
 # shellcheck disable=SC2317  # chamada pelo trap
 limpa() {

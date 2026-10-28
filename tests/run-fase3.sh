@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Executa em ordem os testes da Fase 3: lint-repo, docs, iso, iso-smoke (all), requisitos e manual.
+# Executa em ordem os testes da Fase 3: lint-repo, docs, gui-spec, atalhos, identidade, iso, iso-smoke (all),
+# requisitos e manual.
 # Para no primeiro erro com "FALHA:" e imprime um resumo OK/FALHA por teste.
 # Uso: tests/run-fase3.sh [iso]   (padrão: dist/nexus-os-poc-amd64.iso; precisa de qemu-system-x86 e xorriso)
 set -uo pipefail
@@ -7,7 +8,7 @@ set -uo pipefail
 raiz=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 iso=${1:-$raiz/dist/nexus-os-poc-amd64.iso}
 
-nomes=(lint-repo docs iso iso-smoke requisitos manual)
+nomes=(lint-repo docs gui-spec atalhos identidade iso iso-smoke requisitos manual)
 resumo=()
 
 for nome in "${nomes[@]}"; do
