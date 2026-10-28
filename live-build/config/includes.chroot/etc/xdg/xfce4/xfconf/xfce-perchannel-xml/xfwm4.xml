@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Tema das janelas padrão do Nexus OS (F3.17): o mesmo Greybird do tema GTK. -->
+<channel name="xfwm4" version="1.0">
+  <property name="general" type="empty">
+    <property name="theme" type="string" value="Greybird"/>
+  </property>
+</channel>

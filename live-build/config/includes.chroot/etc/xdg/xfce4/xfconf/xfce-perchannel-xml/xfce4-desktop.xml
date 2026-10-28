@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Papel de parede padrão do Nexus OS (F3.17). O xfdesktop lê um bloco por monitor (pelo nome, como o Virtual-1
+     das VMs, ou pelo número) e, dentro dele, um bloco por área de trabalho (workspace0 a workspace3). -->
+<channel name="xfce4-desktop" version="1.0">
+  <property name="backdrop" type="empty">
+    <property name="screen0" type="empty">
+      <property name="monitorVirtual-1" type="empty">
+        <property name="image-path" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        <property name="image-show" type="bool" value="true"/>
+        <property name="image-style" type="int" value="5"/>
+        <property name="last-image" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        <property name="last-single-image" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        <property name="workspace0" type="empty">
+          <property name="image-style" type="int" value="5"/>
+          <property name="last-image" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        </property>
+        <property name="workspace1" type="empty">
+          <property name="image-style" type="int" value="5"/>
+          <property name="last-image" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        </property>
+        <property name="workspace2" type="empty">
+          <property name="image-style" type="int" value="5"/>
+          <property name="last-image" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        </property>
+        <property name="workspace3" type="empty">
+          <property name="image-style" type="int" value="5"/>
+          <property name="last-image" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        </property>
+      </property>
+      <property name="monitor0" type="empty">
+        <property name="image-path" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        <property name="image-show" type="bool" value="true"/>
+        <property name="image-style" type="int" value="5"/>
+        <property name="last-image" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        <property name="last-single-image" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        <property name="workspace0" type="empty">
+          <property name="image-style" type="int" value="5"/>
+          <property name="last-image" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        </property>
+        <property name="workspace1" type="empty">
+          <property name="image-style" type="int" value="5"/>
+          <property name="last-image" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        </property>
+        <property name="workspace2" type="empty">
+          <property name="image-style" type="int" value="5"/>
+          <property name="last-image" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        </property>
+        <property name="workspace3" type="empty">
+          <property name="image-style" type="int" value="5"/>
+          <property name="last-image" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        </property>
+      </property>
+      <property name="monitor1" type="empty">
+        <property name="image-path" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        <property name="image-show" type="bool" value="true"/>
+        <property name="image-style" type="int" value="5"/>
+        <property name="last-image" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        <property name="last-single-image" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        <property name="workspace0" type="empty">
+          <property name="image-style" type="int" value="5"/>
+          <property name="last-image" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        </property>
+        <property name="workspace1" type="empty">
+          <property name="image-style" type="int" value="5"/>
+          <property name="last-image" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        </property>
+        <property name="workspace2" type="empty">
+          <property name="image-style" type="int" value="5"/>
+          <property name="last-image" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        </property>
+        <property name="workspace3" type="empty">
+          <property name="image-style" type="int" value="5"/>
+          <property name="last-image" type="string" value="/usr/share/backgrounds/nexus-os/papel-de-parede.png"/>
+        </property>
+      </property>
+    </property>
+  </property>
+</channel>

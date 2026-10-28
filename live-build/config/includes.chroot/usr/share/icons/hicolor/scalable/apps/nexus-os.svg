@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-labelledby="t">
+  <title id="t">Nexus OS</title>
+  <defs><linearGradient id="g" gradientUnits="userSpaceOnUse" x1="40" y1="216" x2="216" y2="40"><stop offset="0" stop-color="#c0489f"/><stop offset="1" stop-color="#3f8fe0"/></linearGradient></defs>
+  <rect width="256" height="256" rx="56" fill="#23253e"/>
+    <path d="M128.0 50.0L195.5 167.0L60.5 167.0Z" fill="none" stroke="url(#g)" stroke-width="6" stroke-linejoin="round" opacity=".55"/>
+    <line x1="128" y1="128" x2="128.0" y2="50.0" stroke="url(#g)" stroke-width="10" stroke-linecap="round"/>
+    <line x1="128" y1="128" x2="195.5" y2="167.0" stroke="url(#g)" stroke-width="10" stroke-linecap="round"/>
+    <line x1="128" y1="128" x2="60.5" y2="167.0" stroke="url(#g)" stroke-width="10" stroke-linecap="round"/>
+    <circle cx="128.0" cy="50.0" r="16" fill="url(#g)"/>
+    <circle cx="195.5" cy="167.0" r="16" fill="url(#g)"/>
+    <circle cx="60.5" cy="167.0" r="16" fill="url(#g)"/>
+    <circle cx="128" cy="128" r="22" fill="#ffffff"/>
+</svg>
