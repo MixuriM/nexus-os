@@ -114,12 +114,17 @@ mon=$(como_user xrandr --listmonitors | awk 'NR == 2 {print $NF}')
 img=$(como_user xfconf-query -c xfce4-desktop -p "/backdrop/screen0/monitor$mon/workspace0/last-image")
 [ "$(readlink -f "$img")" = "$papel" ] || fail "monitor $mon sem o papel de parede do Nexus OS (workspace0/last-image '$img')"
 tema=$(como_user xfconf-query -c xsettings -p /Net/ThemeName)
-[ "$tema" = Greybird ] || fail "tema GTK do $usuario é '$tema', esperado Greybird"
+[ "$tema" = Nexus-Dark ] || fail "tema GTK do $usuario é '$tema', esperado Nexus-Dark"
+icones=$(como_user xfconf-query -c xsettings -p /Net/IconThemeName)
+[ "$icones" = Papirus-Dark ] || fail "tema de ícones do $usuario é '$icones', esperado Papirus-Dark"
+janelas_tema=$(como_user xfconf-query -c xfwm4 -p /general/theme)
+[ "$janelas_tema" = Nexus-Dark ] || fail "tema das janelas do $usuario é '$janelas_tema', esperado Nexus-Dark"
+[ -f /usr/share/themes/Nexus-Dark/gtk-3.0/gtk.css ] || fail "tema Nexus-Dark ausente em /usr/share/themes"
 titulo=$(como_user xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-title)
 [ "$titulo" = "Nexus OS" ] || fail "título do botão do menu é '$titulo', esperado Nexus OS"
 nome=$(getent passwd "$usuario" | cut -d: -f5 | cut -d, -f1)
 [ "$nome" = "Nexus OS" ] || fail "nome completo do $usuario é '$nome', esperado Nexus OS"
-echo "identidade: papel de parede $papel, tema $tema, menu '$titulo', nome '$nome'"
+echo "identidade: papel de parede $papel, tema $tema, ícones $icones, janelas $janelas_tema, menu '$titulo', nome '$nome'"
 
 # shellcheck disable=SC2317  # chamada pelo trap
 limpa() {
