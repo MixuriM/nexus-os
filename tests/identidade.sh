@@ -80,7 +80,8 @@ for f in "${fundos[@]}" "${capturas[@]}"; do
     png_ok "$f" || { fail "sem assinatura PNG: $f"; continue; }
 done
 for f in "${fundos[@]}"; do
-    [ -f "$f" ] && png_ok "$f" || continue
+    [ -f "$f" ] || continue
+    png_ok "$f" || continue
     dim=$(png_dim "$f")
     [ "$dim" = "1920 1080" ] || fail "$f tem ${dim:-?} (esperado 1920 1080)"
 done

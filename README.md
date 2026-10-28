@@ -8,7 +8,7 @@
 
 ![Licença](https://img.shields.io/badge/licen%C3%A7a-GPL--3.0--or--later-blue)
 ![Base](https://img.shields.io/badge/base-Debian%2013%20(trixie)-a80030)
-![Estado](https://img.shields.io/badge/estado-RC1%20%2B%20desktop%20(pr%C3%A9-RC2)-purple)
+![Estado](https://img.shields.io/badge/estado-RC2-purple)
 
 [Estado atual](#estado-atual) · [Arquitetura](#arquitetura) · [Como gerar a ISO](#como-gerar-a-iso) · [Usar a ISO](#usar-a-iso-integrada) · [Requisitos](#requisitos-medidos-da-rc1) · [Testes](#testes) · [Documentação](#documentação)
 
@@ -24,7 +24,7 @@ Projeto Integrador acadêmico, em desenvolvimento.
 
 ## Estado atual
 
-A **RC1** é a primeira ISO integrada, só com o núcleo e sem ambiente gráfico ([docs/rc1.md](docs/rc1.md)). A ISO atual (pré-RC2) soma a ela o **desktop XFCE** com login automático do `user` e 9 atalhos para os componentes (F3.15 e F3.16, [docs/gui.md](docs/gui.md)); a identidade visual, os requisitos com desktop e o congelamento da RC2 ainda não foram feitos.
+A **RC1** é a primeira ISO integrada, só com o núcleo e sem ambiente gráfico ([docs/rc1.md](docs/rc1.md)). A **RC2** soma a ela o **desktop XFCE** com login automático do `user`, 9 atalhos para os componentes (F3.15 e F3.16, [docs/gui.md](docs/gui.md)) e a identidade visual do Nexus OS (F3.17, [docs/branding.md](docs/branding.md)); identificação, SHA256 e testes em [docs/rc2.md](docs/rc2.md), requisitos com desktop em [docs/requisitos.md](docs/requisitos.md). O congelamento da ISO e a tag são da Fase 4.
 
 | Componente | Versão na ISO | Como usar | Smoke test |
 | --- | --- | --- | --- |
@@ -38,7 +38,7 @@ A **RC1** é a primeira ISO integrada, só com o núcleo e sem ambiente gráfico
 
 Fora da ISO: OpenDaylight (opcional, só depois que o núcleo estiver validado) e GNS3 (apenas documentado em [docs/gns3.md](docs/gns3.md)).
 
-O desktop é o **XFCE** com `lightdm`, escolhido por medição. Na ISO ele sobe sozinho no login do `user`: a sessão já estava ativa 25 s depois do boot, com 840 MiB de RAM em repouso e ISO de 1260126208 bytes (com KVM; sem KVM o smoke `desktop` também passa, mais lento). Comparação dos candidatos, atalhos e medições em [docs/gui.md](docs/gui.md).
+O desktop é o **XFCE** com `lightdm`, escolhido por medição. Na ISO ele sobe sozinho no login do `user`: a sessão fica pronta 20 s depois do boot, com 854 MiB de RAM em repouso e ISO de 1268842496 bytes (com KVM; sem KVM o smoke `desktop` também passa, mais lento). Comparação dos candidatos, atalhos e medições em [docs/gui.md](docs/gui.md).
 
 ## Arquitetura
 
@@ -94,7 +94,7 @@ Preparo da VM: [docs/ambiente-de-build.md](docs/ambiente-de-build.md). Resultado
 
 ## Usar a ISO integrada
 
-1. Inicie a ISO numa VM com vídeo (testado: QEMU com KVM; o Hyper-V está descrito em [docs/rc1.md](docs/rc1.md)) com **2048 MiB de RAM** (valor provisório para uso interativo; o mínimo medido com o desktop é 1024 MiB, veja [docs/gui.md](docs/gui.md)) e a ISO como CD. Na tela do isolinux, aperte Enter. A ISO entra no desktop XFCE já logada como `user`.
+1. Inicie a ISO numa VM com vídeo (testado: QEMU com KVM; o Hyper-V está descrito em [docs/rc1.md](docs/rc1.md)) com **2048 MiB de RAM** (a recomendada com o desktop; o mínimo medido é 1024 MiB, veja [docs/requisitos.md](docs/requisitos.md)) e a ISO como CD. Na tela do isolinux, aperte Enter. A ISO entra no desktop XFCE já logada como `user`.
 2. Use o menu "Nexus OS" ou os ícones da área de trabalho, ou abra um terminal. Se a sessão pedir login: usuário `user` e senha `live` (credencial pública da Debian Live, de laboratório). O `sudo` não pede senha.
 3. Os atalhos chamam os comandos abaixo; no terminal use os comandos diretamente.
 
@@ -120,7 +120,18 @@ Medidos com KVM, em boot live com os serviços ativos (método e limitações em
 | Boot até `login:` | 27 s com KVM |
 | Build limpo | 516 s |
 
-Com o desktop (ISO pré-RC2, [docs/gui.md](docs/gui.md)): ISO de 1260126208 bytes, 840 MiB de RAM em repouso com a sessão ativa, `all` de 8 testes em 120 s com KVM. A `docs/requisitos.md` com o desktop ainda será refeita.
+## Requisitos medidos da RC2 (com desktop)
+
+Medidos com KVM, na ISO da RC2 ([docs/rc2.md](docs/rc2.md)); método e limitações em [docs/requisitos.md](docs/requisitos.md), seção "Com ambiente gráfico".
+
+| Item | Valor |
+| --- | --- |
+| RAM recomendada | **2048 MiB** (validada com o `all` de 8 testes, `OK` em 117 s) |
+| RAM em repouso e de pico | 854 MiB (sessão ativa) e 1045 MiB (guest de 4096 MiB) |
+| Mínimo de RAM dos smokes | 1024 MiB (o `all` passa, mais lento; 768 MiB falha) |
+| Mínimo de RAM do `tests/iso.sh` | 512 MiB (menor valor testado) |
+| ISO | 1268842496 bytes (1210 MiB), +347144192 bytes sobre a RC1 |
+| Sessão do XFCE pronta | 20 s depois do boot, com KVM |
 
 ## Testes
 
@@ -132,12 +143,13 @@ Cada script imprime `OK:` ou `FALHA:` e sai com código diferente de zero em fal
 | `tests/iso.sh <iso>` | SHA256 da ISO e boot no QEMU até o `login:` (RAM por `NEXUS_ISO_MEM`, padrão 2048 MiB) |
 | `tests/iso-smoke.sh <iso> <nome>\|all` | Inicia a ISO sem rede e roda dentro dela os 8 smokes: `sdn`, `virtualizacao`, `libvirt`, `containers`, `frr`, `nfv`, `orquestracao` e `desktop` (sessão do XFCE e os 9 atalhos executados). `NEXUS_SMOKE_KVM=0` força a emulação |
 | `tests/run-fase2.sh [iso]` | Verificação do repositório, boot e laboratórios de Open vSwitch, libvirt e FRR com Containerlab, parando no primeiro erro |
-| `tests/requisitos.sh` | Confere a tabela de requisitos e o SHA256 da RC1 |
-| `tests/docs.sh` | Documentos por componente, índice, links e seções do manual e do GNS3. Roda no Git Bash e no Linux |
+| `tests/requisitos.sh` | Confere as tabelas de requisitos (núcleo e com desktop) e o SHA256 da RC1 e da RC2 |
+| `tests/docs.sh` | Documentos por componente, do desktop e da RC2, índice, links e seções do manual (com blocos do desktop) e do GNS3. Roda no Git Bash e no Linux |
 | `tests/manual.sh <iso>` | Executa os blocos do [manual](docs/manual.md) dentro da ISO, sem rede |
 | `tests/atalhos.sh` | Confere os 9 atalhos `nexus-*.desktop` do desktop (menu, área de trabalho, validação). Roda no Git Bash e no Linux |
 | `tests/gui-spec.sh` | Confere `docs/gui.md`: candidatos, finalistas medidos com KVM e desktop escolhido. Roda no Git Bash e no Linux |
-| `tests/run-fase3.sh [iso]` | `lint-repo`, `docs`, `iso`, `iso-smoke all`, `requisitos` e `manual`, parando no primeiro erro |
+| `tests/identidade.sh` | Confere a identidade visual: SVG, PNG, capturas, licenças em `docs/branding.md` e o nome "Nexus OS". Roda no Git Bash e no Linux |
+| `tests/run-fase3.sh [iso]` | `lint-repo`, `docs`, `gui-spec`, `atalhos`, `identidade`, `iso`, `iso-smoke all`, `requisitos` e `manual`, parando no primeiro erro |
 
 Validação da RC1 (com KVM): `all` com 7 de 7 testes em 69 s (4096 MiB) e 73 s (1536 MiB). Numa VM do Hyper-V sem KVM, 6 de 7 na primeira execução, com uma falha intermitente do `libvirt` ([issue 35](https://github.com/MixuriM/nexus-os/issues/35)).
 Para testar a documentação do zero: [checklist](docs/checklist-teste-documentacao.md).
@@ -177,7 +189,7 @@ Acompanhadas como issues no GitHub.
 - Abaixo de cerca de 896 MiB de RAM o Docker não carrega a imagem FRR (issue 31).
 - O `nexus-smoke.service` executa como root o conteúdo de um CD com rótulo `NEXUS_SMOKE`; a decisão de removê-lo ou condicioná-lo fica para o congelamento da ISO (issue 32).
 - A RAM em repouso varia entre execuções (issue 33) e o desligamento da live pede ENTER (issue 34).
-- Identidade visual, requisitos de hardware com desktop e o congelamento da RC2 ainda não foram feitos; o desktop foi medido só com KVM em um ambiente (Hyper-V) e sem KVM uma vez, e os fluxos interativos (clique nos ícones, terminal esperando Enter) não foram exercitados.
+- O desktop foi medido só com KVM em um ambiente (Hyper-V) e sem KVM uma vez; o boot com desktop no Hyper-V e no VirtualBox, o papel de parede em monitores com outro nome que `Virtual-1` e os fluxos interativos (clique nos ícones, terminal esperando Enter) não foram exercitados: o roteiro humano está na parte H de [docs/checklist-teste-documentacao.md](docs/checklist-teste-documentacao.md). O congelamento da RC2 e a tag são da Fase 4.
 
 ## Fluxo de trabalho
 

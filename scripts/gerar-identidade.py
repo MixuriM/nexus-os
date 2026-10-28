@@ -7,7 +7,7 @@ live-build/config/includes.chroot e converte os dois fundos para PNG 1920x1080 c
 (pacote librsvg2-bin, Debian main). O texto "Nexus OS" usa a fonte DejaVu Sans Bold
 (pacote fonts-dejavu-core); o PNG já sai com o texto desenhado.
 
-Uso: scripts/gerar-identidade.py   (na raiz do repo; precisa de rsvg-convert e fonts-dejavu-core)
+Uso: python3 scripts/gerar-identidade.py   (na raiz do repo; precisa de rsvg-convert e fonts-dejavu-core)
 """
 import math
 import pathlib
