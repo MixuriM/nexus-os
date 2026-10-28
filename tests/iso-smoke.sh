@@ -96,7 +96,7 @@ ultimas() {
     tr -d '\r' <"$serial" | tail -n 15 >&2 || true
 }
 
-# O menu do isolinux espera uma tecla (timeout 0): manda Enter nos primeiros 60 s.
+# O menu do isolinux tem contagem de 5 s (timeout 50): manda Enter nos primeiros 60 s para adiantar o boot.
 start=$SECONDS
 done_line=
 while [ $((SECONDS - start)) -lt "$limit" ]; do

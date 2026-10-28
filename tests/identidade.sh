@@ -20,9 +20,15 @@ svgs=(
     "$inc/usr/share/icons/hicolor/scalable/apps/nexus-os.svg"
     "$inc/usr/share/pixmaps/nexus-os-logo.svg"
 )
-# Ícones próprios dos 9 atalhos (um por atalho do menu e da área de trabalho).
-for i in terminal vm sdn vnf-up vnf-status vnf-down clab-up clab-down docs; do
+# Ícones próprios dos 10 atalhos (um por atalho do menu e da área de trabalho).
+for i in terminal vm sdn vnf-up vnf-status vnf-down clab-up clab-down docs configuracoes; do
     svgs+=("$inc/usr/share/icons/hicolor/scalable/apps/nexus-$i.svg")
+done
+# Tema de ícones Nexus: os ícones padrão da área de trabalho (pasta pessoal, lixeira, unidades) no estilo dos próprios.
+tema_icones=$inc/usr/share/icons/Nexus
+for i in places/user-home places/user-trash places/user-trash-full devices/media-floppy devices/media-optical     devices/drive-optical devices/drive-removable-media devices/drive-harddisk devices/computer \
+    apps/org.xfce.thunar apps/system-file-manager; do
+    svgs+=("$tema_icones/scalable/$i.svg")
 done
 fundos=(
     "$inc/usr/share/backgrounds/nexus-os/papel-de-parede.png"
@@ -33,6 +39,7 @@ configs=(
     "$inc/etc/lightdm/lightdm-gtk-greeter.conf"
     "$inc/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml"
     "$inc/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml"
+    "$inc/etc/xdg/xfce4/panel/default.xml"
 )
 # Arquivos que não são XML: tema GTK e das janelas, terminal, vídeo do Hyper-V, hooks e geradores.
 extras=(
@@ -41,6 +48,14 @@ extras=(
     "$inc/usr/share/themes/Nexus-Dark/xfwm4/themerc"
     "$inc/etc/xdg/xfce4/terminal/terminalrc"
     "$inc/etc/X11/xorg.conf.d/20-hyperv.conf"
+    "$tema_icones/index.theme"
+    "$inc/usr/share/firefox-esr/distribution/policies.json"
+    live-build/config/bootloaders/splash.svg
+    live-build/config/bootloaders/syslinux_common/menu.cfg
+    live-build/config/bootloaders/syslinux_common/live.cfg.in
+    live-build/config/bootloaders/isolinux/isolinux.cfg
+    live-build/config/bootloaders/grub-pc/config.cfg
+    live-build/config/bootloaders/grub-pc/live-theme/theme.txt
     live-build/config/hooks/live/0600-nexus-identidade.hook.chroot
     scripts/gerar-identidade.py
     scripts/gerar-tema-xfwm4.py
@@ -79,7 +94,7 @@ xml_ok() {
     command -v xmllint >/dev/null || { echo "FALHA: sem python3, python nem xmllint para validar XML" >&2; exit 1; }
     xmllint --noout "$1" 2>/dev/null
 }
-for f in "${svgs[@]}" "${configs[@]:1}"; do
+for f in "${svgs[@]}" "${configs[@]:1}" live-build/config/bootloaders/splash.svg; do
     [ -f "$f" ] || continue
     xml_ok "$f" || fail "XML mal formado: $f"
 done
@@ -118,11 +133,49 @@ grep -qF 'Nexus-Dark' "${configs[2]}" 2>/dev/null || fail "${configs[2]} sem o t
 grep -qF 'theme-name=Nexus-Dark' "$greeter" 2>/dev/null || fail "$greeter sem theme-name=Nexus-Dark"
 grep -qF 'kmsdev' "$inc/etc/X11/xorg.conf.d/20-hyperv.conf" 2>/dev/null || fail "20-hyperv.conf sem a opção kmsdev"
 hook=live-build/config/hooks/live/0600-nexus-identidade.hook.chroot
+grep -qF 'purge -y light-locker' "$hook" || fail "$hook não remove o light-locker (a tela não deve bloquear)"
 grep -qF 'F3.17' "$hook" || fail "$hook sem as linhas da F3.17"
-grep -qF 'button-title' "$hook" || fail "$hook não define o título do botão do menu (Nexus OS)"
 grep -qx 'LIVE_USER_FULLNAME="Nexus OS"' "$inc/etc/live/config.conf.d/nexus.conf" || fail "nexus.conf sem LIVE_USER_FULLNAME=\"Nexus OS\""
+# Fundos sem faixas nos gradientes: ruído fino (feTurbulence) por cima.
+for f in papel-de-parede tela-de-login; do
+    grep -qF 'feTurbulence' "$inc/usr/share/backgrounds/nexus-os/$f.svg" 2>/dev/null || fail "$f.svg sem ruído feTurbulence (faixas nos gradientes)"
+done
+# Tema de ícones Nexus herda do Papirus-Dark e vira o padrão do desktop e do login.
+grep -qx 'Inherits=Papirus-Dark,hicolor' "$tema_icones/index.theme" 2>/dev/null || fail "$tema_icones/index.theme sem Inherits=Papirus-Dark,hicolor"
+grep -qxF 'icon-theme-name=Nexus' "$greeter" 2>/dev/null || fail "$greeter sem icon-theme-name=Nexus"
+grep -qF 'value="Nexus"' live-build/config/hooks/live/0600-nexus-identidade.hook.chroot || fail "hook 0600 não define IconThemeName Nexus"
+grep -qF 'XfdesktopIconView' "$inc/usr/share/themes/Nexus-Dark/gtk-3.0/gtk.css" 2>/dev/null || fail "gtk.css sem o estilo dos rótulos da área de trabalho (XfdesktopIconView)"
+# Barra estilo Windows: uma barra só, embaixo, com a lista de janelas abertas; sem seletor de áreas de trabalho.
+painel=${configs[3]}
+if [ -f "$painel" ]; then
+    grep -qF 'value="tasklist"' "$painel" || fail "$painel sem o plugin tasklist (janelas abertas)"
+    ! grep -qF 'value="pager"' "$painel" || fail "$painel ainda tem o seletor de áreas de trabalho (pager)"
+    [ "$(grep -c 'name="panel-[0-9]*" type="empty"' "$painel")" -eq 1 ] || fail "$painel deveria ter uma barra só"
+    grep -qF 'value="p=10;' "$painel" || fail "$painel com a barra fora da parte de baixo (p=10)"
+    grep -qF 'value="Nexus OS"' "$painel" || fail "$painel sem o título Nexus OS no botão do menu"
+    grep -qF 'name="button-icon" type="string" value="nexus-os"' "$painel" || fail "$painel sem o ícone nexus-os no botão do menu"
+fi
+grep -qF 'name="workspace_count" type="int" value="1"' "${configs[2]}" 2>/dev/null || fail "${configs[2]} sem workspace_count 1"
+# Menu de boot (syslinux e GRUB) com a identidade Nexus OS, sem capacete nem texto do Debian, e com contagem de 5 s.
+boot=live-build/config/bootloaders
+grep -qF 'Nexus OS' "$boot/syslinux_common/menu.cfg" 2>/dev/null || fail "$boot/syslinux_common/menu.cfg sem 'Nexus OS'"
+grep -qF 'Nexus OS' "$boot/syslinux_common/live.cfg.in" 2>/dev/null || fail "$boot/syslinux_common/live.cfg.in sem 'Nexus OS'"
+grep -qF 'Nexus OS' "$boot/grub-pc/live-theme/theme.txt" 2>/dev/null || fail "$boot/grub-pc/live-theme/theme.txt sem 'Nexus OS'"
+grep -qE '^timeout [1-9][0-9]*$' "$boot/isolinux/isolinux.cfg" 2>/dev/null || fail "$boot/isolinux/isolinux.cfg sem contagem (timeout 50)"
+grep -qxF 'set timeout=5' "$boot/grub-pc/config.cfg" 2>/dev/null || fail "$boot/grub-pc/config.cfg sem set timeout=5"
+for f in "$boot"/splash.svg "$boot"/syslinux_common/* "$boot"/grub-pc/live-theme/theme.txt; do
+    [ -f "$f" ] || continue
+    ! grep -qiE 'debian|live-build|live boot menu' "$f" || fail "$f cita Debian, live-build ou 'Live Boot Menu'"
+done
+# Idioma, teclado, fuso, nome da máquina e tela sem bloqueio (padrões do live-config e do Xorg).
+conf=$inc/etc/live/config.conf.d/nexus.conf
+for par in 'LIVE_LOCALES="pt_BR.UTF-8"' 'LIVE_TIMEZONE="America/Sao_Paulo"' 'LIVE_KEYBOARD_LAYOUTS="br"' 'LIVE_HOSTNAME="nexus-os"'; do
+    grep -qxF "$par" "$conf" 2>/dev/null || fail "$conf sem $par"
+done
+grep -qF 'XkbLayout' "$inc/etc/X11/xorg.conf.d/00-nexus-teclado.conf" 2>/dev/null || fail "00-nexus-teclado.conf sem XkbLayout (teclado ABNT2 no X)"
+grep -qF 'BlankTime' "$inc/etc/X11/xorg.conf.d/10-nexus-sem-bloqueio.conf" 2>/dev/null || fail "10-nexus-sem-bloqueio.conf sem BlankTime (tela sem apagar)"
 [ ! -e "$inc/etc/os-release" ] || fail "$inc/etc/os-release existe: a base continua Debian, o arquivo não pode mudar"
-for pacote in papirus-icon-theme fonts-inter; do
+for pacote in papirus-icon-theme fonts-inter xfce4-screenshooter mousepad; do
     grep -qxF "$pacote" live-build/config/package-lists/nexus-desktop.list.chroot || fail "$pacote fora de nexus-desktop.list.chroot"
 done
 
