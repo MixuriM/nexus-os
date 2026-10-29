@@ -303,7 +303,7 @@ Tempo estimado: 20 min para preparar a máquina e 1 h para os itens. Reserve a t
 | H0.2 | Uma máquina que rode a ISO com a RAM recomendada para a VM | O valor está em `docs/requisitos.md`, seção "Com ambiente gráfico", linha "Desktop: RAM recomendada" (em MiB). Se faltar RAM, use 4096 MiB e anote |
 | H0.3 | O repositório aberto no navegador, arquivo `docs/manual.md`, seção "Ambiente gráfico" | Navegador, na página do repositório no GitHub |
 
-Escolha **um** ambiente e anote qual na ficha H8: Hyper-V no Windows 11 Pro (siga H1-A), Linux com QEMU e `/dev/kvm` (siga H1-B) ou VirtualBox (só sem KVM, o mais lento: crie uma VM Linux de 64 bits com a RAM acima, 2 CPUs, sem disco, vídeo com 16 MB ou mais, a ISO no leitor óptico, e siga H2).
+Escolha **um** ambiente e anote qual na ficha H8: Hyper-V no Windows 11 Pro (siga H1-A), Linux com QEMU e `/dev/kvm` (siga H1-B) ou VirtualBox (só sem KVM, o mais lento: siga H1-C).
 
 ### H1-A: Hyper-V no Windows (PowerShell como administrador)
 
@@ -328,8 +328,25 @@ Escolha **um** ambiente e anote qual na ficha H8: Hyper-V no Windows 11 Pro (sig
    vmconnect.exe localhost $vm
    ```
 
-   O `Connect-VMNetworkAdapter` liga a VM à internet do Windows (`Default Switch`); sem ele o Firefox acusa `NS_ERROR_OFFLINE`. Se o comando acusar que a VM não tem adaptador de rede, rode antes `Add-VMNetworkAdapter -VMName $vm`. Deve abrir uma janela com o menu de boot do Nexus OS. Se algum comando der erro, copie a mensagem e abra uma issue (H7). Se preferir a Geração 2, anote na ficha H8 que usou a Geração 2: ela não foi validada pelo projeto.
+   O `Connect-VMNetworkAdapter` liga a VM à internet do Windows (`Default Switch`); sem ele o Firefox acusa `NS_ERROR_OFFLINE`. Se o comando acusar que a VM não tem adaptador de rede, rode antes `Add-VMNetworkAdapter -VMName $vm`. Deve abrir uma janela com o menu de boot do Nexus OS. Se algum comando der erro, copie a mensagem e abra uma issue (H7). Para usar a Geração 2 (UEFI), siga a variante abaixo no lugar deste passo; ela está em validação pendente (rodada 1), anote na ficha H8 qual geração usou.
 4. Ao terminar tudo, apague a VM (PowerShell): `Stop-VM -Name nexus-rc2-lab -TurnOff` e depois `Remove-VM -Name nexus-rc2-lab -Force`.
+
+**Variante Geração 2 (validação pendente, rodada 1).** No passo 3, troque o bloco por este (PowerShell como administrador, um comando por vez; os cmdlets e parâmetros conferem com a documentação da Microsoft, módulo Hyper-V, e o `Set-VMFirmware` só existe para a Geração 2):
+
+```powershell
+$vm = "nexus-rc2-lab"
+New-VM -Name $vm -Generation 2 -MemoryStartupBytes 2560MB -NoVHD
+Set-VMProcessor -VMName $vm -Count 2
+Set-VMMemory -VMName $vm -DynamicMemoryEnabled $false -StartupBytes 2560MB
+Set-VMFirmware -VMName $vm -EnableSecureBoot Off
+Add-VMDvdDrive -VMName $vm -Path "C:\HyperV\nexus-os-rc2-amd64.iso"
+Set-VMFirmware -VMName $vm -FirstBootDevice (Get-VMDvdDrive -VMName $vm)
+Connect-VMNetworkAdapter -VMName $vm -SwitchName "Default Switch"
+Start-VM -Name $vm
+vmconnect.exe localhost $vm
+```
+
+`-EnableSecureBoot Off` é obrigatório: com a Secure Boot padrão do Hyper-V a ISO não inicia ([hyperv.md](hyperv.md)). `-NoVHD` deixa a VM sem disco, como na Geração 1. A Geração 2 não tem controlador de disquete nem vídeo legado, então a janela pode abrir em resolução diferente de 1024x768: anote a resolução na ficha H8 (a mesma regra vale para o passo 4, que serve às duas gerações).
 
 ### H1-B: Linux com QEMU
 
@@ -343,6 +360,30 @@ Escolha **um** ambiente e anote qual na ficha H8: Hyper-V no Windows 11 Pro (sig
 
    Para ter internet na VM, acrescente `-nic user` ao comando. Deve abrir uma janela do QEMU com o menu de boot do Nexus OS.
 
+### H1-C: VirtualBox (sem KVM, o mais lento)
+
+Versão do manual conferida: VirtualBox 7.2 ([hyperv.md](hyperv.md) cita a 7.2.20). Com o hypervisor do Windows ligado, o VirtualBox roda sobre o Hyper-V e fica ainda mais lento; não deixe o Hyper-V rodando outra VM ao mesmo tempo. A virtualização aninhada fica **desligada** (`--nested-hw-virt off`): em CPU AMD o KVM aninhado derruba a VM (issue 25). Por isso a VM não tem `/dev/kvm`.
+
+1. Confira o SHA256 da ISO como em H1-A, passo 2 (o arquivo em `C:\HyperV`).
+2. Crie a VM. Onde: PowerShell (não precisa ser administrador); o `VBoxManage.exe` fica em `C:\Program Files\Oracle\VirtualBox`:
+
+   ```powershell
+   $vb = "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe"
+   $vm = "nexus-rc2-vbox"
+   & $vb createvm --name $vm --platform-architecture=x86 --ostype Debian_64 --register
+   & $vb modifyvm $vm --memory 2560 --cpus 2 --vram 128 --graphicscontroller vmsvga --firmware bios --nested-hw-virt off
+   & $vb modifyvm $vm --boot1 dvd --boot2 none --boot3 none --boot4 none --nic1 nat
+   & $vb storagectl $vm --name IDE --add ide
+   & $vb storageattach $vm --storagectl IDE --port 0 --device 0 --type dvddrive --medium "C:\HyperV\nexus-os-rc2-amd64.iso"
+   ```
+
+   Troque `2560` pela RAM de H0.2 se ela for maior. Sem disco: o live roda da ISO. Se `--platform-architecture` ou outra opção der erro, rode `& $vb modifyvm --help`, copie a mensagem e abra uma issue (H7).
+3. Inicie: `& $vb startvm $vm --type gui`. Deve abrir a janela do VirtualBox com o menu de boot do Nexus OS. Siga H2.
+4. Para o teste `sudo nexus-smoke all` (G3.29 do manual), o teste `desktop` exige **ausência de rota padrão**: desconecte o cabo da rede antes, com `& $vb controlvm $vm setlinkstate1 off` (e `on` para reconectar; também há `--cable-connected1 on|off` no `modifyvm`, com a VM desligada). Sem KVM os smokes são lentos: medido em QEMU sem KVM, só o `desktop` levou 782 s (1196 s com o boot); os demais não foram medidos sem KVM, o `all` leva bem mais que o `desktop`: espere e anote o tempo total. Para o restante do roteiro (H2 a H6) a rede NAT pode ficar conectada (o Firefox abre páginas externas).
+5. Ao terminar: `& $vb controlvm $vm poweroff` e depois `& $vb unregistervm $vm --delete`.
+
+Fonte dos comandos: manual do VirtualBox 7.2, capítulo VBoxManage (`createvm`, `modifyvm`, `storagectl`, `storageattach`, `startvm`, `controlvm`, `unregistervm`). Validação pendente: o projeto ainda não executou o VirtualBox com esta ISO (rodada 2).
+
 ### H2: esperar o desktop
 
 | # | O que fazer | O que deve aparecer | Passou ou falhou | O que aconteceu e saída |
@@ -350,7 +391,7 @@ Escolha **um** ambiente e anote qual na ficha H8: Hyper-V no Windows 11 Pro (sig
 | H2.1 | No menu de boot (fundo azul-escuro com a logo do Nexus OS e a entrada **Iniciar o Nexus OS**), aperte **Enter** ou espere os 5 s da contagem. O menu **não** deve mostrar o texto "Debian GNU/Linux" nem o capacete do live-build | Mensagens de boot e, depois, uma tela azul-escura com losangos finos e a logo do Nexus OS no centro (o papel de parede). Com KVM leva cerca de 40 s; sem KVM, vários minutos | | |
 | H2.2 | Não digite nada: espere até a barra aparecer na **parte de baixo** da tela | Uma barra escura de ponta a ponta embaixo, como a do Windows: o botão **Nexus OS** (com o ícone da marca) à esquerda, ícones de lançamento (terminal, arquivos, Firefox, máquinas virtuais, configurações), o relógio e o usuário à direita. Nada de barra em cima e nada de quatro quadradinhos de áreas de trabalho. **Não** deve pedir usuário nem senha (o login é automático) | | |
 | H2.3 | Se aparecer uma tela de login em vez do desktop, entre com usuário `user` e senha `live` e anote | O desktop abre. Marque "falhou" no H2.2, porque o login devia ser automático | | |
-| H2.4 | Olhe a área de trabalho (o fundo) | Dez ícones com os nomes dos atalhos, sem aviso de "atalho não confiável" e sem ponto de exclamação, e os ícones **Pasta pessoal**, **Lixeira** e, na VM, o disco da ISO e o "Disquete" (se a VM tiver um), todos no mesmo estilo (quadrado azul-escuro com contorno colorido). Os nomes ficam sobre o fundo, sem caixa escura. Os ícones de unidades da máquina virtual não contam como atalhos (abrir o "Disco Disquete" da Geração 1 do Hyper-V dá `Can't open blockdev`: erro conhecido, anote e siga) | | |
+| H2.4 | Olhe a área de trabalho (o fundo) | Dez ícones com os nomes dos atalhos, sem aviso de "atalho não confiável" e sem ponto de exclamação, e os ícones **Pasta pessoal**, **Lixeira** e, na VM, o disco da ISO, todos no mesmo estilo (quadrado azul-escuro com contorno colorido). Os nomes ficam sobre o fundo, sem caixa escura. Os ícones de unidades da máquina virtual não contam como atalhos. **Não** deve haver ícone "Disco Disquete" (mesmo na Geração 1 do Hyper-V) | | |
 | H2.5 | Cronometre: quantos segundos do Enter do H2.1 até a barra aparecer | Um número. Anote em H8 | | |
 
 ### H3: itens da definição de `docs/gui.md`
