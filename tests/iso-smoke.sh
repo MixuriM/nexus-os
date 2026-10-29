@@ -5,6 +5,7 @@
 # Uso: tests/iso-smoke.sh [--extra arq.sh]... <iso> <nome[,nome]...|all>
 # Ambiente: NEXUS_SMOKE_LIMIT (segundos), NEXUS_SMOKE_MEM (MiB, padrão 4096), NEXUS_SMOKE_SMP (vCPU, padrão 2),
 # NEXUS_SMOKE_KVM=0 (força a emulação por software mesmo com /dev/kvm),
+# NEXUS_SMOKE_FLOPPY=0 (não anexa o disquete vazio; padrão 1, reproduz o hardware do Hyper-V Geração 1),
 # NEXUS_SMOKE_SERIAL (arquivo onde guardar a serial inteira, para diagnóstico).
 set -euo pipefail
 
@@ -48,6 +49,8 @@ smp=${NEXUS_SMOKE_SMP:-2}
 [[ $limit =~ ^[0-9]+$ ]] || fail "NEXUS_SMOKE_LIMIT inválido: $limit"
 [[ $mem =~ ^[0-9]+$ ]] || fail "NEXUS_SMOKE_MEM inválido: $mem"
 [[ $smp =~ ^[0-9]+$ ]] || fail "NEXUS_SMOKE_SMP inválido: $smp"
+floppy=${NEXUS_SMOKE_FLOPPY:-1}
+[[ $floppy =~ ^[01]$ ]] || fail "NEXUS_SMOKE_FLOPPY inválido: $floppy"
 
 tmp=$(mktemp -d)
 qpid=
@@ -75,6 +78,13 @@ done
 xorriso -as mkisofs -quiet -V NEXUS_SMOKE -r -J -o "$tmp/smoke.iso" "$tmp/cd" >/dev/null 2>"$tmp/xorriso.err" \
     || fail "xorriso não criou o CD: $(tail -n 3 "$tmp/xorriso.err")"
 
+# Disquete vazio de 1440 KiB, como o controlador de disquete do Hyper-V Geração 1.
+floppy_args=()
+if [ "$floppy" = 1 ]; then
+    truncate -s 1440K "$tmp/floppy.img"
+    floppy_args=(-drive "if=floppy,format=raw,file=$tmp/floppy.img")
+fi
+
 serial="$tmp/serial.log"
 : >"$serial"
 # Monitor do QEMU por FIFOs dentro do mktemp (modo 0700): só o usuário que roda o teste alcança.
@@ -87,7 +97,7 @@ dpid=$!
 qemu-system-x86_64 "${accel[@]}" -m "$mem" -smp "$smp" \
     -drive "file=$iso,media=cdrom,readonly=on,index=2" \
     -drive "file=$tmp/smoke.iso,media=cdrom,readonly=on,index=3" \
-    -boot d -nic none -vga std -display none -serial "file:$serial" \
+    "${floppy_args[@]}" -boot d -nic none -vga std -display none -serial "file:$serial" \
     -chardev "pipe,id=mon,path=$tmp/mon" -mon chardev=mon,mode=readline 2>"$tmp/qemu.err" &
 qpid=$!
 
