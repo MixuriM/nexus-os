@@ -135,7 +135,7 @@ Recomendação: manter `NEXUS_SMOKE_MEM=4096` (padrão). Para uso interativo, 20
 
 VMs de build:
 
-- Hyper-V: a ISO de teste tem boot BIOS (isolinux) e UEFI (`/boot/grub/efi.img`), conferido com `xorriso -indev <iso> -report_el_torito plain`. Isso permite uma VM de Geração 2; o boot nela e o Secure Boot não foram validados.
+- Hyper-V: a ISO de teste tem boot BIOS (isolinux) e UEFI (`/boot/grub/efi.img`), conferido com `xorriso -indev <iso> -report_el_torito plain`. Isso permite uma VM de Geração 2; o boot nela, com a Secure Boot desligada, foi validado em 29/10/2026 (H2 a H6 do checklist); com a Secure Boot ligada não foi testado.
 - VirtualBox: sem KVM (em CPU AMD o KVM aninhado derruba a VM, veja [integracao-iso.md](integracao-iso.md)); o desktop não foi validado lá.
 
 ## Impacto nos requisitos
@@ -251,7 +251,7 @@ Mutações (4 de 4, com cópia de `tests/desktop.sh` por `--extra`, sem rebuild;
 - Os números do passo A (candidatos) são relativos ao estado da VM de build (Docker, QEMU e outros já instalados) e usam `--no-install-recommends`; por isso a sanidade com `xorg` e o applet de rede está acima. A medição que decide é a do passo B, em ISO.
 - Item 8 da definição: o `nm-applet` está em execução na ISO com desktop, mas o ícone não aparece na captura (sem rede). Foi verificado por processo, não por clique; o ícone com o desktop em VM com rede não foi conferido.
 - Item 9: o smoke `desktop` confere que `journalctl -b -u lightdm -p err` está vazio, além da sessão `active` e do `lightdm` ativo. Os arquivos de `/var/log/lightdm` não são lidos.
-- Boot em Hyper-V Geração 2, Secure Boot e VirtualBox não foram validados (veja "Sessão sem janela"). Na Geração 1, a ISO de SHA256 `c1a1d5c2...0eba` subiu em 28/10/2026 em janela de 1024x768 (limite do vídeo da Geração 1: use tela cheia ou outro ambiente) e mostrava o ícone "Disco Disquete", que dava erro ao ser aberto; o bloqueio do módulo `floppy` o remove na ISO atual, conferido no QEMU com disquete virtual (`tests/desktop.sh`) e ainda não repetido no Hyper-V Geração 1. O botão "Monitor" sem ícone visto na barra numa captura em tela cheia não apareceu no QEMU e segue a investigar no Hyper-V (a janela e o processo dono saem de `xwininfo -root -tree` e `xprop`).
+- VirtualBox e a Secure Boot ligada não foram validados (veja "Sessão sem janela"); o Hyper-V Geração 2 com a Secure Boot desligada foi validado em 29/10/2026 (H2 a H6 do checklist). Na Geração 1, a ISO de SHA256 `c1a1d5c2...0eba` subiu em 28/10/2026 em janela de 1024x768 (limite do vídeo da Geração 1: use tela cheia ou outro ambiente) e mostrava o ícone "Disco Disquete", que dava erro ao ser aberto; o bloqueio do módulo `floppy` o remove na ISO atual, conferido no QEMU com disquete virtual (`tests/desktop.sh`) e ainda não repetido no Hyper-V Geração 1. O botão "Monitor" sem ícone visto na lista de janelas da barra numa captura de 28/10/2026 não apareceu no QEMU nem na rodada 1 da Geração 2 e segue a investigar (a janela e o processo dono saem de `xwininfo -root -tree` e `xprop`).
 - O tempo "até a sessão" é o `uptime` do guest: não inclui firmware nem o menu do isolinux. O tempo medido no host, do início do QEMU até o marcador, ficou entre 33 s e 38 s.
 - A RAM do 768 MiB foi testada em uma execução só, e o 3072 MiB e o 896 MiB não tiveram a sessão medida com o XFCE.
 - `all` com o desktop foi executado na F3.15 e na F3.16 (8 testes, veja "Medições da ISO"). O 768 MiB, o 896 MiB e o 3072 MiB ainda não foram testados com os atalhos.

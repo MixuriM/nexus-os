@@ -328,10 +328,10 @@ Escolha **um** ambiente e anote qual na ficha H8: Hyper-V no Windows 11 Pro (sig
    vmconnect.exe localhost $vm
    ```
 
-   O `Connect-VMNetworkAdapter` liga a VM à internet do Windows (`Default Switch`); sem ele o Firefox acusa `NS_ERROR_OFFLINE`. Se o comando acusar que a VM não tem adaptador de rede, rode antes `Add-VMNetworkAdapter -VMName $vm`. Deve abrir uma janela com o menu de boot do Nexus OS. Se algum comando der erro, copie a mensagem e abra uma issue (H7). Para usar a Geração 2 (UEFI), siga a variante abaixo no lugar deste passo; ela está em validação pendente (rodada 1), anote na ficha H8 qual geração usou.
+   O `Connect-VMNetworkAdapter` liga a VM à internet do Windows (`Default Switch`); sem ele o Firefox acusa `NS_ERROR_OFFLINE`. Se o comando acusar que a VM não tem adaptador de rede, rode antes `Add-VMNetworkAdapter -VMName $vm`. Deve abrir uma janela com o menu de boot do Nexus OS. Se algum comando der erro, copie a mensagem e abra uma issue (H7). Para usar a Geração 2 (UEFI), siga a variante abaixo no lugar deste passo; ela foi validada em 29/10/2026 (H2 a H6 passaram, 22 s até a barra), anote na ficha H8 qual geração usou.
 4. Ao terminar tudo, apague a VM (PowerShell): `Stop-VM -Name nexus-rc2-lab -TurnOff` e depois `Remove-VM -Name nexus-rc2-lab -Force`.
 
-**Variante Geração 2 (validação pendente, rodada 1).** No passo 3, troque o bloco por este (PowerShell como administrador, um comando por vez; os cmdlets e parâmetros conferem com a documentação da Microsoft, módulo Hyper-V, e o `Set-VMFirmware` só existe para a Geração 2):
+**Variante Geração 2 (validada em 29/10/2026).** No passo 3, troque o bloco por este (PowerShell como administrador, um comando por vez; os cmdlets e parâmetros conferem com a documentação da Microsoft, módulo Hyper-V, e o `Set-VMFirmware` só existe para a Geração 2):
 
 ```powershell
 $vm = "nexus-rc2-lab"
