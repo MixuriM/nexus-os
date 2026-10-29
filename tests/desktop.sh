@@ -161,7 +161,26 @@ done
 for h in index manual; do [ -f "/usr/share/nexus-os/docs-html/$h.html" ] || fail "documentação em HTML ausente em /usr/share/nexus-os/docs-html"; done
 id -nG "$usuario" | tr ' ' '\n' | grep -qx wireshark || fail "$usuario fora do grupo wireshark (captura sem root)"
 { [ -n "$(getcap /usr/bin/dumpcap 2>/dev/null)" ] || [ -u /usr/bin/dumpcap ]; } || fail "dumpcap sem permissão de captura para o grupo wireshark"
+# Disquete virtual (Hyper-V Geração 1): o módulo floppy fica bloqueado, sem /dev/fd0 e sem unidade na sessão.
+conf_disquete=/etc/modprobe.d/nexus-os-sem-disquete.conf
+[ -f "$conf_disquete" ] || fail "$conf_disquete ausente (bloqueio do módulo floppy)"
+grep -qx 'blacklist floppy' "$conf_disquete" || fail "$conf_disquete sem 'blacklist floppy'"
+grep -qx 'install floppy /bin/false' "$conf_disquete" || fail "$conf_disquete sem 'install floppy /bin/false'"
+! lsmod | awk '$1 == "floppy" {f = 1} END {exit !f}' || fail "módulo floppy carregado"
+! compgen -G '/dev/fd[0-9]*' >/dev/null || fail "/dev/fd0 existe: $(compgen -G '/dev/fd[0-9]*' | tr '\n' ' ')"
+unidades=$(como_user gio mount -l 2>&1)
+! grep -qiE 'floppy|disquete|fd0' <<<"$unidades" || fail "a sessão lista disquete: ${unidades//$'\n'/|}"
+
+# LibreOffice: sem o aviso de primeira execução (WhatsNew) e sem a dica do dia, no perfil padrão do user.
+perfil_lo=$casa/.config/libreoffice/4/user/registrymodifications.xcu
+[ -f "$perfil_lo" ] || fail "perfil padrão do LibreOffice ausente: $perfil_lo"
+[ "$(stat -c %U "$perfil_lo")" = "$usuario" ] || fail "$perfil_lo não pertence a $usuario"
+for chave in '/org.openoffice.Setup/Product|WhatsNew' '/org.openoffice.Office.UI.Infobar/Enabled|WhatsNew' '/org.openoffice.Office.Common/Misc|ShowTipOfTheDay'; do
+    grep -qF "<item oor:path=\"${chave%%|*}\"><prop oor:name=\"${chave##*|}\" oor:op=\"fuse\"><value>false</value></prop></item>" "$perfil_lo" \
+        || fail "$perfil_lo sem ${chave##*|}=false em ${chave%%|*}"
+done
 echo "sistema: pt_BR, fuso America/Sao_Paulo, teclado br, máquina nexus-os, sem bloqueio de tela, programas padrão e documentação em HTML"
+echo "disquete bloqueado (sem floppy, sem /dev/fd0) e LibreOffice sem aviso de primeira execução"
 echo "identidade: papel de parede $papel, tema $tema, ícones $icones, janelas $janelas_tema, menu '$titulo', nome '$nome'"
 
 # shellcheck disable=SC2317  # chamada pelo trap
