@@ -21,7 +21,7 @@ Recomendação: **1536 MiB de RAM** e uma mídia (CD, DVD, pendrive ou ISO anexa
 
 ## Com ambiente gráfico
 
-Medido em 2026-10-28, **com KVM**, na ISO da RC2 (ISO final do build limpo do commit `e4abbf0`, [rc2.md](rc2.md); a RAM e os mínimos foram medidos na ISO anterior, do commit `d9c40b8`, com a mesma lista de pacotes, e a ISO final repetiu o `tests/iso.sh` e o smoke `desktop`), guest QEMU com 2 vCPU, `-vga std` e sem rede. As execuções completas do `nexus-smoke all` (8 testes, o último é o `desktop`) seguem o método abaixo: a primeira, com 4096 MiB, coleta o pico e a segunda, com a RAM recomendada, valida.
+Medido em 2026-10-28, **com KVM**, na ISO da RC2 (ISO do build limpo do commit `1858d17`, rodada 4, [rc2.md](rc2.md); a RAM e os mínimos foram medidos na ISO anterior, do commit `d9c40b8`, com a mesma lista de pacotes, e a ISO final repetiu o `tests/iso.sh` e o smoke `desktop`), guest QEMU com 2 vCPU, `-vga std` e sem rede. As execuções completas do `nexus-smoke all` (8 testes, o último é o `desktop`) seguem o método abaixo: a primeira, com 4096 MiB, coleta o pico e a segunda, com a RAM recomendada, valida.
 
 | Item | Valor | Unidade | Como foi medido |
 | --- | --- | --- | --- |
@@ -34,7 +34,7 @@ Medido em 2026-10-28, **com KVM**, na ISO da RC2 (ISO final do build limpo do co
 | Desktop: tempo até a sessão (s) | 23 | s | início do último processo do desktop (`xfce4-session`, `xfce4-panel`, `xfwm4`, `xfdesktop`) em segundos de uptime do guest: 23,7 e 22,6 |
 | Desktop: mínimo de RAM do tests/iso.sh (MiB) | 512 | MiB | `NEXUS_ISO_MEM`: 1024, 768 e 512 chegam ao `login:` em 36 s; valores abaixo de 512 não foram testados |
 | Desktop: mínimo de RAM dos smokes (MiB) | 1792 | MiB | `NEXUS_SMOKE_MEM` com o `all`: 1792 passa (307 s, o `desktop` leva 202 s); 1536, 1280 e 1024 falham |
-| Desktop: SHA256 | `c1a1d5c28c4eca5d33b53999f9aa034e04f98202fc1d694fc341f962126d0eba` | | `sha256sum` da ISO, o mesmo de [rc2.md](rc2.md) |
+| Desktop: SHA256 | `f5516d5635620276cf07013337a9cd7e42464c2a268c5c03850cc99b68acfe30` | | `sha256sum` da ISO, o mesmo de [rc2.md](rc2.md) |
 
 Recomendação com o desktop: **2560 MiB de RAM** para a VM e uma mídia de pelo menos 1693 MiB (cabe em DVD e pendrive, não em CD). O desktop e os programas somam 333 MiB ao repouso medido na RC1 (796 MiB) e 1014 MiB ao pico (813 MiB), por causa do XFCE, do tema de ícones, da fonte Inter e dos programas do desktop (LibreOffice, Wireshark, GIMP e outros; veja "Resultado").
 
