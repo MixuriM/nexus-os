@@ -44,3 +44,6 @@ chmod 0755 /etc/skel/Desktop/nexus-*.desktop
 chmod 0755 /usr/local/bin/nexus-docs-html
 /usr/local/bin/nexus-docs-html /usr/share/nexus-os/docs /usr/share/nexus-os/docs-html
 test -f /usr/share/nexus-os/docs-html/index.html
+
+# Disquete virtual do Hyper-V Geração 1: o floppy.ko está no initramfs, gerado antes do includes.chroot; refaz para o bloqueio de /etc/modprobe.d valer já no boot
+update-initramfs -u -k all
