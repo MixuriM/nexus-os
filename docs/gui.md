@@ -153,7 +153,7 @@ A ISO cresce 36%. O "repouso" do núcleo foi lido pelo `nexus-smoke` antes do pr
 
 F3.15 e F3.16, medidos em 27/10/2026 na VM de build do Hyper-V, **com KVM** (e uma vez **sem KVM**, indicado onde for o caso).
 
-- Pacotes: `live-build/config/package-lists/nexus-desktop.list.chroot` (`xfce4`, `xfce4-terminal`, `network-manager`, `network-manager-gnome`, `lightdm`, `lightdm-gtk-greeter`, `xorg`, `firefox-esr`, `virt-manager`, `desktop-file-utils`, `x11-utils`, `libgtk-3-bin`, `libglib2.0-bin`). Os quatro últimos servem ao smoke e aos atalhos: `desktop-file-validate`, `xwininfo`, `gtk-launch` e `gio`.
+- Pacotes (na F3.15; a lista atual, com os programas da rodada 3, está em "Programas incluídos"): `live-build/config/package-lists/nexus-desktop.list.chroot` (`xfce4`, `xfce4-terminal`, `network-manager`, `network-manager-gnome`, `lightdm`, `lightdm-gtk-greeter`, `xorg`, `firefox-esr`, `virt-manager`, `desktop-file-utils`, `x11-utils`, `libgtk-3-bin`, `libglib2.0-bin`). Os quatro últimos servem ao smoke e aos atalhos: `desktop-file-validate`, `xwininfo`, `gtk-launch` e `gio`.
 - Login automático e sessão padrão: nenhum arquivo próprio. O `0100-lightdm` do `live-config` já grava `autologin-user=user` e o `lightdm` do pacote é o `display-manager`; a sessão padrão é a do XFCE.
 - `nexus-smoke.service` não ganhou `After=lightdm.service`, porque o teste `desktop` espera por laço (limite de 120 s) o `lightdm`, a sessão e os processos do desktop, sem depender da ordem das unidades. Uma primeira versão com o `After=` também passou; foi retirado para o laço de espera ser exercitado de verdade.
 - Menu: categoria "Nexus OS" por `etc/xdg/menus/applications-merged/nexus-os.menu` e `usr/share/desktop-directories/nexus-os.directory`. A categoria dos atalhos é `X-Nexus-OS` (categoria própria precisa do prefixo `X-`).
@@ -232,6 +232,8 @@ Ficaram de fora, por decisão do grupo: Thunderbird (81 MB) e GParted (5 MB). O 
 | Sessão do `user` ativa, com KVM | já ativa quando o teste começou, com uptime do guest de 25,0 s |
 | Sessão do `user` ativa, sem KVM | já ativa quando o teste começou, com uptime de 258,8 s |
 | Smoke `desktop` sem KVM (`NEXUS_SMOKE_KVM=0 NEXUS_SMOKE_SMP=1 NEXUS_SMOKE_MEM=2048`) | `OK: 2 teste(s) sem falha em 477 s`, `desktop=161s`: os 9 atalhos da época executavam sem KVM |
+
+Rodada 3 da RC2 (ISO atual, build limpo do commit `d9c40b8`): ISO de 1773174784 bytes (+513048576 sobre a da tabela acima, por causa dos programas), build de 1164 s; `all` com 4096 MiB `OK` em 181 s (`desktop=64s`, repouso 1115 MiB, pico 1827 MiB) e com 2560 MiB `OK` em 172 s; sessão ativa em 23 s; smoke `desktop` sem KVM `OK` em 1196 s (`desktop=782s`). Os números completos e os mínimos de RAM estão em [requisitos.md](requisitos.md) e [rc2.md](rc2.md); os desta seção são da F3.15 e da F3.16.
 
 O uptime da sessão é um limite superior: a sessão pode ter ficado ativa antes do início do teste, porque o `nexus-smoke.service` só começa depois dos serviços dos componentes. A medição de repouso e do uptime vem de um script fora do repositório (`--extra`: espera a sessão, lê `free -m` 3 vezes com 30 s de atraso).
 

@@ -38,7 +38,7 @@ A **RC1** é a primeira ISO integrada, só com o núcleo e sem ambiente gráfico
 
 Fora da ISO: OpenDaylight (opcional, só depois que o núcleo estiver validado) e GNS3 (apenas documentado em [docs/gns3.md](docs/gns3.md)).
 
-O desktop é o **XFCE** com `lightdm`, escolhido por medição. Na ISO ele sobe sozinho no login do `user`: a sessão fica pronta 20 s depois do boot, com 1044 MiB de RAM em repouso e ISO de 1295843328 bytes (com KVM; sem KVM o smoke `desktop` também passa, mais lento). Comparação dos candidatos, atalhos e medições em [docs/gui.md](docs/gui.md).
+O desktop é o **XFCE** com `lightdm`, escolhido por medição. Na ISO ele sobe sozinho no login do `user`: a sessão fica pronta 23 s depois do boot, com 1129 MiB de RAM em repouso e ISO de 1773174784 bytes (com KVM; sem KVM o smoke `desktop` também passa, mais lento). Comparação dos candidatos, atalhos e medições em [docs/gui.md](docs/gui.md).
 
 ## Arquitetura
 
@@ -94,7 +94,7 @@ Preparo da VM: [docs/ambiente-de-build.md](docs/ambiente-de-build.md). Resultado
 
 ## Usar a ISO integrada
 
-1. Inicie a ISO numa VM com vídeo (testado: QEMU com KVM; o Hyper-V está descrito em [docs/rc1.md](docs/rc1.md)) com **2048 MiB de RAM** (a recomendada com o desktop; o mínimo medido é 1536 MiB, veja [docs/requisitos.md](docs/requisitos.md)) e a ISO como CD. O menu de boot inicia sozinho em 5 segundos (Enter adianta). A ISO entra no desktop XFCE já logada como `user`. **Internet:** no QEMU use `-nic user`; no Hyper-V, a VM criada sem rede precisa de `Connect-VMNetworkAdapter -VMName <vm> -SwitchName "Default Switch"` (comandos completos em [docs/manual.md](docs/manual.md), seção "Ambiente gráfico").
+1. Inicie a ISO numa VM com vídeo (testado: QEMU com KVM; o Hyper-V está descrito em [docs/rc1.md](docs/rc1.md)) com **2560 MiB de RAM** (a recomendada com o desktop; o mínimo medido é 1792 MiB, veja [docs/requisitos.md](docs/requisitos.md)) e a ISO como CD. O menu de boot inicia sozinho em 5 segundos (Enter adianta). A ISO entra no desktop XFCE já logada como `user`. **Internet:** no QEMU use `-nic user`; no Hyper-V, a VM criada sem rede precisa de `Connect-VMNetworkAdapter -VMName <vm> -SwitchName "Default Switch"` (comandos completos em [docs/manual.md](docs/manual.md), seção "Ambiente gráfico").
 2. Use o menu "Nexus OS" ou os ícones da área de trabalho, ou abra um terminal. Se a sessão pedir login: usuário `user` e senha `live` (credencial pública da Debian Live, de laboratório). O `sudo` não pede senha.
 3. Os atalhos chamam os comandos abaixo; no terminal use os comandos diretamente.
 
@@ -126,12 +126,12 @@ Medidos com KVM, na ISO da RC2 ([docs/rc2.md](docs/rc2.md)); método e limitaç�
 
 | Item | Valor |
 | --- | --- |
-| RAM recomendada | **2048 MiB** (validada com o `all` de 8 testes, `OK` em 129 s) |
-| RAM em repouso e de pico | 1044 MiB (sessão ativa) e 1439 MiB (guest de 4096 MiB) |
-| Mínimo de RAM dos smokes | 1536 MiB (o `all` passa, mais lento; 1280, 1024 e 768 MiB falham) |
+| RAM recomendada | **2560 MiB** (validada com o `all` de 8 testes, `OK` em 172 s) |
+| RAM em repouso e de pico | 1129 MiB (sessão ativa) e 1827 MiB (guest de 4096 MiB) |
+| Mínimo de RAM dos smokes | 1792 MiB (o `all` passa, bem mais lento; 1536, 1280 e 1024 MiB falham) |
 | Mínimo de RAM do `tests/iso.sh` | 512 MiB (menor valor testado) |
-| ISO | 1295843328 bytes (1236 MiB), +374145024 bytes sobre a RC1 |
-| Sessão do XFCE pronta | 20 s depois do boot, com KVM |
+| ISO | 1773174784 bytes (1691 MiB), +851476480 bytes sobre a RC1 (cabe em DVD e pendrive, não em CD) |
+| Sessão do XFCE pronta | 23 s depois do boot, com KVM |
 
 ## Testes
 
