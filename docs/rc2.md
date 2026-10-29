@@ -7,17 +7,17 @@ Segunda release candidate: a RC1 (núcleo da stack) mais o **ambiente gráfico**
 | Item | Valor |
 | --- | --- |
 | Arquivo | `dist/nexus-os-rc2-amd64.iso` (cópia da ISO do build limpo, com `.sha256` regenerado para esse nome) |
-| Commit do build | `d9c40b832848dd0bad96b66443f60ab00c3e968d` (clone novo de `origin/marcos`) |
+| Commit do build | `e4abbf04fd2ccc45d33b5d5a005a639c830b427b` (clone novo de `origin/marcos`) |
 | Data | 2026-10-28 |
-| Tamanho | 1773174784 bytes |
-| SHA256 | `391734920cad410da5d42464c11d0633e3ca88f9320c8e0c9fa20473ab93ffc9` |
-| Tempo do build | 1164 s, um comando (`sudo scripts/build-iso.sh`), terminou com `Build completed successfully` |
+| Tamanho | 1774911488 bytes |
+| SHA256 | `c1a1d5c28c4eca5d33b53999f9aa034e04f98202fc1d694fc341f962126d0eba` |
+| Tempo do build | 816 s, um comando (`sudo scripts/build-iso.sh`), terminou com `Build completed successfully` |
 | Ambiente do build | Debian 13 em VM Hyper-V com KVM, 4 vCPU, 6 GB estáticos |
 | Onde fica | na máquina do responsável (VM de build, pasta `dist/` do clone, fora do Git) |
 
 Esta é a **terceira geração da RC2**. A primeira (commit `7ddf021`) tinha o tema Greybird e ícones Tango; a segunda (commit `007f7ba`, SHA256 `a21a7eb9...`, 1295843328 bytes) trouxe a logo original, o tema Nexus-Dark, os ícones Papirus-Dark e a fonte Inter. Depois de a segunda ser testada no Hyper-V Geração 1, a terceira refez a barra (uma só, embaixo, com a lista de janelas), criou o tema de ícones Nexus, tirou as faixas dos fundos, trocou o menu de boot, passou o sistema para português do Brasil com teclado ABNT2, fuso de Brasília e nome de máquina `nexus-os`, acrescentou os programas (veja [gui.md](gui.md), "Programas incluídos"), a documentação em HTML, o atalho Configurações e a tecla Print. Todos os números abaixo são da ISO nova.
 
-Os documentos desta pasta que entram na ISO (`/usr/share/nexus-os/docs`) são os do commit do build. `rc2.md` e `requisitos.md` (seção "Com ambiente gráfico") têm o SHA256 da ISO e por isso nascem depois dela: a ISO não os contém. Depois do build entraram só três ajustes de teste (`ce73989`, e os commits que dão bit de execução aos testes e sobem a espera por atalho para 300 s): a ISO tem a cópia anterior desses scripts, e o comportamento é o mesmo.
+Os documentos desta pasta que entram na ISO (`/usr/share/nexus-os/docs`) são os do commit do build. `rc2.md` e `requisitos.md` (seção "Com ambiente gráfico") têm o SHA256 da ISO e por isso nascem depois dela: a ISO não os contém. Esta ISO é a do último commit com todos os documentos e testes. Os números de RAM, os mínimos, o `run-fase3` e o smoke sem KVM abaixo foram medidos numa ISO anterior, do commit `d9c40b8` (SHA256 `391734920cad410da5d42464c11d0633e3ca88f9320c8e0c9fa20473ab93ffc9`, 1773174784 bytes, build de 1164 s), com a mesma lista de pacotes; essa ISO foi apagada da VM por engano e refeita no commit acima. Na ISO final foram repetidos o `tests/iso.sh` (`OK` em 36 s) e o smoke `desktop` (`OK: 1 teste(s) sem falha em 102 s`, repouso 1114 MiB, pico 1852 MiB com 4096 MiB).
 
 ## Build limpo com um comando
 
@@ -25,8 +25,8 @@ Clone novo de `origin/marcos` em pasta nova, depois só `sudo scripts/build-iso.
 
 | Item | Valor |
 | --- | --- |
-| Tempo | 1164 s (com o clone) |
-| Tamanho | 1773174784 bytes, +851476480 sobre a RC1 (921698304) e +477331456 sobre a RC2 anterior (1295843328) |
+| Tempo | 816 s (com o clone) |
+| Tamanho | 1774911488 bytes, +853213184 sobre a RC1 (921698304) e +479068160 sobre a RC2 anterior (1295843328) |
 | Origem do aumento sobre a RC2 anterior | LibreOffice, Wireshark, VLC, GIMP, Inkscape, KeePassXC, ferramentas de rede, pacotes de idioma e os demais de `nexus-desktop.list.chroot` ([gui.md](gui.md)); o tema de ícones Nexus e os fundos pesam pouco ([branding.md](branding.md)) |
 
 ## Validação da RC2

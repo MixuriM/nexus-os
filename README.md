@@ -38,7 +38,7 @@ A **RC1** é a primeira ISO integrada, só com o núcleo e sem ambiente gráfico
 
 Fora da ISO: OpenDaylight (opcional, só depois que o núcleo estiver validado) e GNS3 (apenas documentado em [docs/gns3.md](docs/gns3.md)).
 
-O desktop é o **XFCE** com `lightdm`, escolhido por medição. Na ISO ele sobe sozinho no login do `user`: a sessão fica pronta 23 s depois do boot, com 1129 MiB de RAM em repouso e ISO de 1773174784 bytes (com KVM; sem KVM o smoke `desktop` também passa, mais lento). Comparação dos candidatos, atalhos e medições em [docs/gui.md](docs/gui.md).
+O desktop é o **XFCE** com `lightdm`, escolhido por medição. Na ISO ele sobe sozinho no login do `user`: a sessão fica pronta 23 s depois do boot, com 1129 MiB de RAM em repouso e ISO de 1774911488 bytes (com KVM; sem KVM o smoke `desktop` também passa, mais lento). Comparação dos candidatos, atalhos e medições em [docs/gui.md](docs/gui.md).
 
 ## Arquitetura
 
@@ -130,7 +130,7 @@ Medidos com KVM, na ISO da RC2 ([docs/rc2.md](docs/rc2.md)); método e limitaç�
 | RAM em repouso e de pico | 1129 MiB (sessão ativa) e 1827 MiB (guest de 4096 MiB) |
 | Mínimo de RAM dos smokes | 1792 MiB (o `all` passa, bem mais lento; 1536, 1280 e 1024 MiB falham) |
 | Mínimo de RAM do `tests/iso.sh` | 512 MiB (menor valor testado) |
-| ISO | 1773174784 bytes (1691 MiB), +851476480 bytes sobre a RC1 (cabe em DVD e pendrive, não em CD) |
+| ISO | 1774911488 bytes (1693 MiB), +853213184 bytes sobre a RC1 (cabe em DVD e pendrive, não em CD) |
 | Sessão do XFCE pronta | 23 s depois do boot, com KVM |
 
 ## Testes

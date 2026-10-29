@@ -398,7 +398,7 @@ Saída esperada: seis linhas `<atalho>: código 0`.
 
 ## Requisitos
 
-RAM recomendada 1536 MiB para o núcleo (RC1) e **2560 MiB com o desktop (RC2)**; o mínimo medido é 896 MiB sem desktop (o Docker precisa carregar a imagem FRR) e 1792 MiB com desktop (menos que isso o `all` falha). Disco do guest não é usado (a live roda na memória); a ISO da RC2 ocupa 1691 MiB de mídia. Tabelas medidas e método: [requisitos.md](requisitos.md).
+RAM recomendada 1536 MiB para o núcleo (RC1) e **2560 MiB com o desktop (RC2)**; o mínimo medido é 896 MiB sem desktop (o Docker precisa carregar a imagem FRR) e 1792 MiB com desktop (menos que isso o `all` falha). Disco do guest não é usado (a live roda na memória); a ISO da RC2 ocupa 1693 MiB de mídia. Tabelas medidas e método: [requisitos.md](requisitos.md).
 
 ## Solução de problemas
 
