@@ -42,6 +42,7 @@ Todas as execuções abaixo são **com KVM**, exceto a indicada, na VM de build 
 | `tests/manual.sh` | `OK: 13 bloco(s) do manual na ISO` em 94 s |
 | Smoke `desktop` **sem KVM** (`NEXUS_SMOKE_KVM=0 NEXUS_SMOKE_SMP=1 NEXUS_SMOKE_MEM=2048`, espera por atalho de 300 s) | `OK: 1 teste(s) sem falha em 1196 s`, `desktop=782s`; repouso 836 MiB, pico 1707 MiB. Com a espera de 150 s o teste falhou: sem KVM o `nexus-vnf-up` passa de 150 s |
 | Smoke `rede` (QEMU com `-nic user`, script fora do repositório) | o NetworkManager pegou `10.0.2.15/24` por DHCP em `ens3`, rota padrão por `10.0.2.2`, DNS e `HTTP/1.1 200 OK` em `deb.debian.org`; nome da máquina `nexus-os` |
+| Teste manual no Hyper-V Geração 1 (28/10/2026, capturas de tela) | boot, desktop em 1024x768, barra, hora de Brasília, internet, Writer, Mousepad, Print e teclado ABNT2 funcionaram; o ícone "Disco Disquete" dá erro ao abrir (issue 55) |
 | Menu de boot, BIOS (isolinux) e UEFI (GRUB, OVMF) | título "Nexus OS", logo e entradas em português; o boot inicia sozinho depois de 5 s |
 | Mínimos de RAM e tempo até a sessão (23 s) | [requisitos.md](requisitos.md), seção "Com ambiente gráfico" |
 
@@ -57,7 +58,7 @@ Debian 13 em VM Hyper-V com KVM (`/dev/kvm`), 4 vCPU, 6 GB de RAM estáticos; li
 
 - **`nexus-smoke.service` continua na RC2:** a unidade que executa como root o conteúdo de um CD `NEXUS_SMOKE` não foi removida. A decisão de removê-la ou condicioná-la é do congelamento da ISO (F4.6; issue 32).
 - A reprodução por uma segunda pessoa e a execução do roteiro humano do desktop (parte H de [checklist-teste-documentacao.md](checklist-teste-documentacao.md)) continuam pendentes. Nada desta RC conta como tal.
-- Uma versão anterior da RC2 subiu sozinha no Hyper-V Geração 1, a 1080p em tela cheia e em janela de 1024x768; a **ISO desta geração ainda não foi iniciada no Hyper-V** (issue 55). VirtualBox, Geração 2 e vídeo real também não. O papel de parede foi conferido só no monitor `Virtual-1` do QEMU (issue 56).
+- No Hyper-V Geração 1, a ISO final (SHA256 `c1a1d5c2...0eba`) subiu sozinha no Hyper-V Geração 1 (2560 MB, 2 vCPU, `Default Switch`) em 28/10/2026, conferida por um integrante do grupo a partir de capturas de tela: menu de boot, desktop em janela de 1024x768 (limite do vídeo da Geração 1), barra inferior, hora de Brasília, internet no Firefox, LibreOffice Writer em português, `.md` no Mousepad, tecla Print e teclado ABNT2. Falha conhecida: o ícone "Disco Disquete" (hardware virtual da Geração 1, sem mídia) dá `Error mounting /dev/fd0 ... Can't open blockdev` ao ser aberto; a correção está pendente (issue 55). VirtualBox, Geração 2 e vídeo real não foram iniciados. O papel de parede foi conferido só no monitor `Virtual-1` do QEMU (issue 56).
 - Mínimo de RAM: com 1792 MiB o `all` passa, mas o `desktop` leva 202 s; com 1536, 1280 e 1024 MiB falha. A recomendada é 2560 MiB. O `tests/iso.sh` chega ao `login:` com 512 MiB, sem provar a sessão gráfica.
 - A ISO tem 1691 MiB: cabe em DVD e pendrive, não em CD.
 - Os fluxos interativos (clique nos ícones, terminal esperando Enter, VM criada pelo `virt-manager`, abrir os programas novos) não foram exercitados: os atalhos foram lançados pelo `gtk-launch` com `NEXUS_ATALHO_TESTE=1` e os programas só tiveram a presença conferida.

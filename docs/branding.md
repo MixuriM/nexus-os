@@ -141,3 +141,4 @@ As capturas usam o comando `screendump` do monitor do QEMU com `-vga std` (1280x
 - O papel de parede padrão foi conferido no monitor `Virtual-1` do QEMU; em outros vídeos (Hyper-V e VirtualBox) ele depende do alternativo `desktop-background` e dos blocos `monitor0` e `monitor1` (issue 56).
 - O `20-hyperv.conf` fixa `/dev/dri/card0` para qualquer vídeo; em máquina com mais de uma placa o dispositivo certo pode ser outro.
 - Reprodução por segunda pessoa e a conferência em VirtualBox e em máquina física continuam pendentes.
+- No Hyper-V Geração 1 a ISO final subiu e o visual conferiu (janela de 1024x768, tema, ícones, barra e papel de parede); o ícone "Disco Disquete" (hardware da VM) dá `Error mounting /dev/fd0 ... Can't open blockdev` ao ser aberto, pendente (issue 55).

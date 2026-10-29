@@ -255,7 +255,7 @@ vmconnect.exe localhost $vm
 
 **Internet na VM do Hyper-V:** o `New-VM` com `-NoVHD` cria a VM sem placa de rede conectada, e sem ela o Firefox acusa `NS_ERROR_OFFLINE` e a barra não oferece rede nenhuma. O `Connect-VMNetworkAdapter` acima liga a VM ao `Default Switch` (NAT do Windows, com DHCP e internet); se a VM já existe, rode só essa linha com a VM desligada ou ligada. Se o comando acusar que a VM não tem adaptador de rede, use antes `Add-VMNetworkAdapter -VMName $vm`. No QEMU, sem rede por padrão no `-nic none` dos testes, use `-nic user` para ter internet.
 
-A ISO tem boot BIOS e UEFI (`xorriso -indev <iso> -report_el_torito plain`), então a Geração 2 deveria servir; só a Geração 1 foi validada. Uma versão anterior da RC2 subiu sozinha no Hyper-V Geração 1, a 1080p em tela cheia e em janela de 1024x768 (conferido por um integrante do grupo em 28/10/2026, a partir de capturas de tela); a versão atual ainda precisa dessa conferência: o roteiro humano da parte H do [checklist](checklist-teste-documentacao.md) é quem confirma. Sem KVM a sessão leva alguns minutos para aparecer.
+A ISO tem boot BIOS e UEFI (`xorriso -indev <iso> -report_el_torito plain`), então a Geração 2 deveria servir; só a Geração 1 foi validada. Na Geração 1, a ISO final (SHA256 `c1a1d5c2...0eba`) subiu sozinha no Hyper-V Geração 1 (2560 MB, 2 vCPU, `Default Switch`) em 28/10/2026, conferida por um integrante do grupo a partir de capturas de tela: menu de boot, desktop em janela de 1024x768 (limite do vídeo da Geração 1), barra inferior, hora de Brasília, internet no Firefox, LibreOffice Writer em português, `.md` no Mousepad, tecla Print e teclado ABNT2. Falha conhecida: o ícone "Disco Disquete" (hardware virtual da Geração 1, sem mídia) dá `Error mounting /dev/fd0 ... Can't open blockdev` ao ser aberto; a correção está pendente (issue 55). O roteiro humano completo da parte H do [checklist](checklist-teste-documentacao.md) segue pendente. Sem KVM a sessão leva alguns minutos para aparecer.
 
 ### O que há no desktop
 
@@ -394,6 +394,7 @@ Saída esperada: seis linhas `<atalho>: código 0`.
 | Ícone de rede não aparece na barra | Sem rede, o applet fica sem ícone ativo | Confira por `pgrep -u user nm-applet` |
 | Firefox diz que está offline e a barra não lista redes | A VM do Hyper-V foi criada sem placa de rede conectada | Com o PowerShell como administrador: `Connect-VMNetworkAdapter -VMName <vm> -SwitchName "Default Switch"` |
 | Tecla Print não faz nada | Versões antes da rodada 3 da RC2 não tinham o `xfce4-screenshooter` | Use a ISO atual |
+| "Falha ao montar Disco Disquete" (`Can't open blockdev`) | O Hyper-V Geração 1 tem um disquete virtual sem mídia; o ícone aparece e não monta | Ignore: não afeta o sistema. Correção pendente (issue 55) |
 | O papel de parede mudou | O `user` trocou nas configurações | Reinicie a ISO: a sessão volta ao padrão do Nexus OS |
 
 ## Requisitos
