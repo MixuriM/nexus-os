@@ -75,8 +75,8 @@ A licença é a do repositório, GPL-3.0-or-later ([LICENSE](../LICENSE)). Os ca
 Linhas acrescentadas a arquivos que já existiam (mesma licença do repositório):
 
 - `live-build/config/includes.chroot/etc/live/config.conf.d/nexus.conf`: `LIVE_USER_FULLNAME="Nexus OS"`, o nome completo do usuário `user` mostrado na barra (o padrão do live-config é "Debian Live user").
-- `live-build/config/package-lists/nexus-desktop.list.chroot`: `papirus-icon-theme` e `fonts-inter`.
-- Os 9 atalhos `nexus-*.desktop` (menu e área de trabalho): a chave `Icon=` aponta para os ícones próprios acima.
+- `live-build/config/package-lists/nexus-desktop.list.chroot`: `papirus-icon-theme`, `fonts-inter` e, na rodada 3, os programas do desktop (veja [gui.md](gui.md), "Programas incluídos").
+- Os 10 atalhos `nexus-*.desktop` (menu e área de trabalho): a chave `Icon=` aponta para os ícones próprios acima.
 
 ## Arquivos de pacotes do Debian
 
@@ -98,14 +98,14 @@ O que vem de pacote do Debian 13 `main` mantém a licença do pacote (lida em `/
 
 | Item | Valor |
 | --- | --- |
-| ISO sem a identidade (parte 9, F3.15 e F3.16) | 1260126208 bytes |
-| ISO com a identidade (RC2) | 1295843328 bytes |
-| Diferença | +35717120 bytes (34,1 MiB), dentro do limite de 40 MB para tema e ícones |
-| Origem da diferença | `papirus-icon-theme` (22,6 MB no `.deb`, 187 MB instalados), `fonts-inter` (4,6 MB no `.deb`) e as imagens do Nexus OS |
+| ISO da RC2 anterior (identidade com Papirus-Dark e Inter, sem os programas novos) | 1295843328 bytes |
+| ISO da RC2 atual (rodada 3) | 1773174784 bytes |
+| Diferença | +477331456 bytes (455,2 MiB): quase tudo são os programas (LibreOffice, Wireshark, VLC, GIMP, Inkscape e demais); o tema de ícones Nexus, os fundos com ruído e o menu de boot somam poucos MiB. A estimativa de download feita antes do build era de cerca de 380 MB |
+| Origem da diferença | os pacotes dos programas e os de idioma; o `papirus-icon-theme` (22,6 MB no `.deb`) e a fonte Inter já vinham da RC2 anterior |
 
 ## Como a identidade é aplicada
 
-- **Login:** `/etc/lightdm/lightdm-gtk-greeter.conf` aponta `background` para `tela-de-login.png` (a logo original), `theme-name` para Nexus-Dark, `icon-theme-name` para Papirus-Dark e `default-user-image` para a marca. O `gtk.css` estiliza a janela de login (`#login_window`). Com o login automático (padrão da ISO) a tela de login não aparece; para vê-la, inicie com o parâmetro de boot `live-config.noautologin`.
+- **Login:** `/etc/lightdm/lightdm-gtk-greeter.conf` aponta `background` para `tela-de-login.png` (a logo original), `theme-name` para Nexus-Dark, `icon-theme-name` para Nexus e `default-user-image` para a marca. O `gtk.css` estiliza a janela de login (`#login_window`). Com o login automático (padrão da ISO) a tela de login não aparece; para vê-la, inicie com o parâmetro de boot `live-config.noautologin`.
 - **Sessão:** o `xfce4-desktop.xml` do `/etc/xdg` é o padrão do XFCE para qualquer usuário novo, inclusive o `user` que o live-config cria no boot; o `xsettings.xml` (tema, ícones e fonte) e o painel (título "Nexus OS", ícone da marca e altura) são ajustados no hook; o `xfwm4.xml` define o tema das janelas. O live-config só cria o usuário a partir do `/etc/skel` e não toca nesses arquivos de `/etc/xdg`: o smoke `desktop` confirma em boot limpo, como o `user` recém-criado, o papel de parede, os temas, o título do menu e o nome completo.
 - **Papel de parede em outros monitores:** o xfdesktop guarda uma configuração por monitor e por área de trabalho. O padrão cobre o monitor `Virtual-1` (o vídeo das VMs do QEMU) e os blocos `monitor0` e `monitor1`; o hook também registra o papel de parede como alternativa `desktop-background` do Debian, o que cobre o caminho padrão `/usr/share/images/desktop-base/default`.
 - **Vídeo no Hyper-V:** na Geração 1 o Xorg não sobe sem o `20-hyperv.conf` (o log mostra `Cannot run in framebuffer mode`); com ele fixando `/dev/dri/card0` a sessão abriu na VM do Hyper-V.
@@ -113,7 +113,7 @@ O que vem de pacote do Debian 13 `main` mantém a licença do pacote (lida em `/
 
 ## Como regenerar
 
-O `scripts/gerar-identidade.py` copia a logo original, recorta a marca, desenha os 9 ícones e os dois fundos e converte os fundos para PNG 1920x1080. Precisa de `python3` e `rsvg-convert` (pacote `librsvg2-bin`). Na VM de build, na raiz do repositório:
+O `scripts/gerar-identidade.py` copia a logo original, recorta a marca, desenha os 10 ícones dos atalhos, o tema de ícones Nexus, o fundo do menu de boot e os dois fundos e converte os fundos para PNG 1920x1080. Precisa de `python3` e `rsvg-convert` (pacote `librsvg2-bin`). Na VM de build, na raiz do repositório:
 
 ```bash
 sudo apt-get install -y librsvg2-bin
@@ -127,7 +127,7 @@ A saída é determinística. O tema das janelas sai de `scripts/gerar-tema-xfwm4
 As capturas usam o comando `screendump` do monitor do QEMU com `-vga std` (1280x800), convertido para PNG de 256 cores com o `python3-pil` (pacote `python3-pil`), com até 300 KB cada.
 
 - `docs/img/sessao.png`: a ISO iniciada normalmente; a captura foi feita com a sessão do `user` já aberta.
-- `docs/img/login.png`: a tela de login só aparece sem o login automático. A captura usou boot direto do kernel e do initrd da ISO com o parâmetro `live-config.noautologin`, só para essa captura; a ISO entregue não muda. O relógio e o nome de máquina `debian` que aparecem na barra do login são os do próprio boot.
+- `docs/img/login.png`: a tela de login só aparece sem o login automático. A captura usou boot direto do kernel e do initrd da ISO com o parâmetro `live-config.noautologin`, só para essa captura; a ISO entregue não muda. O relógio e o nome de máquina que aparecem na barra do login são os do próprio boot.
 
 ![Tela de login do Nexus OS](img/login.png)
 
@@ -135,9 +135,9 @@ As capturas usam o comando `screendump` do monitor do QEMU com `-vga std` (1280x
 
 ## Problemas conhecidos
 
-- A barra do login mostra o nome de máquina `debian` e o relógio, porque o `lightdm-gtk-greeter` os mostra sempre; o nome de máquina não foi alterado (issue 57).
+- A barra do login mostra o relógio e o nome de máquina (`nexus-os`), porque o `lightdm-gtk-greeter` os mostra sempre.
 - O `desktop-base` continua instalado (dependência do desktop) e traz o logotipo e os papéis de parede do Debian em `/usr/share`; nenhum é usado pelo Nexus OS.
-- O menu de boot (isolinux) ainda mostra o texto "Debian GNU/Linux" e o capacete do live-build: a identidade da F3.17 cobre o login e a sessão, não o menu de boot.
+- O menu de boot (isolinux e GRUB) agora tem a identidade do Nexus OS e contagem de 5 s; o texto "Automatic boot in N seconds..." do isolinux continua em inglês (vem do próprio syslinux).
 - O papel de parede padrão foi conferido no monitor `Virtual-1` do QEMU; em outros vídeos (Hyper-V e VirtualBox) ele depende do alternativo `desktop-background` e dos blocos `monitor0` e `monitor1` (issue 56).
 - O `20-hyperv.conf` fixa `/dev/dri/card0` para qualquer vídeo; em máquina com mais de uma placa o dispositivo certo pode ser outro.
 - Reprodução por segunda pessoa e a conferência em VirtualBox e em máquina física continuam pendentes.

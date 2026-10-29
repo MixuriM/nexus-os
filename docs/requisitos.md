@@ -21,43 +21,45 @@ Recomendação: **1536 MiB de RAM** e uma mídia (CD, DVD, pendrive ou ISO anexa
 
 ## Com ambiente gráfico
 
-Medido em 2026-10-28, **com KVM**, na ISO da RC2 (commit `007f7ba`, [rc2.md](rc2.md)), guest QEMU com 2 vCPU, `-vga std` e sem rede. As duas execuções completas do `nexus-smoke all` (8 testes, o último é o `desktop`) seguem o método abaixo: a primeira com 4096 MiB coleta o pico e a segunda, com a RAM recomendada, valida.
+Medido em 2026-10-28, **com KVM**, na ISO da RC2 (build limpo do commit `d9c40b8`, [rc2.md](rc2.md)), guest QEMU com 2 vCPU, `-vga std` e sem rede. As execuções completas do `nexus-smoke all` (8 testes, o último é o `desktop`) seguem o método abaixo: a primeira, com 4096 MiB, coleta o pico e a segunda, com a RAM recomendada, valida.
 
 | Item | Valor | Unidade | Como foi medido |
 | --- | --- | --- | --- |
-| Desktop: RAM em repouso | 1044 | MiB | média de duas execuções, cada uma com 3 leituras de `free -m` (`used`) a partir de 30 s depois de a sessão ficar ativa: 1043 e 1045 MiB |
-| Desktop: RAM de pico | 1439 | MiB | maior `used` durante `nexus-smoke all` com 4096 MiB (8 testes, amostrado a cada 5 s) |
-| Desktop: RAM recomendada | 2048 | MiB | `ceil((pico + 512) / 512) * 512`, validada com `NEXUS_SMOKE_MEM=2048` (abaixo) |
-| Desktop: disco do root em memória | 27 | MiB | `df -m /` (overlay sobre tmpfs; a live não usa disco do guest); o Docker segue com 193 MiB |
-| Desktop: ISO (bytes) | 1295843328 | bytes | tamanho do arquivo (1236 MiB) |
-| Desktop: diferença da ISO para a RC1 (bytes) | 374145024 | bytes | 1295843328 menos 921698304 (+40,6%) |
-| Desktop: tempo até a sessão (s) | 20 | s | início do último processo do desktop (`xfce4-session`, `xfce4-panel`, `xfwm4`, `xfdesktop`) em segundos de uptime do guest: 20,4 e 20,1 |
-| Desktop: mínimo de RAM do tests/iso.sh (MiB) | 512 | MiB | `NEXUS_ISO_MEM`: 1024, 768 e 512 chegam ao `login:` em 33 s; valores abaixo de 512 não foram testados |
-| Desktop: mínimo de RAM dos smokes (MiB) | 1536 | MiB | `NEXUS_SMOKE_MEM` com o `all`: 1536 passa; 1280, 1024 e 768 falham |
-| Desktop: SHA256 | `a21a7eb9506646ad567c6c92a6bac0c32153be247face0a5a41839ddc319913c` | | `sha256sum` da ISO, o mesmo de [rc2.md](rc2.md) |
+| Desktop: RAM em repouso | 1129 | MiB | média de duas execuções, cada uma com 3 leituras de `free -m` (`used`) a partir de 30 s depois de a sessão ficar ativa: 1140 e 1118 MiB |
+| Desktop: RAM de pico | 1827 | MiB | maior `used` durante `nexus-smoke all` com 4096 MiB (8 testes, amostrado a cada 5 s) |
+| Desktop: RAM recomendada | 2560 | MiB | `ceil((pico + 512) / 512) * 512`, validada com `NEXUS_SMOKE_MEM=2560` (abaixo) |
+| Desktop: disco do root em memória | 28 | MiB | `df -m /` (overlay sobre tmpfs; a live não usa disco do guest); o Docker segue com 193 MiB |
+| Desktop: ISO (bytes) | 1773174784 | bytes | tamanho do arquivo (1691 MiB) |
+| Desktop: diferença da ISO para a RC1 (bytes) | 851476480 | bytes | 1773174784 menos 921698304 (+92,4%) |
+| Desktop: tempo até a sessão (s) | 23 | s | início do último processo do desktop (`xfce4-session`, `xfce4-panel`, `xfwm4`, `xfdesktop`) em segundos de uptime do guest: 23,7 e 22,6 |
+| Desktop: mínimo de RAM do tests/iso.sh (MiB) | 512 | MiB | `NEXUS_ISO_MEM`: 1024, 768 e 512 chegam ao `login:` em 36 s; valores abaixo de 512 não foram testados |
+| Desktop: mínimo de RAM dos smokes (MiB) | 1792 | MiB | `NEXUS_SMOKE_MEM` com o `all`: 1792 passa (307 s, o `desktop` leva 202 s); 1536, 1280 e 1024 falham |
+| Desktop: SHA256 | `391734920cad410da5d42464c11d0633e3ca88f9320c8e0c9fa20473ab93ffc9` | | `sha256sum` da ISO, o mesmo de [rc2.md](rc2.md) |
 
-Recomendação com o desktop: **2048 MiB de RAM** para a VM e uma mídia de pelo menos 1236 MiB. O desktop soma 248 MiB ao repouso medido na RC1 (796 MiB) e 626 MiB ao pico (813 MiB), por causa do XFCE, do tema de ícones Papirus-Dark e da fonte Inter (veja "Resultado").
+Recomendação com o desktop: **2560 MiB de RAM** para a VM e uma mídia de pelo menos 1691 MiB (cabe em DVD e pendrive, não em CD). O desktop e os programas somam 333 MiB ao repouso medido na RC1 (796 MiB) e 1014 MiB ao pico (813 MiB), por causa do XFCE, do tema de ícones, da fonte Inter e dos programas do desktop (LibreOffice, Wireshark, GIMP e outros; veja "Resultado").
 
 ### Execuções completas do `all`
 
 | RAM do guest (MiB) | Resultado | Repouso | Pico |
 | --- | --- | --- | --- |
-| 4096 (coleta do pico) | `OK: 8 teste(s) sem falha em 141 s`, `desktop=53s` | 1140 MiB | 1439 MiB |
-| 2048 (recomendada) | `OK: 8 teste(s) sem falha em 129 s`, `desktop=51s` | 867 MiB | 1296 MiB |
-| 1536 | `OK` em 165 s, `desktop=82s` | 835 MiB | 1319 MiB |
-| 1280 | `FALHA: NEXUS-SMOKE-DONE não apareceu em 400 s`; com limite de 900 s terminou com `DONE 8 1` e o teste `desktop` com erro | | |
+| 4096 (coleta do pico) | `OK: 8 teste(s) sem falha em 181 s`, `desktop=64s` | 1115 MiB | 1827 MiB |
+| 2560 (recomendada) | `OK: 8 teste(s) sem falha em 172 s`, `desktop=66s` | 950 MiB | 1722 MiB |
+| 2048 | `OK` em 160 s, `desktop=78s` | 871 MiB | 1730 MiB |
+| 1792 | `OK` em 307 s, `desktop=202s` | 853 MiB | 1674 MiB |
+| 1536 | `FALHA: NEXUS-SMOKE-DONE não apareceu em 400 s` | | |
+| 1280 | `FALHA: NEXUS-SMOKE-DONE não apareceu em 400 s` | | |
 | 1024 | `FALHA: NEXUS-SMOKE-DONE não apareceu em 400 s` | | |
-| 768 | `FALHA: NEXUS-SMOKE-DONE não apareceu em 400 s` | | |
+| 768 | não medido (já falhava em 1024) | | |
 
-Uma execução por valor. Com 1536 MiB o `all` passa, mas o `desktop` leva 82 s contra 51 s com 2048 MiB: é o mínimo, não um valor confortável. O repouso de 1140 MiB do primeiro `all` é lido ainda no fim do boot, com o desktop subindo; os 1044 MiB acima são lidos com a sessão estável. Na RC2 anterior (só com o tema Greybird e os ícones Tango) o `all` ainda passava com 1024 MiB; o tema de ícones e a fonte novos subiram o mínimo.
+Uma execução por valor. Com 1792 MiB o `all` passa, mas o `desktop` leva 202 s contra 66 s com 2560 MiB: é o mínimo, não um valor confortável. O repouso de 1115 MiB do primeiro `all` é lido ainda no fim do boot, com o desktop subindo; os 1129 MiB acima são lidos com a sessão estável. A ISO anterior da RC2 (sem os programas novos) passava com 1536 MiB; LibreOffice, Wireshark, VLC, GIMP, Inkscape e o resto subiram o mínimo.
 
 ### Mínimo do `tests/iso.sh`
 
-O `tests/iso.sh` só espera o `login:` na serial. Medido com `NEXUS_ISO_MEM`, uma execução por valor, com KVM: 1024, 768 e 512 MiB chegam ao `login:` em 33 s, com o SHA256 conferido. O menor valor testado que passa é 512 MiB. O padrão do script continua 2048 MiB.
+O `tests/iso.sh` só espera o `login:` na serial. Medido com `NEXUS_ISO_MEM`, uma execução por valor, com KVM: 1024, 768 e 512 MiB chegam ao `login:` em 36 s, com o SHA256 conferido. O menor valor testado que passa é 512 MiB. O padrão do script continua 2048 MiB.
 
 ### Limitações com o desktop
 
-- Medido só com KVM, em um ambiente (VM de build no Hyper-V). Sem KVM, o smoke `desktop` passou uma vez na RC2 anterior (442 s no total, 1 vCPU, 2048 MiB), veja [rc2.md](rc2.md); o resto não foi repetido sem KVM.
+- Medido com KVM, em um ambiente (VM de build no Hyper-V). Sem KVM, o smoke `desktop` passou na RC2 atual: `OK` em 1196 s, `desktop=782s`, 1 vCPU, 2048 MiB, repouso 836 MiB, pico 1707 MiB (`NEXUS_SMOKE_KVM=0 NEXUS_SMOKE_SMP=1 NEXUS_SMOKE_MEM=2048`, com a espera por atalho de 300 s); o resto não foi repetido sem KVM.
 - Uma execução por valor de RAM; a RAM em repouso varia entre execuções (veja a issue 33).
 - O `tests/iso.sh` só chega ao `login:` na serial: não prova que a sessão gráfica sobe com 512 MiB. O mínimo que cobre a sessão e todos os componentes é o dos smokes, 1536 MiB.
 - Hyper-V (Geração 1 e 2), VirtualBox e vídeo real não foram medidos com o desktop.

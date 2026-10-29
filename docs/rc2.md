@@ -1,23 +1,23 @@
 # RC2 do Nexus OS (F3.17 e F3.18)
 
-Segunda release candidate: a RC1 (núcleo da stack) mais o **ambiente gráfico** XFCE com login automático, os 9 atalhos dos componentes e a identidade visual do Nexus OS. Não há tag Git nesta fase: a tag é do congelamento da ISO (F4.6).
+Segunda release candidate: a RC1 (núcleo da stack) mais o **ambiente gráfico** XFCE com login automático, os 10 atalhos dos componentes, a identidade visual do Nexus OS, a barra única embaixo como a do Windows, o idioma português do Brasil e programas prontos para uso (LibreOffice, Wireshark, VLC, GIMP, Inkscape, KeePassXC e mais). Não há tag Git nesta fase: a tag é do congelamento da ISO (F4.6).
 
 ## Identificação
 
 | Item | Valor |
 | --- | --- |
 | Arquivo | `dist/nexus-os-rc2-amd64.iso` (cópia da ISO do build limpo, com `.sha256` regenerado para esse nome) |
-| Commit do build | `007f7ba0b53e74f4c16d4868cf0bbd1a1be768ad` (clone novo de `origin/marcos`) |
+| Commit do build | `d9c40b832848dd0bad96b66443f60ab00c3e968d` (clone novo de `origin/marcos`) |
 | Data | 2026-10-28 |
-| Tamanho | 1295843328 bytes |
-| SHA256 | `a21a7eb9506646ad567c6c92a6bac0c32153be247face0a5a41839ddc319913c` |
-| Tempo do build | 703 s, um comando (`sudo scripts/build-iso.sh`), terminou com `Build completed successfully` |
+| Tamanho | 1773174784 bytes |
+| SHA256 | `391734920cad410da5d42464c11d0633e3ca88f9320c8e0c9fa20473ab93ffc9` |
+| Tempo do build | 1164 s, um comando (`sudo scripts/build-iso.sh`), terminou com `Build completed successfully` |
 | Ambiente do build | Debian 13 em VM Hyper-V com KVM, 4 vCPU, 6 GB estáticos |
 | Onde fica | na máquina do responsável (VM de build, pasta `dist/` do clone, fora do Git) |
 
-Esta é a **segunda geração da RC2**: a primeira (commit `7ddf021`, SHA256 `0692c04a...`, 1268842496 bytes) tinha o tema Greybird, os ícones Tango e uma marca desenhada à parte; depois de testar a ISO numa VM do Hyper-V, a identidade foi refeita com a logo original, o tema Nexus-Dark, ícones Papirus-Dark e fonte Inter (F3.17), e o vídeo do Hyper-V Geração 1 passou a ser fixado no `/dev/dri/card0`. Todos os números abaixo são da ISO nova.
+Esta é a **terceira geração da RC2**. A primeira (commit `7ddf021`) tinha o tema Greybird e ícones Tango; a segunda (commit `007f7ba`, SHA256 `a21a7eb9...`, 1295843328 bytes) trouxe a logo original, o tema Nexus-Dark, os ícones Papirus-Dark e a fonte Inter. Depois de a segunda ser testada no Hyper-V Geração 1, a terceira refez a barra (uma só, embaixo, com a lista de janelas), criou o tema de ícones Nexus, tirou as faixas dos fundos, trocou o menu de boot, passou o sistema para português do Brasil com teclado ABNT2, fuso de Brasília e nome de máquina `nexus-os`, acrescentou os programas (veja [gui.md](gui.md), "Programas incluídos"), a documentação em HTML, o atalho Configurações e a tecla Print. Todos os números abaixo são da ISO nova.
 
-Os documentos desta pasta que entram na ISO (`/usr/share/nexus-os/docs`) são os do commit do build. `rc2.md` e `requisitos.md` (seção "Com ambiente gráfico") têm o SHA256 da ISO e por isso nascem depois dela: a ISO não os contém.
+Os documentos desta pasta que entram na ISO (`/usr/share/nexus-os/docs`) são os do commit do build. `rc2.md` e `requisitos.md` (seção "Com ambiente gráfico") têm o SHA256 da ISO e por isso nascem depois dela: a ISO não os contém. Depois do build entraram só três ajustes de teste (`ce73989`, e os commits que dão bit de execução aos testes e sobem a espera por atalho para 300 s): a ISO tem a cópia anterior desses scripts, e o comportamento é o mesmo.
 
 ## Build limpo com um comando
 
@@ -25,9 +25,9 @@ Clone novo de `origin/marcos` em pasta nova, depois só `sudo scripts/build-iso.
 
 | Item | Valor |
 | --- | --- |
-| Tempo | 703 s (com o clone) |
-| Tamanho | 1295843328 bytes, +374145024 sobre a RC1 (921698304) |
-| Origem do aumento | desktop XFCE, `firefox-esr`, `virt-manager`, `lightdm` e dependências (+338427904 na F3.15 e F3.16) e a identidade visual (+35717120: tema de ícones `papirus-icon-theme`, fonte `fonts-inter` e as imagens, veja [branding.md](branding.md)) |
+| Tempo | 1164 s (com o clone) |
+| Tamanho | 1773174784 bytes, +851476480 sobre a RC1 (921698304) e +477331456 sobre a RC2 anterior (1295843328) |
+| Origem do aumento sobre a RC2 anterior | LibreOffice, Wireshark, VLC, GIMP, Inkscape, KeePassXC, ferramentas de rede, pacotes de idioma e os demais de `nexus-desktop.list.chroot` ([gui.md](gui.md)); o tema de ícones Nexus e os fundos pesam pouco ([branding.md](branding.md)) |
 
 ## Validação da RC2
 
@@ -35,33 +35,35 @@ Todas as execuções abaixo são **com KVM**, exceto a indicada, na VM de build 
 
 | Teste | Resultado |
 | --- | --- |
-| `tests/run-fase3.sh dist/nexus-os-rc2-amd64.iso` | `OK: tests/run-fase3.sh (9 testes)` em 270 s: `lint-repo`, `docs`, `gui-spec`, `atalhos`, `identidade`, `iso` (36 s), `iso-smoke all`, `requisitos` e `manual` |
-| `iso-smoke all` dentro do `run-fase3.sh`, 4096 MiB | `OK: 8 teste(s) sem falha em 135 s` (`desktop` 50 s); repouso 1164 MiB, pico 1452 MiB |
-| `iso-smoke all`, `NEXUS_SMOKE_MEM=4096` (coleta do pico) | `OK: 8 teste(s) sem falha em 141 s` (`desktop` 53 s); pico 1439 MiB |
-| `iso-smoke all`, `NEXUS_SMOKE_MEM=2048` (RAM recomendada, validação) | `OK: 8 teste(s) sem falha em 129 s` (`desktop` 51 s); pico 1296 MiB |
-| `tests/manual.sh` | `OK: 12 bloco(s) do manual na ISO` em 93 s (8 blocos do núcleo e 4 do desktop) |
-| Smoke `desktop` **sem KVM** (`NEXUS_SMOKE_KVM=0 NEXUS_SMOKE_SMP=1 NEXUS_SMOKE_MEM=2048`) | `OK: 1 teste(s) sem falha em 505 s`, `desktop=244s`; repouso 811 MiB, pico 1303 MiB |
-| Mínimos de RAM e tempo até a sessão (20 s) | [requisitos.md](requisitos.md), seção "Com ambiente gráfico" |
+| `tests/run-fase3.sh dist/nexus-os-rc2-amd64.iso` | `OK: tests/run-fase3.sh (9 testes)`: `lint-repo`, `docs`, `gui-spec`, `atalhos`, `identidade`, `iso` (36 s), `iso-smoke all`, `requisitos` e `manual` |
+| `iso-smoke all` dentro do `run-fase3.sh`, 4096 MiB | `OK: 8 teste(s) sem falha em 135 s` (`desktop` 53 s); repouso 1127 MiB, pico 1786 MiB |
+| `iso-smoke all`, `NEXUS_SMOKE_MEM=4096` (coleta do pico) | `OK: 8 teste(s) sem falha em 181 s` (`desktop` 64 s); pico 1827 MiB |
+| `iso-smoke all`, `NEXUS_SMOKE_MEM=2560` (RAM recomendada, validação) | `OK: 8 teste(s) sem falha em 172 s` (`desktop` 66 s); pico 1722 MiB |
+| `tests/manual.sh` | `OK: 13 bloco(s) do manual na ISO` em 94 s |
+| Smoke `desktop` **sem KVM** (`NEXUS_SMOKE_KVM=0 NEXUS_SMOKE_SMP=1 NEXUS_SMOKE_MEM=2048`, espera por atalho de 300 s) | `OK: 1 teste(s) sem falha em 1196 s`, `desktop=782s`; repouso 836 MiB, pico 1707 MiB. Com a espera de 150 s o teste falhou: sem KVM o `nexus-vnf-up` passa de 150 s |
+| Smoke `rede` (QEMU com `-nic user`, script fora do repositório) | o NetworkManager pegou `10.0.2.15/24` por DHCP em `ens3`, rota padrão por `10.0.2.2`, DNS e `HTTP/1.1 200 OK` em `deb.debian.org`; nome da máquina `nexus-os` |
+| Menu de boot, BIOS (isolinux) e UEFI (GRUB, OVMF) | título "Nexus OS", logo e entradas em português; o boot inicia sozinho depois de 5 s |
+| Mínimos de RAM e tempo até a sessão (23 s) | [requisitos.md](requisitos.md), seção "Com ambiente gráfico" |
 
-Identidade visual na ISO: o smoke `desktop` confere o papel de parede padrão do `user` (`/usr/share/backgrounds/nexus-os/papel-de-parede.png`, lido pelo `xfconf-query` do monitor ativo), os temas GTK, de ícones e de janelas (Nexus-Dark, Papirus-Dark e Nexus-Dark), o título "Nexus OS" no menu e o nome completo "Nexus OS" do usuário. Capturas de tela da sessão e do login em [branding.md](branding.md).
+O smoke `desktop` confere, além do que já conferia: a barra única embaixo (`tasklist`, sem `pager`, uma área de trabalho, janela do `xfce4-panel` na parte de baixo da tela), o idioma `pt_BR.UTF-8`, o fuso `America/Sao_Paulo`, o teclado `br`, o nome da máquina `nexus-os`, a tela sem bloqueio, o programa padrão de `.md`, texto, PDF, imagem e HTML, a presença dos programas, o `docs-html`, o grupo `wireshark` e o `dumpcap`, a tecla Print e os 10 atalhos executados (incluindo documentação no Firefox e Configurações). Os temas conferidos são Nexus-Dark (GTK e janelas) e Nexus (ícones).
 
-Mutações: M1 (SVG com tag sem fechar), M2 (licença removida de `docs/branding.md`) e M5 (logo da ISO diferente da original de `assets/`) fazem o `tests/identidade.sh` falhar; M3 (`tests/desktop.sh` esperando outro papel de parede, por `--extra`) dá `FALHA: papel de parede do Nexus OS ausente`; M4 (comando inexistente num bloco do manual, feita na primeira geração da RC2) dá `FALHA: smoke com falhas: ... NEXUS-SMOKE-END manual 127`; e a remoção de uma linha numérica de `requisitos.md` faz o `tests/requisitos.sh` falhar.
-
-Ordem dos REDs, antes da implementação: `tests/identidade.sh` sem arquivos, `tests/requisitos.sh` e `tests/docs.sh` sem a seção nova e o smoke `desktop` na ISO anterior (`FALHA: papel de parede do Nexus OS ausente`). Os testes acharam três bugs: a chave errada do papel de parede do xfdesktop (o smoke passava, a captura mostrava o papel de parede do XFCE), o manual com a contagem antiga de 7 testes no `smoke.list` e o `lint-repo.sh` tratando o gerador em Python como shell. O teste na VM do Hyper-V Geração 1 achou o bug do vídeo (`lightdm` em laço, `Cannot run in framebuffer mode`), que nenhum teste em QEMU podia pegar e que o `20-hyperv.conf` corrige.
+Achados dos testes (não foram feitas mutações novas nesta geração): o `light-locker` vinha como recomendação do `lightdm` e o teste de tela sem bloqueio o pegou (o hook `0600` passou a removê-lo); o ID do Wireshark no `mimeapps.list` estava errado e foi corrigido pela conferência no chroot; o `shellcheck` acusou SC2015 em `tests/desktop.sh`; o `run-fase3.sh` falhou com `Permissão negada` porque três testes estavam sem bit de execução no Git (corrigido). Os REDs vieram antes: `tests/atalhos.sh`, `tests/identidade.sh` e `tests/docs.sh` falharam com `FALHA:` antes de qualquer implementação.
 
 ## Ambiente
 
-Debian 13 em VM Hyper-V com KVM (`/dev/kvm`), 4 vCPU, 6 GB de RAM estáticos; live-build do Debian 13; QEMU do Debian 13 com `-vga std`, `-nic none` e 2 vCPU no guest. Todas as medições são com KVM, salvo a linha "sem KVM".
+Debian 13 em VM Hyper-V com KVM (`/dev/kvm`), 4 vCPU, 6 GB de RAM estáticos; live-build do Debian 13; QEMU do Debian 13 com `-vga std`, `-nic none` (e `-nic user` só no teste de rede) e 2 vCPU no guest. Todas as medições são com KVM, salvo a linha "sem KVM".
 
 ## Limitações e riscos conhecidos
 
 - **`nexus-smoke.service` continua na RC2:** a unidade que executa como root o conteúdo de um CD `NEXUS_SMOKE` não foi removida. A decisão de removê-la ou condicioná-la é do congelamento da ISO (F4.6; issue 32).
-- A reprodução por uma segunda pessoa, a execução do roteiro humano do desktop (parte H de [checklist-teste-documentacao.md](checklist-teste-documentacao.md)) e a premissa 1 nas máquinas dos demais integrantes continuam pendentes. Nada desta RC conta como tal.
-- O desktop abriu numa VM do Hyper-V Geração 1 da primeira geração da RC2, mas só depois de a configuração de vídeo ser digitada à mão no console; a **ISO desta geração, com o `20-hyperv.conf`, ainda não foi iniciada no Hyper-V** (issue 55). VirtualBox, Geração 2 e vídeo real também não foram iniciados. O papel de parede foi conferido só no monitor `Virtual-1` do QEMU (issue 56).
-- Mínimo de RAM: com 1536 MiB o `all` passa, mas o `desktop` leva 82 s; com 1280, 1024 e 768 MiB falha. O `tests/iso.sh` chega ao `login:` com 512 MiB, sem provar a sessão gráfica.
-- Os fluxos interativos (clique nos ícones, terminal esperando Enter, VM criada pelo `virt-manager`) não foram exercitados: os atalhos foram lançados pelo `gtk-launch` com `NEXUS_ATALHO_TESTE=1`.
-- A barra da tela de login mostra o nome de máquina `debian` e o menu de boot (isolinux) ainda mostra "Debian GNU/Linux" e o capacete do live-build ([branding.md](branding.md), "Problemas conhecidos"; issue 57).
+- A reprodução por uma segunda pessoa e a execução do roteiro humano do desktop (parte H de [checklist-teste-documentacao.md](checklist-teste-documentacao.md)) continuam pendentes. Nada desta RC conta como tal.
+- Uma versão anterior da RC2 subiu sozinha no Hyper-V Geração 1, a 1080p em tela cheia e em janela de 1024x768; a **ISO desta geração ainda não foi iniciada no Hyper-V** (issue 55). VirtualBox, Geração 2 e vídeo real também não. O papel de parede foi conferido só no monitor `Virtual-1` do QEMU (issue 56).
+- Mínimo de RAM: com 1792 MiB o `all` passa, mas o `desktop` leva 202 s; com 1536, 1280 e 1024 MiB falha. A recomendada é 2560 MiB. O `tests/iso.sh` chega ao `login:` com 512 MiB, sem provar a sessão gráfica.
+- A ISO tem 1691 MiB: cabe em DVD e pendrive, não em CD.
+- Os fluxos interativos (clique nos ícones, terminal esperando Enter, VM criada pelo `virt-manager`, abrir os programas novos) não foram exercitados: os atalhos foram lançados pelo `gtk-launch` com `NEXUS_ATALHO_TESTE=1` e os programas só tiveram a presença conferida.
+- O Hyper-V precisa de `Connect-VMNetworkAdapter` para a VM ter internet ([manual.md](manual.md)); a ISO só foi testada com rede no QEMU.
+- A barra da tela de login mostra o relógio e o nome de máquina (agora `nexus-os`).
 - A RAM em repouso varia entre execuções (issue 33); o desligamento da live pede ENTER (issue 34).
 - A RC2 não tem tag Git: a tag é do congelamento.
 
-Falhas e limitações viram issues com o ID da tarefa no título: 54 (roteiro humano do desktop), 55 (Hyper-V e VirtualBox), 56 (papel de parede em outros monitores) e 57 (nome de máquina no login).
+Falhas e limitações viram issues com o ID da tarefa no título: 54 (roteiro humano do desktop), 55 (Hyper-V e VirtualBox), 56 (papel de parede em outros monitores) e 57 (nome de máquina no login, resolvido nesta geração: a máquina agora é `nexus-os`).

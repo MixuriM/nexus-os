@@ -315,13 +315,13 @@ Escolha **um** ambiente e anote qual na ficha H8: Hyper-V no Windows 11 Pro (sig
    ```
 
    O valor `Hash` deve ser igual ao de `docs/rc2.md` (maiúsculas e minúsculas não importam). Se for diferente, pare e anote como falha de H0.1.
-3. Crie e inicie a VM. Onde: PowerShell como administrador, um comando por vez (o bloco do manual, seção "Ambiente gráfico", "Iniciar com vídeo"). Troque `2048MB` pela RAM de H0.2 se ela for maior:
+3. Crie e inicie a VM. Onde: PowerShell como administrador, um comando por vez (o bloco do manual, seção "Ambiente gráfico", "Iniciar com vídeo"). Troque `2560MB` pela RAM de H0.2 se ela for maior:
 
    ```powershell
    $vm = "nexus-rc2-lab"
-   New-VM -Name $vm -Generation 1 -MemoryStartupBytes 2048MB -BootDevice CD -NoVHD
+   New-VM -Name $vm -Generation 1 -MemoryStartupBytes 2560MB -BootDevice CD -NoVHD
    Set-VMProcessor -VMName $vm -Count 2
-   Set-VMMemory -VMName $vm -DynamicMemoryEnabled $false -StartupBytes 2048MB
+   Set-VMMemory -VMName $vm -DynamicMemoryEnabled $false -StartupBytes 2560MB
    Add-VMDvdDrive -VMName $vm -Path "C:\HyperV\nexus-os-rc2-amd64.iso"
    Connect-VMNetworkAdapter -VMName $vm -SwitchName "Default Switch"
    Start-VM -Name $vm
@@ -338,7 +338,7 @@ Escolha **um** ambiente e anote qual na ficha H8: Hyper-V no Windows 11 Pro (sig
 3. Inicie a ISO com janela (terminal):
 
    ```bash
-   qemu-system-x86_64 -enable-kvm -cpu host -m 2048 -smp 2 -vga std -cdrom nexus-os-rc2-amd64.iso -boot d
+   qemu-system-x86_64 -enable-kvm -cpu host -m 2560 -smp 2 -vga std -cdrom nexus-os-rc2-amd64.iso -boot d
    ```
 
    Para ter internet na VM, acrescente `-nic user` ao comando. Deve abrir uma janela do QEMU com o menu de boot do Nexus OS.

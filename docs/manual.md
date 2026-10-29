@@ -34,7 +34,7 @@ O build gera `dist/nexus-os-poc-amd64.iso` e o `.sha256`. A RC1 validada é a c�
 
 ## Iniciar a ISO
 
-Use pelo menos **1536 MiB de RAM** com a ISO da RC1 e **2048 MiB** com a da RC2, que tem o desktop ([requisitos.md](requisitos.md)). A ISO tem boot BIOS (isolinux), então no Hyper-V use VM de Geração 1. Na tela do isolinux, aperte Enter.
+Use pelo menos **1536 MiB de RAM** com a ISO da RC1 e **2560 MiB** com a da RC2, que tem o desktop ([requisitos.md](requisitos.md)). A ISO tem boot BIOS (isolinux), então no Hyper-V use VM de Geração 1. Na tela do isolinux, aperte Enter.
 
 **QEMU no Linux** (com KVM se `/dev/kvm` existir; sem `-enable-kvm -cpu host` a emulação por software é bem mais lenta):
 
@@ -235,18 +235,18 @@ Use pelo menos a RAM recomendada com o desktop em [requisitos.md](requisitos.md)
 **QEMU no Linux, com janela** (`-vga std` é o vídeo que os testes usam; sem `-enable-kvm -cpu host` a emulação por software leva minutos até a sessão):
 
 ```bash
-qemu-system-x86_64 -enable-kvm -cpu host -m 2048 -smp 2 -vga std -cdrom dist/nexus-os-rc2-amd64.iso -boot d
+qemu-system-x86_64 -enable-kvm -cpu host -m 2560 -smp 2 -vga std -cdrom dist/nexus-os-rc2-amd64.iso -boot d
 ```
 
 O menu de boot do Nexus OS inicia sozinho em 5 segundos (Enter adianta). A janela do QEMU em si não foi exercitada pelos testes (eles usam `-display none` e a captura de tela do monitor do QEMU); a sessão foi verificada por `loginctl` e pelas capturas de `docs/img/`.
 
-**Hyper-V no Windows** (PowerShell como administrador; ISO em `C:\HyperV`). Mesmo procedimento da seção "Iniciar a ISO", com a ISO da RC2 e pelo menos 2048 MB de memória estática:
+**Hyper-V no Windows** (PowerShell como administrador; ISO em `C:\HyperV`). Mesmo procedimento da seção "Iniciar a ISO", com a ISO da RC2 e pelo menos 2560 MB de memória estática:
 
 ```powershell
 $vm = "nexus-rc2-lab"
-New-VM -Name $vm -Generation 1 -MemoryStartupBytes 2048MB -BootDevice CD -NoVHD
+New-VM -Name $vm -Generation 1 -MemoryStartupBytes 2560MB -BootDevice CD -NoVHD
 Set-VMProcessor -VMName $vm -Count 2
-Set-VMMemory -VMName $vm -DynamicMemoryEnabled $false -StartupBytes 2048MB
+Set-VMMemory -VMName $vm -DynamicMemoryEnabled $false -StartupBytes 2560MB
 Add-VMDvdDrive -VMName $vm -Path "C:\HyperV\nexus-os-rc2-amd64.iso"
 Connect-VMNetworkAdapter -VMName $vm -SwitchName "Default Switch"
 Start-VM -Name $vm
@@ -398,7 +398,7 @@ Saída esperada: seis linhas `<atalho>: código 0`.
 
 ## Requisitos
 
-RAM recomendada 1536 MiB para o núcleo (RC1) e **2048 MiB com o desktop (RC2)**; o mínimo medido é 896 MiB sem desktop (o Docker precisa carregar a imagem FRR) e 1536 MiB com desktop (menos que isso o `all` falha). Disco do guest não é usado (a live roda na memória); a ISO da RC2 ocupa 1236 MiB de mídia. Tabelas medidas e método: [requisitos.md](requisitos.md).
+RAM recomendada 1536 MiB para o núcleo (RC1) e **2560 MiB com o desktop (RC2)**; o mínimo medido é 896 MiB sem desktop (o Docker precisa carregar a imagem FRR) e 1792 MiB com desktop (menos que isso o `all` falha). Disco do guest não é usado (a live roda na memória); a ISO da RC2 ocupa 1691 MiB de mídia. Tabelas medidas e método: [requisitos.md](requisitos.md).
 
 ## Solução de problemas
 
