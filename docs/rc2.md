@@ -7,11 +7,11 @@ Segunda release candidate: a RC1 (núcleo da stack) mais o **ambiente gráfico**
 | Item | Valor |
 | --- | --- |
 | Arquivo | `dist/nexus-os-rc2-amd64.iso` (cópia da ISO do build limpo, com `.sha256` regenerado para esse nome) |
-| Commit do build | `f10dcaaae91e1673d83489aef9474a2238f9a3dd` (clone novo de `origin/marcos`) |
+| Commit do build | `fc572613` (clone novo de `origin/marcos`; a ISO anterior da rodada 5, SHA256 `8889f613...38aa`, é do commit `f10dcaa` e foi a testada no Hyper-V Geração 2) |
 | Data | 2026-11-03 |
 | Tamanho | 1990639616 bytes (1898 MiB) |
-| SHA256 | `8889f613e7807bb8b951eed484b701040a52ea916025eebdf6537f679ed138aa` |
-| Tempo do build | 1063 s (rodada 4: 1076 s; rodada 3: 816 s), um comando (`sudo scripts/build-iso.sh`), terminou com `Build completed successfully` |
+| SHA256 | `bb6d89c68970fb24bb6e35ec3db0a74a88490b257eed166729edb941ce673e58` |
+| Tempo do build | 1355 s (ISO anterior da rodada 5: 1063 s; rodada 4: 1076 s; rodada 3: 816 s), um comando (`sudo scripts/build-iso.sh`), terminou com `Build completed successfully` |
 | Ambiente do build | Debian 13 em VM Hyper-V com KVM, 4 vCPU, 6 GB estáticos |
 | Onde fica | na máquina do responsável (VM de build, pasta `dist/` do clone, fora do Git) |
 
@@ -25,7 +25,7 @@ Clone novo de `origin/marcos` em pasta nova, depois só `sudo scripts/build-iso.
 
 | Item | Valor |
 | --- | --- |
-| Tempo | 1063 s (clone novo; rodada 4: 1076 s) |
+| Tempo | 1355 s (clone novo; ISO anterior da rodada 5: 1063 s) |
 | Tamanho | 1990639616 bytes, +215728128 sobre a rodada 4 (1774911488), +1068941312 sobre a RC1 (921698304) |
 | Origem do aumento sobre a RC2 anterior | LibreOffice, Wireshark, VLC, GIMP, Inkscape, KeePassXC, ferramentas de rede, pacotes de idioma e os demais de `nexus-desktop.list.chroot` ([gui.md](gui.md)); o tema de ícones Nexus e os fundos pesam pouco ([branding.md](branding.md)) |
 
@@ -36,10 +36,10 @@ Todas as execuções abaixo são **com KVM**, exceto a indicada, na VM de build 
 | Teste | Resultado |
 | --- | --- |
 | Rodada 5: RED na ISO da rodada 4 (`--extra tests/desktop.sh`) | `FALHA:` em 42 asserções novas (M1 a M17, D9, D12), sem erro de sintaxe |
-| Rodada 5: smoke `desktop` na ISO final (`all`, 4096 MiB e 2560 MiB) | `OK: 8 teste(s) sem falha em 228 s` (`desktop=136s`, repouso 1171 MiB, pico 1973 MiB) e em 223 s com 2560 MiB (`desktop=139s`, repouso 947 MiB, pico 1892 MiB); com KVM |
+| Rodada 5: `all` na ISO final (commit `fc57261`), 4096 MiB e 2560 MiB | `OK: 8 teste(s) sem falha em 216 s` (`desktop=133s`, repouso 1095 MiB, pico 2006 MiB) e em 219 s com 2560 MiB (`desktop=141s`, repouso 909 MiB, pico 1863 MiB); com KVM |
 | Rodada 5: mutações do `desktop.sh` por `--extra` (18, uma por pedido, sem rebuild) | cada uma terminou em `FALHA:` com o prefixo do pedido (M1 a M17, D9 e D12); com KVM |
 | Rodada 5: `tests/manual.sh` | `OK: tests/manual.sh (13 bloco(s) do manual na ISO, 94 s, com KVM)`, depois de atualizar os blocos 10, 11 e 12 do manual para a barra e os 12 atalhos |
-| Rodada 5: `tests/run-fase3.sh dist/nexus-os-rc2-amd64.iso` (clone novo, commit `9a48124`) | `OK: tests/run-fase3.sh (9 testes)`: `lint-repo`, `docs`, `gui-spec`, `atalhos`, `identidade`, `iso`, `iso-smoke`, `requisitos` e `manual` (13 blocos); a execução anterior, no commit `2e79e84`, parou no `manual` porque os blocos 10 a 12 do manual ainda eram da barra antiga, e antes disso no `lint-repo` (SC2015 em `tests/gui-spec.sh`); os dois foram corrigidos; com KVM |
+| Rodada 5: `tests/run-fase3.sh dist/nexus-os-rc2-amd64.iso` (clone novo, commit `fc57261`) | `OK: tests/run-fase3.sh (9 testes)`: `lint-repo`, `docs`, `gui-spec`, `atalhos`, `identidade`, `iso`, `iso-smoke`, `requisitos` e `manual` (13 blocos); a execução anterior, no commit `2e79e84`, parou no `manual` porque os blocos 10 a 12 do manual ainda eram da barra antiga, e antes disso no `lint-repo` (SC2015 em `tests/gui-spec.sh`); os dois foram corrigidos; com KVM |
 | Rodada 5: capturas do QEMU olhadas | barra centralizada, relógio com hora e data, menu aberto pela tecla Super, GIMP na busca, realce e dica do botão da logo, `nexus-barra esquerda`, `nexus-icone`, janela "Ícones dos aplicativos", bateria simulada (pasta falsa) e `xfce4-session-logout --halt` desligando a VM; "Monitor": 0 janelas; com KVM |
 | Rodada 5: teste manual no Hyper-V Geração 2 (03/11/2026, ISO `8889f613...38aa`, Marcos, não conta como segunda pessoa) | N1 a N20 passaram; ressalvas: janela do Terminal e do Arquivos não agrupa com o ícone fixado da barra (docklike sem `StartupWMClass`, corrigido no repositório, falta nova ISO), grupo da barra cerca de 80 px à esquerda do centro, ícone "user" do Thunar fora do estilo, menu lembra o Windows 7; a bateria do notebook apareceu com 100% |
 | `tests/run-fase3.sh dist/nexus-os-rc2-amd64.iso` | `OK: tests/run-fase3.sh (9 testes)`: `lint-repo`, `docs`, `gui-spec`, `atalhos`, `identidade`, `iso` (36 s), `iso-smoke all`, `requisitos` e `manual` (clone limpo, ISO da rodada 4) |
