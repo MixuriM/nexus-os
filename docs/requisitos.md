@@ -21,12 +21,12 @@ Recomendação: **1536 MiB de RAM** e mídia: pendrive (ou ISO anexada em VM) co
 
 ## Com ambiente gráfico
 
-Medido em 2026-11-03, **com KVM**, na ISO da RC2 (ISO do build limpo do commit `f10dcaa`, rodada 5, [rc2.md](rc2.md); os mínimos de RAM e o tempo até a sessão são das rodadas 3 e 4 e não foram repetidos), guest QEMU com 2 vCPU, `-vga std` e sem rede. As execuções completas do `nexus-smoke all` (8 testes, o último é o `desktop`) seguem o método abaixo: a primeira, com 4096 MiB, coleta o pico e a segunda, com a RAM recomendada, valida.
+Medido em 2026-11-03, **com KVM**, na ISO da RC2 (ISO do build limpo do commit `fc57261`, rodada 5, [rc2.md](rc2.md); os mínimos de RAM e o tempo até a sessão são das rodadas 3 e 4 e não foram repetidos), guest QEMU com 2 vCPU, `-vga std` e sem rede. As execuções completas do `nexus-smoke all` (8 testes, o último é o `desktop`) seguem o método abaixo: a primeira, com 4096 MiB, coleta o pico e a segunda, com a RAM recomendada, valida.
 
 | Item | Valor | Unidade | Como foi medido |
 | --- | --- | --- | --- |
-| Desktop: RAM em repouso | 1171 | MiB | `NEXUS-SMOKE-MEM repouso` do `nexus-smoke all` com 4096 MiB (947 MiB no de 2560 MiB; varia entre execuções, issue 33) |
-| Desktop: RAM de pico | 1973 | MiB | maior `used` durante `nexus-smoke all` com 4096 MiB (8 testes, amostrado a cada 5 s) |
+| Desktop: RAM em repouso | 1095 | MiB | `NEXUS-SMOKE-MEM repouso` do `nexus-smoke all` com 4096 MiB (909 MiB no de 2560 MiB; varia entre execuções, issue 33) |
+| Desktop: RAM de pico | 2006 | MiB | maior `used` durante `nexus-smoke all` com 4096 MiB (8 testes, amostrado a cada 5 s) |
 | Desktop: RAM recomendada | 2560 | MiB | `ceil((pico + 512) / 512) * 512`, validada com `NEXUS_SMOKE_MEM=2560` (abaixo) |
 | Desktop: disco do root em memória | 28 | MiB | `df -m /` (overlay sobre tmpfs; a live não usa disco do guest); o Docker segue com 193 MiB |
 | Desktop: ISO (bytes) | 1990639616 | bytes | tamanho do arquivo (1898 MiB) |
@@ -34,16 +34,16 @@ Medido em 2026-11-03, **com KVM**, na ISO da RC2 (ISO do build limpo do commit `
 | Desktop: tempo até a sessão (s) | 23 | s | (rodada 4) início do último processo do desktop (`xfce4-session`, `xfce4-panel`, `xfwm4`, `xfdesktop`) em segundos de uptime do guest: 23,7 e 22,6 |
 | Desktop: mínimo de RAM do tests/iso.sh (MiB) | 512 | MiB | `NEXUS_ISO_MEM`: 1024, 768 e 512 chegam ao `login:` em 36 s; valores abaixo de 512 não foram testados |
 | Desktop: mínimo de RAM dos smokes (MiB) | 1792 | MiB | `NEXUS_SMOKE_MEM` com o `all`: 1792 passa (307 s, o `desktop` leva 202 s); 1536, 1280 e 1024 falham |
-| Desktop: SHA256 | `8889f613e7807bb8b951eed484b701040a52ea916025eebdf6537f679ed138aa` | | `sha256sum` da ISO, o mesmo de [rc2.md](rc2.md) |
+| Desktop: SHA256 | `bb6d89c68970fb24bb6e35ec3db0a74a88490b257eed166729edb941ce673e58` | | `sha256sum` da ISO, o mesmo de [rc2.md](rc2.md) |
 
-Recomendação com o desktop: **2560 MiB de RAM** para a VM e mídia: pendrive (ou ISO anexada em VM) com capacidade de pelo menos o tamanho da ISO (1898 MiB na rodada 5). A ISO é feita só para pendrive e VM, por decisão do grupo, e o tamanho dela não tem teto de mídia óptica. O desktop e os programas somam 375 MiB ao repouso medido na RC1 (796 MiB) e 1160 MiB ao pico (813 MiB), por causa do XFCE, do tema de ícones, da fonte Inter e dos programas do desktop (LibreOffice, Wireshark, GIMP e outros; veja "Resultado").
+Recomendação com o desktop: **2560 MiB de RAM** para a VM e mídia: pendrive (ou ISO anexada em VM) com capacidade de pelo menos o tamanho da ISO (1898 MiB na rodada 5). A ISO é feita só para pendrive e VM, por decisão do grupo, e o tamanho dela não tem teto de mídia óptica. O desktop e os programas somam 299 MiB ao repouso medido na RC1 (796 MiB) e 1193 MiB ao pico (813 MiB), por causa do XFCE, do tema de ícones, da fonte Inter e dos programas do desktop (LibreOffice, Wireshark, GIMP e outros; veja "Resultado").
 
 ### Execuções completas do `all`
 
 | RAM do guest (MiB) | Resultado | Repouso | Pico |
 | --- | --- | --- | --- |
-| 4096 (coleta do pico, rodada 5) | `OK: 8 teste(s) sem falha em 228 s`, `desktop=136s` | 1171 MiB | 1973 MiB |
-| 2560 (recomendada, rodada 5) | `OK: 8 teste(s) sem falha em 223 s`, `desktop=139s` | 947 MiB | 1892 MiB |
+| 4096 (coleta do pico, rodada 5) | `OK: 8 teste(s) sem falha em 216 s`, `desktop=133s` | 1095 MiB | 2006 MiB |
+| 2560 (recomendada, rodada 5) | `OK: 8 teste(s) sem falha em 219 s`, `desktop=141s` | 909 MiB | 1863 MiB |
 | 4096 (coleta do pico, rodada 3) | `OK: 8 teste(s) sem falha em 181 s`, `desktop=64s` | 1115 MiB | 1827 MiB |
 | 2560 (recomendada, rodada 3) | `OK: 8 teste(s) sem falha em 172 s`, `desktop=66s` | 950 MiB | 1722 MiB |
 | 2048 | `OK` em 160 s, `desktop=78s` | 871 MiB | 1730 MiB |

@@ -126,8 +126,8 @@ Medidos com KVM, na ISO da RC2 ([docs/rc2.md](docs/rc2.md)); método e limitaç�
 
 | Item | Valor |
 | --- | --- |
-| RAM recomendada | **2560 MiB** (validada com o `all` de 8 testes, `OK` em 223 s na rodada 5) |
-| RAM em repouso e de pico | 1171 MiB e 1973 MiB (guest de 4096 MiB, rodada 5) |
+| RAM recomendada | **2560 MiB** (validada com o `all` de 8 testes, `OK` em 219 s na rodada 5) |
+| RAM em repouso e de pico | 1095 MiB e 2006 MiB (guest de 4096 MiB, rodada 5) |
 | Mínimo de RAM dos smokes | 1792 MiB (o `all` passa, bem mais lento; 1536, 1280 e 1024 MiB falham) |
 | Mínimo de RAM do `tests/iso.sh` | 512 MiB (menor valor testado) |
 | ISO | 1990639616 bytes (1898 MiB), +1068941312 bytes sobre a RC1 (mídia: pendrive, ou a ISO anexada em VM, com capacidade de pelo menos o tamanho da ISO) |
