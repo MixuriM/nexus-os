@@ -105,7 +105,8 @@ O que vem de pacote do Debian 13 `main` mantém a licença do pacote (lida em `/
 | Item | Valor |
 | --- | --- |
 | ISO da RC2 anterior (identidade com Papirus-Dark e Inter, sem os programas novos) | 1295843328 bytes |
-| ISO da RC2 atual (rodada 3) | 1774911488 bytes |
+| ISO da RC2 (rodada 4) | 1774911488 bytes |
+| ISO da RC2 atual (rodada 5, com os 39 aplicativos novos) | 1990639616 bytes (+215728128 sobre a rodada 4) |
 | Diferença | +479068160 bytes (456,9 MiB): quase tudo são os programas (LibreOffice, Wireshark, VLC, GIMP, Inkscape e demais); o tema de ícones Nexus, os fundos com ruído e o menu de boot somam poucos MiB. A estimativa de download feita antes do build era de cerca de 380 MB |
 | Origem da diferença | os pacotes dos programas e os de idioma; o `papirus-icon-theme` (22,6 MB no `.deb`) e a fonte Inter já vinham da RC2 anterior |
 

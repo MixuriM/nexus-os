@@ -338,15 +338,15 @@ test -f /usr/share/backgrounds/nexus-os/papel-de-parede.png
 imagem=$(como_user xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image)
 [ "$(readlink -f "$imagem")" = /usr/share/backgrounds/nexus-os/papel-de-parede.png ]
 [ "$(como_user xfconf-query -c xsettings -p /Net/ThemeName)" = Nexus-Dark ]
-[ "$(como_user xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-title)" = "Nexus OS" ]
+[ "$(como_user xfconf-query -c xfce4-panel -p /plugins/plugin-2/button-title)" = "Menu do Nexus OS (tecla Windows)" ]
 grep -qx 'ID=debian' /etc/os-release
 ```
 
-Barra inferior, idioma e programas (a barra tem a lista de janelas e não tem o seletor de áreas de trabalho; o sistema está em português do Brasil, com o nome de máquina `nexus-os`; os programas e a documentação em HTML existem):
+Barra inferior, idioma e programas (a barra tem o docklike, com as janelas abertas, e não tem o seletor de áreas de trabalho; o sistema está em português do Brasil, com o nome de máquina `nexus-os`; os programas e a documentação em HTML existem):
 
 ```bash nexus-exec
 plugins=$(como_user xfconf-query -c xfce4-panel -lv | awk '$1 ~ /^\/plugins\/plugin-[0-9]+$/ {print $2}')
-grep -qx tasklist <<<"$plugins"
+grep -qx docklike <<<"$plugins"
 [ -z "$(grep -x pager <<<"$plugins")" ]
 [ "$(hostname)" = nexus-os ]
 grep -qx 'LANG=pt_BR.UTF-8' /etc/default/locale
@@ -362,11 +362,11 @@ Saída esperada: `barra, idioma e programas ok`.
 Atalhos: os dez existem no menu e na área de trabalho, são idênticos e válidos.
 
 ```bash nexus-exec
-[ "$(ls /usr/share/applications/nexus-*.desktop | wc -l)" -eq 10 ]
+[ "$(ls /usr/share/applications/nexus-*.desktop | wc -l)" -eq 12 ]
 [ "$(ls /home/user/Desktop/nexus-*.desktop | wc -l)" -eq 10 ]
 for a in /usr/share/applications/nexus-*.desktop; do
     desktop-file-validate "$a"
-    cmp "$a" "/home/user/Desktop/$(basename "$a")"
+    case $a in */nexus-barra.desktop | */nexus-icones.desktop) ;; *) cmp "$a" "/home/user/Desktop/$(basename "$a")" ;; esac
     grep -m1 '^Name=' "$a"
 done
 ```
@@ -415,7 +415,7 @@ Saída esperada: seis linhas `<atalho>: código 0`.
 
 ## Requisitos
 
-RAM recomendada 1536 MiB para o núcleo (RC1) e **2560 MiB com o desktop (RC2)**; o mínimo medido é 896 MiB sem desktop (o Docker precisa carregar a imagem FRR) e 1792 MiB com desktop (menos que isso o `all` falha). Disco do guest não é usado (a live roda na memória); a mídia é um pendrive (ou a ISO anexada em VM) com capacidade de pelo menos o tamanho da ISO (1960 MiB na rodada 5 da RC2). Tabelas medidas e método: [requisitos.md](requisitos.md).
+RAM recomendada 1536 MiB para o núcleo (RC1) e **2560 MiB com o desktop (RC2)**; o mínimo medido é 896 MiB sem desktop (o Docker precisa carregar a imagem FRR) e 1792 MiB com desktop (menos que isso o `all` falha). Disco do guest não é usado (a live roda na memória); a mídia é um pendrive (ou a ISO anexada em VM) com capacidade de pelo menos o tamanho da ISO (1898 MiB na rodada 5 da RC2). Tabelas medidas e método: [requisitos.md](requisitos.md).
 
 ## Solução de problemas
 

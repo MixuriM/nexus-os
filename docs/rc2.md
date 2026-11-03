@@ -7,15 +7,15 @@ Segunda release candidate: a RC1 (núcleo da stack) mais o **ambiente gráfico**
 | Item | Valor |
 | --- | --- |
 | Arquivo | `dist/nexus-os-rc2-amd64.iso` (cópia da ISO do build limpo, com `.sha256` regenerado para esse nome) |
-| Commit do build | `1858d1761249922e3a3167406ff895a2f0c9a84f` (clone novo de `origin/marcos`) |
-| Data | 2026-10-29 |
-| Tamanho | 1774911488 bytes |
-| SHA256 | `f5516d5635620276cf07013337a9cd7e42464c2a268c5c03850cc99b68acfe30` |
-| Tempo do build | 1076 s (rodada 3: 816 s), um comando (`sudo scripts/build-iso.sh`), terminou com `Build completed successfully` |
+| Commit do build | `f10dcaaae91e1673d83489aef9474a2238f9a3dd` (clone novo de `origin/marcos`) |
+| Data | 2026-11-03 |
+| Tamanho | 1990639616 bytes (1898 MiB) |
+| SHA256 | `8889f613e7807bb8b951eed484b701040a52ea916025eebdf6537f679ed138aa` |
+| Tempo do build | 1063 s (rodada 4: 1076 s; rodada 3: 816 s), um comando (`sudo scripts/build-iso.sh`), terminou com `Build completed successfully` |
 | Ambiente do build | Debian 13 em VM Hyper-V com KVM, 4 vCPU, 6 GB estáticos |
 | Onde fica | na máquina do responsável (VM de build, pasta `dist/` do clone, fora do Git) |
 
-Esta é a **quarta rodada da RC2**: a mesma lista de pacotes da terceira geração, com o módulo `floppy` bloqueado (o disquete virtual do Hyper-V Geração 1 deixa de aparecer, `etc/modprobe.d/nexus-os-sem-disquete.conf` e `update-initramfs` no hook) e o LibreOffice sem o aviso de primeira execução (`etc/skel/.config/libreoffice/4/user/registrymodifications.xcu`, [branding.md](branding.md)). O teste manual de 28/10/2026 no Hyper-V Geração 1 foi feito com a ISO da terceira geração (commit `e4abbf0`, SHA256 `c1a1d5c2...0eba`, 1774911488 bytes, build de 816 s), anterior à correção do disquete. A primeira (commit `7ddf021`) tinha o tema Greybird e ícones Tango; a segunda (commit `007f7ba`, SHA256 `a21a7eb9...`, 1295843328 bytes) trouxe a logo original, o tema Nexus-Dark, os ícones Papirus-Dark e a fonte Inter. Depois de a segunda ser testada no Hyper-V Geração 1, a terceira refez a barra (uma só, embaixo, com a lista de janelas), criou o tema de ícones Nexus, tirou as faixas dos fundos, trocou o menu de boot, passou o sistema para português do Brasil com teclado ABNT2, fuso de Brasília e nome de máquina `nexus-os`, acrescentou os programas (veja [gui.md](gui.md), "Programas incluídos"), a documentação em HTML, o atalho Configurações e a tecla Print. Todos os números abaixo são da ISO da rodada 4, salvo onde indicado.
+Esta é a **quinta rodada da RC2** (03/11/2026): as melhorias M1 a M19 pedidas depois do teste manual de 29/10/2026 (barra com menu whisker e docklike, relógio em duas linhas, tecla Super, ícones e opção de ícone padrão, 39 aplicativos novos; detalhes em [gui.md](gui.md)), sem loja de aplicativos. O teste manual de 29/10/2026 no Hyper-V Geração 2 foi feito com a ISO de SHA256 `f5516d56...fe30` (rodada 4), anterior às melhorias. A rodada 4 foi: a mesma lista de pacotes da terceira geração, com o módulo `floppy` bloqueado (o disquete virtual do Hyper-V Geração 1 deixa de aparecer, `etc/modprobe.d/nexus-os-sem-disquete.conf` e `update-initramfs` no hook) e o LibreOffice sem o aviso de primeira execução (`etc/skel/.config/libreoffice/4/user/registrymodifications.xcu`, [branding.md](branding.md)). O teste manual de 28/10/2026 no Hyper-V Geração 1 foi feito com a ISO da terceira geração (commit `e4abbf0`, SHA256 `c1a1d5c2...0eba`, 1774911488 bytes, build de 816 s), anterior à correção do disquete. A primeira (commit `7ddf021`) tinha o tema Greybird e ícones Tango; a segunda (commit `007f7ba`, SHA256 `a21a7eb9...`, 1295843328 bytes) trouxe a logo original, o tema Nexus-Dark, os ícones Papirus-Dark e a fonte Inter. Depois de a segunda ser testada no Hyper-V Geração 1, a terceira refez a barra (uma só, embaixo, com a lista de janelas), criou o tema de ícones Nexus, tirou as faixas dos fundos, trocou o menu de boot, passou o sistema para português do Brasil com teclado ABNT2, fuso de Brasília e nome de máquina `nexus-os`, acrescentou os programas (veja [gui.md](gui.md), "Programas incluídos"), a documentação em HTML, o atalho Configurações e a tecla Print. Todos os números abaixo são da ISO da rodada 4, salvo as linhas "Rodada 5" e onde indicado.
 
 Os documentos desta pasta que entram na ISO (`/usr/share/nexus-os/docs`) são os do commit do build. `rc2.md` e `requisitos.md` (seção "Com ambiente gráfico") têm o SHA256 da ISO e por isso nascem depois dela: a ISO não os contém. Esta ISO é a do último commit com todos os documentos e testes. Os mínimos de RAM e o tempo sem KVM abaixo foram medidos na rodada 3 (ISO do commit `d9c40b8`, mesma lista de pacotes); a rodada 4 repetiu o `run-fase3` e o `all` com 4096 e 2560 MiB.
 
@@ -25,8 +25,8 @@ Clone novo de `origin/marcos` em pasta nova, depois só `sudo scripts/build-iso.
 
 | Item | Valor |
 | --- | --- |
-| Tempo | 1076 s (com o clone; rodada 3: 816 s, +260 s) |
-| Tamanho | 1774911488 bytes (igual ao da rodada 3), +853213184 sobre a RC1 (921698304) e +479068160 sobre a RC2 anterior (1295843328) |
+| Tempo | 1063 s (clone novo; rodada 4: 1076 s) |
+| Tamanho | 1990639616 bytes, +215728128 sobre a rodada 4 (1774911488), +1068941312 sobre a RC1 (921698304) |
 | Origem do aumento sobre a RC2 anterior | LibreOffice, Wireshark, VLC, GIMP, Inkscape, KeePassXC, ferramentas de rede, pacotes de idioma e os demais de `nexus-desktop.list.chroot` ([gui.md](gui.md)); o tema de ícones Nexus e os fundos pesam pouco ([branding.md](branding.md)) |
 
 ## Validação da RC2
@@ -35,6 +35,12 @@ Todas as execuções abaixo são **com KVM**, exceto a indicada, na VM de build 
 
 | Teste | Resultado |
 | --- | --- |
+| Rodada 5: RED na ISO da rodada 4 (`--extra tests/desktop.sh`) | `FALHA:` em 42 asserções novas (M1 a M17, D9, D12), sem erro de sintaxe |
+| Rodada 5: smoke `desktop` na ISO final (`all`, 4096 MiB e 2560 MiB) | `OK: 8 teste(s) sem falha em 228 s` (`desktop=136s`, repouso 1171 MiB, pico 1973 MiB) e em 223 s com 2560 MiB (`desktop=139s`, repouso 947 MiB, pico 1892 MiB); com KVM |
+| Rodada 5: mutações do `desktop.sh` por `--extra` (18, uma por pedido, sem rebuild) | cada uma terminou em `FALHA:` com o prefixo do pedido (M1 a M17, D9 e D12); com KVM |
+| Rodada 5: `tests/manual.sh` | `OK: tests/manual.sh (13 bloco(s) do manual na ISO, 94 s, com KVM)`, depois de atualizar os blocos 10, 11 e 12 do manual para a barra e os 12 atalhos |
+| Rodada 5: `tests/run-fase3.sh` | `lint-repo`, `docs`, `gui-spec`, `atalhos`, `identidade`, `iso` (40 s), `iso-smoke all` e `requisitos` OK no commit `2e79e84` (o `lint-repo` pegou um SC2015 em `tests/gui-spec.sh` na primeira execução, corrigido); o `manual` passou em execução separada (linha acima) |
+| Rodada 5: capturas do QEMU olhadas | barra centralizada, relógio com hora e data, menu aberto pela tecla Super, GIMP na busca, realce e dica do botão da logo, `nexus-barra esquerda`, `nexus-icone`, janela "Ícones dos aplicativos", bateria simulada (pasta falsa) e `xfce4-session-logout --halt` desligando a VM; "Monitor": 0 janelas; com KVM |
 | `tests/run-fase3.sh dist/nexus-os-rc2-amd64.iso` | `OK: tests/run-fase3.sh (9 testes)`: `lint-repo`, `docs`, `gui-spec`, `atalhos`, `identidade`, `iso` (36 s), `iso-smoke all`, `requisitos` e `manual` (clone limpo, ISO da rodada 4) |
 | `iso-smoke all` dentro do `run-fase3.sh`, 4096 MiB | `OK: 8 teste(s) sem falha em 138 s` (`desktop` 54 s); repouso 1084 MiB, pico 1852 MiB |
 | (rodada 3) `iso-smoke all`, `NEXUS_SMOKE_MEM=4096` (coleta do pico) | `OK: 8 teste(s) sem falha em 181 s` (`desktop` 64 s); pico 1827 MiB |
