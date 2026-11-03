@@ -1,0 +1,20 @@
+#!/bin/sh
+# nexus-barra centro|esquerda|alternar: menu e ícones da barra no centro (padrão) ou no canto esquerdo.
+# Liga ou desliga a expansão do espaçador da esquerda (plugin-1 de /etc/xdg/xfce4/panel/default.xml) e
+# reinicia o painel. Vale só para esta sessão: a live não guarda a configuração ao desligar.
+set -eu
+
+prop=/plugins/plugin-1/expand
+case ${1:-} in
+    centro) novo=true ;;
+    esquerda) novo=false ;;
+    alternar)
+        if [ "$(xfconf-query -c xfce4-panel -p "$prop")" = true ]; then novo=false; else novo=true; fi
+        ;;
+    *)
+        echo "uso: nexus-barra centro|esquerda|alternar" >&2
+        exit 2
+        ;;
+esac
+xfconf-query -c xfce4-panel -p "$prop" -s "$novo"
+xfce4-panel -r

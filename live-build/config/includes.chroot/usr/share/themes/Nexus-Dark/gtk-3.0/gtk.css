@@ -65,11 +65,22 @@
     color: @nexus_text;
     padding: 2px 8px;
 }
-.xfce4-panel button:hover { background-color: alpha(@nexus_blue_bright, 0.20); border-color: alpha(@nexus_blue_bright, 0.35); }
-.xfce4-panel button:active { background-color: alpha(@nexus_magenta, 0.45); border-color: @nexus_magenta_bright; }
+/* Só o botão da logo (menu) ganha realce: azul translúcido ao passar o mouse, mais forte ao clicar ou com o menu aberto */
+#whiskermenu-button { border-radius: 10px; padding: 2px 6px; }
+#whiskermenu-button:hover { background-color: alpha(@nexus_blue_bright, 0.30); border-color: alpha(@nexus_blue_bright, 0.55); }
+#whiskermenu-button:active, #whiskermenu-button:checked { background-color: alpha(@nexus_blue_bright, 0.55); border-color: @nexus_blue_bright; }
+/* O ícone do volume fica menor que o da logo (o plugin usa o mesmo tamanho do painel) */
+#pulseaudio-button image { -gtk-icon-transform: scale(0.7); }
 /* Janela aberta: botão apagado; a janela em foco ganha fundo azul e linha magenta embaixo, como a barra do Windows */
 .xfce4-panel button:checked { background-color: alpha(@nexus_blue_bright, 0.28); border-color: alpha(@nexus_blue_bright, 0.45); border-bottom: 2px solid @nexus_magenta_bright; }
 .xfce4-panel label { color: @nexus_text; }
+
+/* Menu de aplicativos (whiskermenu): cantos arredondados, fundo translúcido, busca e ícones grandes */
+#whiskermenu-window { background-color: alpha(@nexus_bg, 0.94); border: 1px solid @nexus_border; border-radius: 16px; }
+#whiskermenu-window .search-area entry { border-radius: 12px; padding: 8px 12px; }
+#whiskermenu-window .categories button { border-radius: 10px; }
+#whiskermenu-window .commands-area button { border-radius: 10px; }
+#whiskermenu-window treeview.view, #whiskermenu-window .contents .view { background-color: transparent; }
 
 /* Menus, botões e seleção */
 menu, .menu, .popup { background-color: @nexus_bg; border: 1px solid @nexus_border; border-radius: 8px; }

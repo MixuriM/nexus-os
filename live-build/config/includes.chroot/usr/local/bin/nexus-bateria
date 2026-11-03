@@ -1,0 +1,39 @@
+#!/bin/sh
+# Inclui o plugin de energia (ícone da bateria com a porcentagem) na barra, antes do relógio, só em máquina com
+# bateria. Em VM não existe /sys/class/power_supply/BAT*: nada muda. Roda no início da sessão (autostart).
+# NEXUS_POWER_SUPPLY troca a pasta de busca (teste) e NEXUS_BATERIA_TESTE=1 só imprime o que faria.
+set -eu
+
+pasta=${NEXUS_POWER_SUPPLY:-/sys/class/power_supply}
+set -- "$pasta"/BAT*
+if [ ! -e "$1" ]; then
+    echo nada
+    exit 0
+fi
+if [ "${NEXUS_BATERIA_TESTE:-0}" = 1 ]; then
+    echo adicionar
+    exit 0
+fi
+
+# O painel precisa estar no ar para ler o xfconf.
+i=0
+while ! pgrep -u "$(id -u)" -x xfce4-panel >/dev/null && [ "$i" -lt 30 ]; do
+    sleep 1
+    i=$((i + 1))
+done
+if xfconf-query -c xfce4-panel -lv | grep -q 'power-manager-plugin$'; then
+    echo nada
+    exit 0
+fi
+ids=$(xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids | grep -E '^[0-9]+$')
+relogio=$(echo "$ids" | tail -n 1)
+novo=$(($(echo "$ids" | sort -n | tail -n 1) + 1))
+lista=
+for id in $(echo "$ids" | head -n -1) "$novo" "$relogio"; do
+    lista="$lista -t int -s $id"
+done
+xfconf-query -c xfce4-panel -p "/plugins/plugin-$novo" -n -t string -s power-manager-plugin
+# shellcheck disable=SC2086  # a lista tem de virar vários argumentos
+xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids -a $lista
+xfce4-panel -r
+echo adicionar

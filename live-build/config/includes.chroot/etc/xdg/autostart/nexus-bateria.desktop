@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Bateria do Nexus OS
+Exec=/usr/local/bin/nexus-bateria
+OnlyShowIn=XFCE;
+NoDisplay=true

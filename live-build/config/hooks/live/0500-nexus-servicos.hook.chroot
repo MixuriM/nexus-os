@@ -47,3 +47,6 @@ test -f /usr/share/nexus-os/docs-html/index.html
 
 # Disquete virtual do Hyper-V Geração 1: o floppy.ko está no initramfs, gerado antes do includes.chroot; refaz para o bloqueio de /etc/modprobe.d valer já no boot
 update-initramfs -u -k all
+
+# Rodada 5 da RC2: comandos da barra, da bateria e da opção de ícone padrão
+chmod 0755 /usr/local/bin/nexus-barra /usr/local/bin/nexus-bateria /usr/local/bin/nexus-icone /usr/local/bin/nexus-icones /usr/local/bin/nexus-icones-janela
