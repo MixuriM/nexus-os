@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Posição da barra
+Comment=Alterna o menu e os ícones da barra entre o centro e a esquerda, nesta sessão
+Icon=nexus-barra
+Exec=nexus-barra alternar
+Terminal=false
+Categories=X-Nexus-OS;

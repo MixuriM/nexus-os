@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Barra do Nexus OS (F3.17): uma barra só, embaixo e de ponta a ponta, como no Windows. Da esquerda para a
-     direita: menu Nexus OS, lançadores, lista das janelas abertas (cresce até a bandeja), bandeja, som, relógio,
-     usuário e "mostrar a área de trabalho". Sem seletor de áreas de trabalho e sem nada em cima.
+     direita: espaçador, menu (whiskermenu, só o ícone da logo), docklike (aplicativos fixados e janelas abertas,
+     só ícones), espaçador, bandeja, som e relógio (hora em cima, data embaixo). Os dois espaçadores crescem e
+     centralizam menu e ícones; "nexus-barra esquerda" desliga o da esquerda. A bateria (power-manager-plugin)
+     só entra em máquina com bateria, pelo nexus-bateria. Os aplicativos fixados ficam em
+     /etc/xdg/xfce4/panel/docklike.rc.
      O xfce4-panel copia este arquivo para o xfconf do usuário na primeira sessão. -->
 <channel name="xfce4-panel" version="1.0">
   <property name="configver" type="int" value="2"/>
@@ -12,8 +15,8 @@
       <property name="position" type="string" value="p=10;x=0;y=0"/>
       <property name="length" type="uint" value="100"/>
       <property name="position-locked" type="bool" value="true"/>
-      <property name="icon-size" type="uint" value="28"/>
-      <property name="size" type="uint" value="46"/>
+      <property name="icon-size" type="uint" value="32"/>
+      <property name="size" type="uint" value="48"/>
       <property name="plugin-ids" type="array">
         <value type="int" value="1"/>
         <value type="int" value="2"/>
@@ -22,72 +25,58 @@
         <value type="int" value="5"/>
         <value type="int" value="6"/>
         <value type="int" value="7"/>
-        <value type="int" value="8"/>
-        <value type="int" value="9"/>
-        <value type="int" value="10"/>
-        <value type="int" value="11"/>
-        <value type="int" value="12"/>
-        <value type="int" value="13"/>
-        <value type="int" value="14"/>
       </property>
     </property>
   </property>
   <property name="plugins" type="empty">
-    <property name="plugin-1" type="string" value="applicationsmenu">
-      <property name="button-title" type="string" value="Nexus OS"/>
+    <property name="plugin-1" type="string" value="separator">
+      <property name="style" type="uint" value="0"/>
+      <property name="expand" type="bool" value="true"/>
+    </property>
+    <property name="plugin-2" type="string" value="whiskermenu">
+      <property name="button-title" type="string" value="Menu do Nexus OS (tecla Windows)"/>
       <property name="button-icon" type="string" value="nexus-os"/>
-      <property name="show-button-title" type="bool" value="true"/>
+      <property name="show-button-title" type="bool" value="false"/>
+      <property name="show-button-icon" type="bool" value="true"/>
+      <property name="view-mode" type="int" value="0"/>
+      <property name="launcher-icon-size" type="int" value="4"/>
+      <property name="launcher-show-description" type="bool" value="false"/>
+      <property name="category-icon-size" type="int" value="1"/>
+      <property name="position-commands-alternate" type="bool" value="true"/>
+      <property name="position-search-alternate" type="bool" value="true"/>
+      <property name="position-categories-alternate" type="bool" value="true"/>
+      <property name="default-category" type="int" value="2"/>
+      <property name="profile-shape" type="int" value="2"/>
+      <property name="menu-width" type="int" value="700"/>
+      <property name="menu-height" type="int" value="560"/>
+      <property name="menu-opacity" type="int" value="94"/>
+      <property name="show-command-settings" type="bool" value="false"/>
+      <property name="show-command-lockscreen" type="bool" value="false"/>
+      <property name="show-command-switchuser" type="bool" value="false"/>
+      <property name="show-command-suspend" type="bool" value="false"/>
+      <property name="show-command-hibernate" type="bool" value="false"/>
+      <property name="show-command-menueditor" type="bool" value="false"/>
+      <property name="show-command-profile" type="bool" value="false"/>
+      <property name="show-command-logout" type="bool" value="true"/>
+      <property name="show-command-restart" type="bool" value="true"/>
+      <property name="show-command-shutdown" type="bool" value="true"/>
     </property>
-    <property name="plugin-2" type="string" value="separator">
+    <property name="plugin-3" type="string" value="docklike"/>
+    <property name="plugin-4" type="string" value="separator">
       <property name="style" type="uint" value="0"/>
+      <property name="expand" type="bool" value="true"/>
     </property>
-    <property name="plugin-3" type="string" value="launcher">
-      <property name="items" type="array">
-        <value type="string" value="nexus-terminal.desktop"/>
-      </property>
-    </property>
-    <property name="plugin-4" type="string" value="launcher">
-      <property name="items" type="array">
-        <value type="string" value="xfce4-file-manager.desktop"/>
-      </property>
-    </property>
-    <property name="plugin-5" type="string" value="launcher">
-      <property name="items" type="array">
-        <value type="string" value="firefox-esr.desktop"/>
-      </property>
-    </property>
-    <property name="plugin-6" type="string" value="launcher">
-      <property name="items" type="array">
-        <value type="string" value="nexus-virt-manager.desktop"/>
-      </property>
-    </property>
-    <property name="plugin-7" type="string" value="launcher">
-      <property name="items" type="array">
-        <value type="string" value="nexus-configuracoes.desktop"/>
-      </property>
-    </property>
-    <property name="plugin-8" type="string" value="separator">
-      <property name="style" type="uint" value="0"/>
-    </property>
-    <property name="plugin-9" type="string" value="tasklist">
-      <property name="grouping" type="uint" value="0"/>
-      <property name="flat-buttons" type="bool" value="true"/>
-      <property name="show-labels" type="bool" value="true"/>
-      <property name="show-handle" type="bool" value="false"/>
-      <property name="include-all-workspaces" type="bool" value="true"/>
-      <property name="middle-button-behavior" type="uint" value="2"/>
-    </property>
-    <property name="plugin-10" type="string" value="systray">
+    <property name="plugin-5" type="string" value="systray">
       <property name="square-icons" type="bool" value="true"/>
     </property>
-    <property name="plugin-11" type="string" value="pulseaudio"/>
-    <property name="plugin-12" type="string" value="clock">
+    <property name="plugin-6" type="string" value="pulseaudio"/>
+    <property name="plugin-7" type="string" value="clock">
       <property name="mode" type="uint" value="2"/>
-      <property name="digital-layout" type="uint" value="3"/>
+      <property name="digital-layout" type="uint" value="1"/>
       <property name="digital-time-format" type="string" value="%R"/>
       <property name="digital-date-format" type="string" value="%d/%m/%Y"/>
+      <property name="digital-time-font" type="string" value="Inter Bold 11"/>
+      <property name="digital-date-font" type="string" value="Inter 9"/>
     </property>
-    <property name="plugin-13" type="string" value="actions"/>
-    <property name="plugin-14" type="string" value="showdesktop"/>
   </property>
 </channel>
