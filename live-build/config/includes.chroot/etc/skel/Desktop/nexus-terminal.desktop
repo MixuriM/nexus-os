@@ -5,4 +5,5 @@ Comment=Abre o terminal gráfico do Nexus OS
 Icon=nexus-terminal
 Exec=xfce4-terminal --disable-server "--title=Terminal do Nexus OS"
 Terminal=false
+StartupWMClass=Xfce4-terminal
 Categories=X-Nexus-OS;

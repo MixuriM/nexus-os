@@ -207,9 +207,13 @@ fi
 # M8 e M9: o docklike substitui a lista de janelas e os lançadores (só ícones) e guarda os aplicativos fixados.
 { [ -n "$did" ] && ! grep -qx tasklist <<<"$plugins" && ! grep -qx launcher <<<"$plugins"; } \
     || nok "M8: a barra deve ter o docklike no lugar de tasklist e launcher (plugins: $(tr '\n' ' ' <<<"$plugins"))"
-grep -qxF 'pinned=nexus-terminal;xfce4-file-manager;firefox-esr;nexus-virt-manager;nexus-configuracoes' /etc/xdg/xfce4/panel/docklike.rc 2>/dev/null \
+grep -qxF 'pinned=nexus-terminal;thunar;firefox-esr;nexus-virt-manager;nexus-configuracoes' /etc/xdg/xfce4/panel/docklike.rc 2>/dev/null \
     || nok "M9: /etc/xdg/xfce4/panel/docklike.rc ausente ou sem os 5 aplicativos fixados"
 grep -l libdocklike /proc/[0-9]*/maps 2>/dev/null | grep -q . || nok "M9: nenhum processo do painel carregou o plugin docklike"
+# M9 (rodada manual 1): o docklike agrupa a janela com o ícone fixado pelo StartupWMClass do .desktop fixado.
+for par in nexus-terminal=Xfce4-terminal nexus-virt-manager=Virt-manager nexus-configuracoes=Xfce4-settings-manager; do
+    [ "$(valor "/usr/share/applications/${par%%=*}.desktop" StartupWMClass)" = "${par##*=}" ] || nok "M9: ${par%%=*}.desktop sem StartupWMClass=${par##*=} (a janela abriria fora do ícone fixado)"
+done
 # M10: em VM não há bateria, então nenhum plugin de energia na barra; a lógica do nexus-bateria com pastas falsas.
 ! grep -qx power-manager-plugin <<<"$plugins" || nok "M10: a barra tem o plugin de energia numa máquina sem bateria"
 dpkg -s xfce4-power-manager-plugins >/dev/null 2>&1 || nok "M10: pacote xfce4-power-manager-plugins não instalado"

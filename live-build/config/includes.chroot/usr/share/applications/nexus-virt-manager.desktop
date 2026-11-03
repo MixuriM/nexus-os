@@ -5,4 +5,5 @@ Comment=Abre o virt-manager conectado ao libvirt do sistema (qemu:///system)
 Icon=nexus-vm
 Exec=virt-manager --connect qemu:///system
 Terminal=false
+StartupWMClass=Virt-manager
 Categories=X-Nexus-OS;
