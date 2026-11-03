@@ -85,7 +85,7 @@ lista_apps=live-build/config/package-lists/nexus-apps.list.chroot
 if [ -f "$lista_apps" ]; then
     esperado=$(sed -n 's/^apps_novos="\(.*\)"$/\1/p' tests/desktop.sh | tr ' ' '\n' | sort)
     atual=$(grep -vE '^[[:space:]]*(#|$)' "$lista_apps" | sort)
-    [ -n "$atual" ] && [ "$esperado" = "$atual" ] || fail "$lista_apps difere da lista apps_novos de tests/desktop.sh"
+    { [ -n "$atual" ] && [ "$esperado" = "$atual" ]; } || fail "$lista_apps difere da lista apps_novos de tests/desktop.sh"
 else
     fail "lista de aplicativos ausente: $lista_apps"
 fi
