@@ -20,14 +20,14 @@ svgs=(
     "$inc/usr/share/icons/hicolor/scalable/apps/nexus-os.svg"
     "$inc/usr/share/pixmaps/nexus-os-logo.svg"
 )
-# Ícones próprios dos 10 atalhos (um por atalho do menu e da área de trabalho).
-for i in terminal vm sdn vnf-up vnf-status vnf-down clab-up clab-down docs configuracoes; do
+# Ícones próprios dos 10 atalhos (um por atalho do menu e da área de trabalho) e dos 2 só do menu (barra e ícones).
+for i in terminal vm sdn vnf-up vnf-status vnf-down clab-up clab-down docs configuracoes barra icones; do
     svgs+=("$inc/usr/share/icons/hicolor/scalable/apps/nexus-$i.svg")
 done
 # Tema de ícones Nexus: os ícones padrão da área de trabalho (pasta pessoal, lixeira, unidades) no estilo dos próprios.
 tema_icones=$inc/usr/share/icons/Nexus
 for i in places/user-home places/user-trash places/user-trash-full devices/media-floppy devices/media-optical     devices/drive-optical devices/drive-removable-media devices/drive-harddisk devices/computer \
-    apps/org.xfce.thunar apps/system-file-manager; do
+    apps/org.xfce.thunar apps/org.xfce.filemanager apps/system-file-manager places/user-desktop; do
     svgs+=("$tema_icones/scalable/$i.svg")
 done
 fundos=(
@@ -145,14 +145,20 @@ grep -qx 'Inherits=Papirus-Dark,hicolor' "$tema_icones/index.theme" 2>/dev/null 
 grep -qxF 'icon-theme-name=Nexus' "$greeter" 2>/dev/null || fail "$greeter sem icon-theme-name=Nexus"
 grep -qF 'value="Nexus"' live-build/config/hooks/live/0600-nexus-identidade.hook.chroot || fail "hook 0600 não define IconThemeName Nexus"
 grep -qF 'XfdesktopIconView' "$inc/usr/share/themes/Nexus-Dark/gtk-3.0/gtk.css" 2>/dev/null || fail "gtk.css sem o estilo dos rótulos da área de trabalho (XfdesktopIconView)"
-# Barra estilo Windows: uma barra só, embaixo, com a lista de janelas abertas; sem seletor de áreas de trabalho.
+# Barra estilo Windows: uma barra só, embaixo, com o menu e o docklike (janelas e fixados) no centro; sem seletor de áreas de trabalho.
 painel=${configs[3]}
 if [ -f "$painel" ]; then
-    grep -qF 'value="tasklist"' "$painel" || fail "$painel sem o plugin tasklist (janelas abertas)"
+    for p in docklike whiskermenu; do
+        grep -qF "value=\"$p\"" "$painel" || fail "$painel sem o plugin $p"
+    done
+    for p in tasklist launcher actions showdesktop applicationsmenu; do
+        ! grep -qF "value=\"$p\"" "$painel" || fail "$painel ainda tem o plugin $p (rodada 5 da RC2)"
+    done
     ! grep -qF 'value="pager"' "$painel" || fail "$painel ainda tem o seletor de áreas de trabalho (pager)"
     [ "$(grep -c 'name="panel-[0-9]*" type="empty"' "$painel")" -eq 1 ] || fail "$painel deveria ter uma barra só"
     grep -qF 'value="p=10;' "$painel" || fail "$painel com a barra fora da parte de baixo (p=10)"
-    grep -qF 'value="Nexus OS"' "$painel" || fail "$painel sem o título Nexus OS no botão do menu"
+    grep -qF 'name="show-button-title" type="bool" value="false"' "$painel" || fail "$painel com texto no botão do menu (show-button-title)"
+    grep -qF 'value="Menu do Nexus OS (tecla Windows)"' "$painel" || fail "$painel sem a dica de ferramenta do menu"
     grep -qF 'name="button-icon" type="string" value="nexus-os"' "$painel" || fail "$painel sem o ícone nexus-os no botão do menu"
 fi
 grep -qF 'name="workspace_count" type="int" value="1"' "${configs[2]}" 2>/dev/null || fail "${configs[2]} sem workspace_count 1"

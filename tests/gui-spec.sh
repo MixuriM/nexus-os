@@ -80,6 +80,22 @@ elif ! cut -f1 <<<"$med" | grep -qxF "$escolhido"; then
     fail "desktop escolhido não é um finalista medido: $escolhido"
 fi
 
+# Rodada 5 da RC2: a lista de aplicativos novos do build é a mesma que o smoke desktop confere dentro da ISO (D12).
+lista_apps=live-build/config/package-lists/nexus-apps.list.chroot
+if [ -f "$lista_apps" ]; then
+    esperado=$(sed -n 's/^apps_novos="\(.*\)"$/\1/p' tests/desktop.sh | tr ' ' '\n' | sort)
+    atual=$(grep -vE '^[[:space:]]*(#|$)' "$lista_apps" | sort)
+    [ -n "$atual" ] && [ "$esperado" = "$atual" ] || fail "$lista_apps difere da lista apps_novos de tests/desktop.sh"
+else
+    fail "lista de aplicativos ausente: $lista_apps"
+fi
+# M18 descartado e M19 resolvido por documentação: o texto está em gui.md e manual.md.
+for d in docs/gui.md docs/manual.md; do
+    grep -q 'Copiar e colar no terminal' "$d" || fail "$d sem a seção Copiar e colar no terminal"
+    grep -q 'Ctrl+Shift+C' "$d" || fail "$d não cita Ctrl+Shift+C"
+    grep -q 'sudo apt install' "$d" || fail "$d não explica que programas instalados na sessão live somem ao desligar (sudo apt install)"
+done
+
 if [ "$erros" -ne 0 ]; then
     echo "FALHA: tests/gui-spec.sh com $erros erro(s)" >&2
     exit 1

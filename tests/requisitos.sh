@@ -91,6 +91,12 @@ sha_rc2=$(campo "$rc2" "SHA256")
 [[ $sha_d =~ ^[0-9a-f]{64}$ ]] || fail "$req: 'Desktop: SHA256' ausente ou inválido (achei '${sha_d:-}')"
 [[ $sha_rc2 =~ ^[0-9a-f]{64}$ ]] || fail "$rc2: SHA256 ausente ou inválido (achei '${sha_rc2:-}')"
 [ "$sha_d" = "$sha_rc2" ] || fail "SHA256 diferente: $req tem '$sha_d' e $rc2 tem '$sha_rc2'"
+# Mídia da ISO: só pendrive (ou ISO anexada em VM); decisão do grupo, sem CD nem DVD (rodada 5 da RC2).
+for d in "$req" README.md "$rc2"; do
+    achado=$(grep -nE '\bDVD\b|\bCD\b' "$d" | grep -v NEXUS_SMOKE | head -n 1 | cut -c1-120 || true)
+    [ -z "$achado" ] || fail "$d fala de CD ou DVD como mídia (a ISO é só para pendrive e VM): $achado"
+done
+grep -qE 'pendrive \(ou ISO anexada em VM\) com capacidade de pelo menos' "$req" || fail "$req sem a recomendação de mídia: pendrive (ou ISO anexada em VM) com capacidade de pelo menos o tamanho da ISO"
 
 [ "$erros" -eq 0 ] || exit 1
 echo "OK: requisitos conferidos (repouso ${repouso} MiB, pico ${pico} MiB, recomendada ${recomendada} MiB, ISO ${bytes} bytes; com desktop: repouso ${d_repouso} MiB, pico ${d_pico} MiB, recomendada ${d_recomendada} MiB, ISO ${d_bytes} bytes)"

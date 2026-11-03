@@ -122,14 +122,19 @@ janelas_tema=$(como_user xfconf-query -c xfwm4 -p /general/theme)
 [ "$janelas_tema" = Nexus-Dark ] || fail "tema das janelas do $usuario é '$janelas_tema', esperado Nexus-Dark"
 [ -f /usr/share/icons/Nexus/scalable/places/user-home.svg ] || fail "tema de ícones Nexus ausente em /usr/share/icons"
 [ -f /usr/share/themes/Nexus-Dark/gtk-3.0/gtk.css ] || fail "tema Nexus-Dark ausente em /usr/share/themes"
-titulo=$(como_user xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-title)
-[ "$titulo" = "Nexus OS" ] || fail "título do botão do menu é '$titulo', esperado Nexus OS"
 nome=$(getent passwd "$usuario" | cut -d: -f5 | cut -d, -f1)
 [ "$nome" = "Nexus OS" ] || fail "nome completo do $usuario é '$nome', esperado Nexus OS"
 
-# Barra estilo Windows: uma barra só, embaixo, com a lista de janelas abertas e sem seletor de áreas de trabalho.
-plugins=$(como_user xfconf-query -c xfce4-panel -lv | awk '$1 ~ /^\/plugins\/plugin-[0-9]+$/ {print $2}')
-grep -qx tasklist <<<"$plugins" || fail "barra sem o plugin tasklist (plugins: $(tr '\n' ' ' <<<"$plugins"))"
+# Barra estilo Windows: uma barra só, embaixo, com o menu e as janelas abertas no centro e sem seletor de áreas de trabalho.
+# Os pedidos da rodada 5 da RC2 (M1 a M17, D9c e D12) usam nok(): a falha vai para a contagem e todas aparecem de uma vez.
+erros_m=0
+nok() { echo "FALHA: $*" >&2; erros_m=$((erros_m + 1)); }
+px() { como_user xfconf-query -c xfce4-panel -p "$1" 2>/dev/null; }
+mapa=$(como_user xfconf-query -c xfce4-panel -lv | awk '$1 ~ /^\/plugins\/plugin-[0-9]+$/ {sub(".*plugin-", "", $1); print $1, $2}')
+plugins=$(awk '{print $2}' <<<"$mapa")
+id_de() { awk -v n="$1" '$2 == n {print $1; exit}' <<<"$mapa"; }
+ordem=$(px /panels/panel-1/plugin-ids | grep -E '^[0-9]+$')
+ordem_nomes=$(for i in $ordem; do awk -v i="$i" '$1 == i {print $2}' <<<"$mapa"; done | tr '\n' ' ')
 ! grep -qx pager <<<"$plugins" || fail "barra ainda tem o seletor de áreas de trabalho (pager)"
 posicao=$(como_user xfconf-query -c xfce4-panel -p /panels/panel-1/position)
 case $posicao in p=10\;*) ;; *) fail "barra fora da parte de baixo (position '$posicao', esperado p=10)" ;; esac
@@ -139,6 +144,164 @@ barra=$(janelas | grep '("xfce4-panel"' | awk '{ split($(NF - 1), g, /[x+]/); if
 [ "${barra##*+}" -ge 400 ] || fail "a barra está em cima ($barra)"
 [ "$(como_user xprop -root _NET_NUMBER_OF_DESKTOPS | awk '{print $NF}')" = 1 ] || fail "há mais de uma área de trabalho"
 echo "barra inferior $barra, plugins: $(tr '\n' ' ' <<<"$plugins"), 1 área de trabalho"
+
+# ---- Rodada 5 da RC2: barra, menu, relógio, ícones e aplicativos novos (M1 a M17, D9c e D12) ----
+css=/usr/share/themes/Nexus-Dark/gtk-3.0/gtk.css
+wid=$(id_de whiskermenu)
+did=$(id_de docklike)
+cid=$(id_de clock)
+pid_painel() { pgrep -u "$usuario" -x xfce4-panel | head -n 1; }
+# O "xfce4-panel -r" reinicia o painel: espera a janela da barra voltar (até 120 s) antes do próximo passo.
+espera_painel() {
+    local t=$SECONDS
+    sleep 5
+    until janelas | grep -q '("xfce4-panel"'; do
+        [ $((SECONDS - t)) -lt 120 ] || return 1
+        sleep 2
+    done
+    sleep 5
+}
+# M1: sem o botão azul de mostrar a área de trabalho.
+! grep -qx showdesktop <<<"$plugins" || nok "M1: a barra ainda tem o plugin showdesktop (botão azul de mostrar a área de trabalho)"
+# M2: sem o plugin actions (o nome Nexus OS depois do relógio) e sem texto no botão de nenhum plugin.
+! grep -qx actions <<<"$plugins" || nok "M2: a barra ainda tem o plugin actions (texto Nexus OS depois do relógio)"
+for i in $ordem; do
+    [ "$(px "/plugins/plugin-$i/show-button-title")" != true ] || nok "M2: o plugin $i mostra texto no botão (show-button-title verdadeiro)"
+done
+# M3: o menu mostra só a logo, sem o texto ao lado.
+{ [ -n "$wid" ] && [ "$(px "/plugins/plugin-$wid/show-button-title")" = false ]; } \
+    || nok "M3: whiskermenu ausente ou com show-button-title diferente de false (plugins: $(tr '\n' ' ' <<<"$plugins"))"
+# M4: logo sem quadrado de fundo (um caminho só) e botão maior (barra de 46 a 52 px, ícones de 32 px ou mais).
+logo=/usr/share/icons/hicolor/scalable/apps/nexus-os.svg
+{ ! grep -q 'fill="#23253e"' "$logo" && [ "$(grep -c '<path' "$logo")" = 1 ]; } \
+    || nok "M4: $logo ainda tem o quadrado de fundo (esperado só a marca)"
+tam=$(px /panels/panel-1/size)
+ico=$(px /panels/panel-1/icon-size)
+{ [ "${tam:-0}" -ge 46 ] && [ "$tam" -le 52 ] && [ "${ico:-0}" -ge 32 ]; } \
+    || nok "M4: barra com size '$tam' e icon-size '$ico' (esperado size de 46 a 52 e icon-size de 32 ou mais)"
+# M5: realce só no botão da logo (passar o mouse e clicar), sem realce em todos os botões, e dica de ferramenta com a tecla Windows.
+{ grep -q '^#whiskermenu-button:hover' "$css" && grep -q '^#whiskermenu-button:active' "$css"; } \
+    || nok "M5: $css sem o realce de #whiskermenu-button (:hover e :active)"
+! grep -q '^\.xfce4-panel button:hover' "$css" || nok "M5: $css ainda realça todos os botões da barra (.xfce4-panel button:hover)"
+[ "$(px "/plugins/plugin-${wid:-0}/button-title")" = "Menu do Nexus OS (tecla Windows)" ] \
+    || nok "M5: dica de ferramenta (button-title) do menu é '$(px "/plugins/plugin-${wid:-0}/button-title")'"
+# M6: ícone do volume menor que o da logo.
+grep -qE '^#pulseaudio-button image \{ -gtk-icon-transform: scale\(0\.[0-9]+\); \}' "$css" \
+    || nok "M6: $css sem a regra que reduz o ícone do volume (#pulseaudio-button image)"
+# M7: dois espaçadores que crescem, menu e docklike no meio; nexus-barra leva para a esquerda e volta.
+[ "$ordem_nomes" = "separator whiskermenu docklike separator systray pulseaudio clock " ] \
+    || nok "M7: ordem da barra é '$ordem_nomes', esperado 'separator whiskermenu docklike separator systray pulseaudio clock'"
+while read -r i; do
+    [ "$(px "/plugins/plugin-$i/expand")" = true ] || nok "M7: o espaçador $i não cresce (expand diferente de true)"
+done < <(awk '$2 == "separator" {print $1}' <<<"$mapa")
+if command -v nexus-barra >/dev/null; then
+    como_user nexus-barra esquerda >/dev/null 2>&1 || nok "M7: nexus-barra esquerda falhou"
+    [ "$(px /plugins/plugin-1/expand)" = false ] || nok "M7: nexus-barra esquerda não desligou a expansão do espaçador da esquerda"
+    espera_painel || nok "M7: o painel não voltou depois de nexus-barra esquerda"
+    como_user nexus-barra centro >/dev/null 2>&1 || nok "M7: nexus-barra centro falhou"
+    [ "$(px /plugins/plugin-1/expand)" = true ] || nok "M7: nexus-barra centro não religou a expansão do espaçador da esquerda"
+    espera_painel || nok "M7: o painel não voltou depois de nexus-barra centro"
+else
+    nok "M7: comando nexus-barra ausente"
+fi
+# M8 e M9: o docklike substitui a lista de janelas e os lançadores (só ícones) e guarda os aplicativos fixados.
+{ [ -n "$did" ] && ! grep -qx tasklist <<<"$plugins" && ! grep -qx launcher <<<"$plugins"; } \
+    || nok "M8: a barra deve ter o docklike no lugar de tasklist e launcher (plugins: $(tr '\n' ' ' <<<"$plugins"))"
+grep -qxF 'pinned=nexus-terminal;xfce4-file-manager;firefox-esr;nexus-virt-manager;nexus-configuracoes' /etc/xdg/xfce4/panel/docklike.rc 2>/dev/null \
+    || nok "M9: /etc/xdg/xfce4/panel/docklike.rc ausente ou sem os 5 aplicativos fixados"
+grep -l libdocklike /proc/[0-9]*/maps 2>/dev/null | grep -q . || nok "M9: nenhum processo do painel carregou o plugin docklike"
+# M10: em VM não há bateria, então nenhum plugin de energia na barra; a lógica do nexus-bateria com pastas falsas.
+! grep -qx power-manager-plugin <<<"$plugins" || nok "M10: a barra tem o plugin de energia numa máquina sem bateria"
+dpkg -s xfce4-power-manager-plugins >/dev/null 2>&1 || nok "M10: pacote xfce4-power-manager-plugins não instalado"
+[ -f /etc/xdg/autostart/nexus-bateria.desktop ] || nok "M10: /etc/xdg/autostart/nexus-bateria.desktop ausente"
+if command -v nexus-bateria >/dev/null; then
+    ps_falso=/tmp/nexus-power-supply-teste
+    rm -rf "$ps_falso"
+    mkdir -p "$ps_falso/vazio" "$ps_falso/com/BAT0"
+    chmod -R 755 "$ps_falso"
+    [ "$(como_user env NEXUS_POWER_SUPPLY="$ps_falso/vazio" NEXUS_BATERIA_TESTE=1 nexus-bateria)" = nada ] \
+        || nok "M10: nexus-bateria sem BAT* deveria imprimir 'nada'"
+    [ "$(como_user env NEXUS_POWER_SUPPLY="$ps_falso/com" NEXUS_BATERIA_TESTE=1 nexus-bateria)" = adicionar ] \
+        || nok "M10: nexus-bateria com BAT0 deveria imprimir 'adicionar'"
+    rm -rf "$ps_falso"
+else
+    nok "M10: comando nexus-bateria ausente"
+fi
+# M11: relógio com a hora em cima e a data embaixo (digital-layout 1 = hora e data), 29/10/2026.
+{ [ "$(px "/plugins/plugin-${cid:-0}/mode")" = 2 ] && [ "$(px "/plugins/plugin-${cid:-0}/digital-layout")" = 1 ] \
+    && [ "$(px "/plugins/plugin-${cid:-0}/digital-time-format")" = '%R' ] \
+    && [ "$(px "/plugins/plugin-${cid:-0}/digital-date-format")" = '%d/%m/%Y' ] \
+    && [ -n "$(px "/plugins/plugin-${cid:-0}/digital-time-font")" ] && [ -n "$(px "/plugins/plugin-${cid:-0}/digital-date-font")" ]; } \
+    || nok "M11: relógio com layout '$(px "/plugins/plugin-${cid:-0}/digital-layout")' (esperado 1: hora em cima e data embaixo, %R e %d/%m/%Y, com fontes)"
+# M12 e M13: ícones do gerenciador de arquivos (o nome que o xfce4-file-manager.desktop usa) e da pasta Desktop no tema Nexus.
+ic_fm=$(valor /usr/share/applications/xfce4-file-manager.desktop Icon)
+for f in "apps/$ic_fm" apps/org.xfce.thunar apps/system-file-manager places/user-desktop; do
+    [ -f "/usr/share/icons/Nexus/scalable/$f.svg" ] || nok "M12/M13: ícone ausente no tema Nexus: scalable/$f.svg"
+done
+# M14: a tecla Super (Windows ou Command) abre o menu.
+for k in Super_L Super_R '<Alt>F1'; do
+    [ "$(como_user xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/default/$k" 2>/dev/null)" = xfce4-popup-whiskermenu ] \
+        || nok "M14: o atalho $k não chama xfce4-popup-whiskermenu"
+done
+command -v xfce4-popup-whiskermenu >/dev/null || nok "M14: comando xfce4-popup-whiskermenu ausente"
+# M15: o GIMP aparece como GIMP; /usr/local/share vem antes de /usr/share no XDG_DATA_DIRS da sessão, então a cópia vence.
+[ "$(valor /usr/local/share/applications/gimp.desktop Name 2>/dev/null)" = GIMP ] || nok "M15: /usr/local/share/applications/gimp.desktop sem Name=GIMP"
+xdd=$(amb XDG_DATA_DIRS)
+pos_local=$(tr ':' '\n' <<<"$xdd" | grep -nxE '/usr/local/share/?' | head -n 1 | cut -d: -f1)
+pos_usr=$(tr ':' '\n' <<<"$xdd" | grep -nxE '/usr/share/?' | head -n 1 | cut -d: -f1)
+{ [ -n "$pos_local" ] && [ -n "$pos_usr" ] && [ "$pos_local" -lt "$pos_usr" ]; } \
+    || nok "M15: XDG_DATA_DIRS da sessão ('$xdd') não põe /usr/local/share antes de /usr/share"
+# M16: o grupo Nexus OS do menu usa a logo no lugar da engrenagem.
+[ "$(valor /usr/share/desktop-directories/nexus-os.directory Icon)" = nexus-os ] || nok "M16: nexus-os.directory sem Icon=nexus-os"
+# M17: menu whisker em grade de ícones grandes, com os botões de sessão (sair, reiniciar e desligar) e os comandos do XFCE.
+{ [ -n "$wid" ] && [ "$(px "/plugins/plugin-$wid/view-mode")" = 0 ] && [ "$(px "/plugins/plugin-$wid/launcher-icon-size")" -ge 3 ]; } 2>/dev/null \
+    || nok "M17: whiskermenu ausente ou fora do modo grade com ícones grandes (view-mode, launcher-icon-size)"
+for k in logout restart shutdown; do
+    [ "$(px "/plugins/plugin-${wid:-0}/show-command-$k")" = true ] || nok "M17: botão de sessão '$k' não aparece no menu (show-command-$k)"
+done
+saida_logout=$(como_user xfce4-session-logout --help 2>&1)
+for opcao in --halt --reboot --logout; do
+    grep -q -- "$opcao" <<<"$saida_logout" || nok "M17: xfce4-session-logout sem a opção $opcao"
+done
+# D9c: opção de ícone padrão (ícone original ou do tema Nexus): comandos, atalhos, janela e execução como o usuário.
+for c in nexus-icone nexus-icones nexus-icones-janela nexus-barra nexus-bateria; do
+    [ -x "/usr/local/bin/$c" ] || nok "D9: /usr/local/bin/$c ausente ou sem bit de execução"
+done
+command -v zenity >/dev/null || nok "D9: zenity não instalado (janela Ícones dos aplicativos)"
+for a in nexus-icones nexus-barra; do
+    saida=$(desktop-file-validate "/usr/share/applications/$a.desktop" 2>&1) || nok "D9: desktop-file-validate $a.desktop: $saida"
+done
+if [ -x /usr/local/bin/nexus-icone ]; then
+    # O docklike só relê o .desktop quando o painel reinicia: o nexus-icone reinicia o painel no fim.
+    como_user nexus-icone xfce4-file-manager.desktop padrao >/dev/null 2>&1 || nok "D9: nexus-icone xfce4-file-manager.desktop padrao falhou"
+    sub=$casa/.local/share/applications/xfce4-file-manager.desktop
+    ic=$(valor "$sub" Icon 2>/dev/null)
+    case $ic in
+        /*) [ -f "$ic" ] || nok "D9: o ícone original $ic não existe" ;;
+        *) nok "D9: a cópia $sub não tem Icon= com caminho absoluto (lido '$ic')" ;;
+    esac
+    espera_painel || nok "D9: o painel não voltou depois de nexus-icone padrao"
+    como_user nexus-icone xfce4-file-manager.desktop nexus >/dev/null 2>&1 || nok "D9: nexus-icone xfce4-file-manager.desktop nexus falhou"
+    [ ! -e "$sub" ] || nok "D9: nexus-icone ... nexus não removeu $sub"
+    espera_painel || nok "D9: o painel não voltou depois de nexus-icone nexus"
+fi
+if [ -x /usr/local/bin/nexus-icones ]; then
+    como_user nexus-icones padrao >/dev/null 2>&1 || nok "D9: nexus-icones padrao falhou"
+    [ "$(como_user xfconf-query -c xsettings -p /Net/IconThemeName)" = Papirus-Dark ] || nok "D9: nexus-icones padrao não trocou o tema para Papirus-Dark"
+    espera_painel || nok "D9: o painel não voltou depois de nexus-icones padrao"
+    como_user nexus-icones nexus >/dev/null 2>&1 || nok "D9: nexus-icones nexus falhou"
+    [ "$(como_user xfconf-query -c xsettings -p /Net/IconThemeName)" = Nexus ] || nok "D9: nexus-icones nexus não voltou o tema Nexus"
+    espera_painel || nok "D9: o painel não voltou depois de nexus-icones nexus"
+fi
+# D12: todos os aplicativos da lista nexus-apps.list.chroot estão instalados (tests/gui-spec.sh confere que esta lista é a do arquivo).
+apps_novos="libreoffice-draw libreoffice-math thunderbird thunderbird-l10n-pt-br gparted gnome-disk-utility baobab xfce4-taskmanager pavucontrol zenity zip unzip p7zip-full tree bash-completion geany meld filezilla python3-pip python3-venv ansible-core jq rsync graphviz iftop nload whois ethtool ncdu speedtest-cli remmina-plugin-rdp remmina-plugin-vnc xfce4-power-manager-plugins xfce4-whiskermenu-plugin xfce4-docklike-plugin audacity simplescreenrecorder ffmpeg fonts-noto-color-emoji"
+faltam=
+for p in $apps_novos; do
+    dpkg -s "$p" >/dev/null 2>&1 || faltam="$faltam $p"
+done
+[ -z "$faltam" ] || nok "D12: pacotes da lista de aplicativos não instalados:$faltam"
+[ "$erros_m" -eq 0 ] || fail "rodada 5 da RC2: $erros_m asserção(ões) falharam (veja as linhas FALHA: acima)"
+echo "rodada 5 da RC2: barra [$ordem_nomes], relógio hora e data, menu whisker, Super, GIMP, ícones e $(wc -w <<<"$apps_novos") aplicativos novos"
 
 # Idioma, teclado, fuso e nome da máquina; tela sem bloqueio; programas padrão por tipo de arquivo.
 grep -qx 'LANG=pt_BR.UTF-8' /etc/default/locale || fail "/etc/default/locale sem LANG=pt_BR.UTF-8"
@@ -181,7 +344,7 @@ for chave in '/org.openoffice.Setup/Product|WhatsNew' '/org.openoffice.Office.UI
 done
 echo "sistema: pt_BR, fuso America/Sao_Paulo, teclado br, máquina nexus-os, sem bloqueio de tela, programas padrão e documentação em HTML"
 echo "disquete bloqueado (sem floppy, sem /dev/fd0) e LibreOffice sem aviso de primeira execução"
-echo "identidade: papel de parede $papel, tema $tema, ícones $icones, janelas $janelas_tema, menu '$titulo', nome '$nome'"
+echo "identidade: papel de parede $papel, tema $tema, ícones $icones, janelas $janelas_tema, menu '$(px "/plugins/plugin-${wid:-0}/button-title")', nome '$nome'"
 
 # shellcheck disable=SC2317  # chamada pelo trap
 limpa() {
