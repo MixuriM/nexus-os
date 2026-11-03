@@ -94,7 +94,7 @@ Preparo da VM: [docs/ambiente-de-build.md](docs/ambiente-de-build.md). Resultado
 
 ## Usar a ISO integrada
 
-1. Inicie a ISO numa VM com vídeo (testado: QEMU com KVM; o Hyper-V está descrito em [docs/rc1.md](docs/rc1.md)) com **2560 MiB de RAM** (a recomendada com o desktop; o mínimo medido é 1792 MiB, veja [docs/requisitos.md](docs/requisitos.md)) e a ISO como CD. O menu de boot inicia sozinho em 5 segundos (Enter adianta). A ISO entra no desktop XFCE já logada como `user`. **Internet:** no QEMU use `-nic user`; no Hyper-V, a VM criada sem rede precisa de `Connect-VMNetworkAdapter -VMName <vm> -SwitchName "Default Switch"` (comandos completos em [docs/manual.md](docs/manual.md), seção "Ambiente gráfico").
+1. Inicie a ISO numa VM com vídeo (testado: QEMU com KVM; o Hyper-V está descrito em [docs/rc1.md](docs/rc1.md)) com **2560 MiB de RAM** (a recomendada com o desktop; o mínimo medido é 1792 MiB, veja [docs/requisitos.md](docs/requisitos.md)) e a ISO anexada à VM. O menu de boot inicia sozinho em 5 segundos (Enter adianta). A ISO entra no desktop XFCE já logada como `user`. **Internet:** no QEMU use `-nic user`; no Hyper-V, a VM criada sem rede precisa de `Connect-VMNetworkAdapter -VMName <vm> -SwitchName "Default Switch"` (comandos completos em [docs/manual.md](docs/manual.md), seção "Ambiente gráfico").
 2. Use o menu "Nexus OS" ou os ícones da área de trabalho, ou abra um terminal. Se a sessão pedir login: usuário `user` e senha `live` (credencial pública da Debian Live, de laboratório). O `sudo` não pede senha.
 3. Os atalhos chamam os comandos abaixo; no terminal use os comandos diretamente.
 
@@ -130,7 +130,7 @@ Medidos com KVM, na ISO da RC2 ([docs/rc2.md](docs/rc2.md)); método e limitaç�
 | RAM em repouso e de pico | 1129 MiB (sessão ativa) e 1827 MiB (guest de 4096 MiB) |
 | Mínimo de RAM dos smokes | 1792 MiB (o `all` passa, bem mais lento; 1536, 1280 e 1024 MiB falham) |
 | Mínimo de RAM do `tests/iso.sh` | 512 MiB (menor valor testado) |
-| ISO | 1774911488 bytes (1693 MiB), +853213184 bytes sobre a RC1 (cabe em DVD e pendrive, não em CD) |
+| ISO | 1774911488 bytes (1693 MiB), +853213184 bytes sobre a RC1 (mídia: pendrive, ou a ISO anexada em VM, com capacidade de pelo menos o tamanho da ISO) |
 | Sessão do XFCE pronta | 23 s depois do boot, com KVM |
 
 ## Testes

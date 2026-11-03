@@ -389,7 +389,7 @@ Fonte dos comandos: manual do VirtualBox 7.2, capítulo VBoxManage (`createvm`, 
 | # | O que fazer | O que deve aparecer | Passou ou falhou | O que aconteceu e saída |
 | --- | --- | --- | --- | --- |
 | H2.1 | No menu de boot (fundo azul-escuro com a logo do Nexus OS e a entrada **Iniciar o Nexus OS**), aperte **Enter** ou espere os 5 s da contagem. O menu **não** deve mostrar o texto "Debian GNU/Linux" nem o capacete do live-build | Mensagens de boot e, depois, uma tela azul-escura com losangos finos e a logo do Nexus OS no centro (o papel de parede). Com KVM leva cerca de 40 s; sem KVM, vários minutos | | |
-| H2.2 | Não digite nada: espere até a barra aparecer na **parte de baixo** da tela | Uma barra escura de ponta a ponta embaixo, como a do Windows: o botão **Nexus OS** (com o ícone da marca) à esquerda, ícones de lançamento (terminal, arquivos, Firefox, máquinas virtuais, configurações), o relógio e o usuário à direita. Nada de barra em cima e nada de quatro quadradinhos de áreas de trabalho. **Não** deve pedir usuário nem senha (o login é automático) | | |
+| H2.2 | Não digite nada: espere até a barra aparecer na **parte de baixo** da tela | Uma barra escura de ponta a ponta embaixo, como a do Windows: no centro o botão do menu (só o ícone da marca) e os ícones dos aplicativos fixados (terminal, arquivos, Firefox, máquinas virtuais, configurações); à direita o som e o relógio, com a hora em cima e a data embaixo. Nada de barra em cima e nada de quatro quadradinhos de áreas de trabalho. **Não** deve pedir usuário nem senha (o login é automático) | | |
 | H2.3 | Se aparecer uma tela de login em vez do desktop, entre com usuário `user` e senha `live` e anote | O desktop abre. Marque "falhou" no H2.2, porque o login devia ser automático | | |
 | H2.4 | Olhe a área de trabalho (o fundo) | Dez ícones com os nomes dos atalhos, sem aviso de "atalho não confiável" e sem ponto de exclamação, e os ícones **Pasta pessoal**, **Lixeira** e, na VM, o disco da ISO, todos no mesmo estilo (quadrado azul-escuro com contorno colorido). Os nomes ficam sobre o fundo, sem caixa escura. Os ícones de unidades da máquina virtual não contam como atalhos. **Não** deve haver ícone "Disco Disquete" (mesmo na Geração 1 do Hyper-V) | | |
 | H2.5 | Cronometre: quantos segundos do Enter do H2.1 até a barra aparecer | Um número. Anote em H8 | | |
@@ -483,3 +483,32 @@ Valem as regras da Parte E. Diferenças para o desktop:
 4. O resultado final: **passou**, **passou com ressalvas** ou **falhou**.
 
 Com isso o responsável pelo build registra a execução do manual do desktop por uma segunda pessoa (F3.18).
+
+### H10: melhorias da rodada 5 da RC2
+
+Confira na ISO da rodada 5, com a VM no desktop. Marque passou ou falhou e anote o que apareceu.
+
+| # | O que fazer | O que deve aparecer | Passou? | Anotação |
+| --- | --- | --- | --- | --- |
+| H10.1 | Olhe o canto direito da barra (M1) | Sem botão azul de mostrar a área de trabalho | | |
+| H10.2 | Olhe o relógio e o que vem depois, e o lado da logo (M2 e M3) | Nenhum texto "Nexus OS" na barra | | |
+| H10.3 | Olhe a logo na barra (M4) | Só o losango com o N, sem quadrado de fundo, com 36 a 40 px | | |
+| H10.4 | Passe o mouse sobre a logo e clique (M5) | Fundo azul translúcido ao passar, mais forte ao clicar, e a dica "Menu do Nexus OS (tecla Windows)"; outros botões sem esse realce | | |
+| H10.5 | Compare o ícone do volume com os outros (M6) | Menor que o da logo | | |
+| H10.6 | Olhe a posição do menu e dos ícones; rode `nexus-barra esquerda` e depois `nexus-barra centro` (M7) | Centralizados; vão para o canto esquerdo e voltam ao centro | | |
+| H10.7 | Abra três aplicativos (M8) | Cada um aparece na barra só com o ícone, sem texto | | |
+| H10.8 | Com um aplicativo aberto, clique com o botão direito no ícone e fixe; feche; desafixe (M9) | Fica na barra ao fechar e some ao desafixar | | |
+| H10.9 | Procure a bateria na barra (M10) | Em VM, sem ícone de bateria. Em notebook, a porcentagem (só a parte da VM é provada) | | |
+| H10.10 | Olhe o relógio (M11) | Hora em cima e data embaixo, como `29/10/2026` | | |
+| H10.11 | Olhe os ícones do gerenciador de arquivos (barra e menu) e da pasta Desktop (M12 e M13) | No estilo do Nexus OS; o Firefox continua o ícone oficial | | |
+| H10.12 | Aperte a tecla Windows (Super ou Command) (M14) | O menu abre; a mesma tecla ou Esc fecha | | |
+| H10.13 | Procure "gimp" no menu (M15) | Aparece só "GIMP" | | |
+| H10.14 | No menu, olhe o grupo "Nexus OS" (M16) | Com a logo, não a engrenagem | | |
+| H10.15 | Olhe o menu (M17) | Grade de ícones grandes, categorias na lateral, busca e botões de reiniciar, desligar e sair na base | | |
+| H10.16 | Abra os aplicativos novos: Thunderbird, Geany, GParted, Audacity, FileZilla e os demais da lista de [gui.md](gui.md) | Todos abrem sem erro | | |
+| H10.17 | No terminal, selecione texto e use Ctrl+Shift+C e Ctrl+Shift+V; rode `sleep 100` e aperte Ctrl+C (M19) | Copia e cola; o Ctrl+C interrompe o `sleep` | | |
+| H10.18 | Abra "Ícones dos aplicativos", marque o gerenciador de arquivos, confirme; rode `nexus-icone xfce4-file-manager.desktop nexus` | O ícone da barra muda para o original e volta | | |
+| H10.19 | Use o botão de sair, reiniciar ou desligar do menu | A sessão encerra, reinicia ou a VM desliga | | |
+| H10.20 | Olhe a lista de janelas com vários programas abertos (botão "Monitor") | Nenhum botão sem ícone; se aparecer, rode `xwininfo -root -tree \| grep -i -B2 -A2 monitor` e cole a saída | | |
+
+A loja de aplicativos (M18) foi descartada: a ISO é live e o que se instala na sessão some ao desligar ([manual.md](manual.md)).
