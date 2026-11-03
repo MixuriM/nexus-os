@@ -5,4 +5,5 @@ Comment=Abre as configurações do sistema: rede, aparência, teclado e vídeo
 Icon=nexus-configuracoes
 Exec=xfce4-settings-manager
 Terminal=false
+StartupWMClass=Xfce4-settings-manager
 Categories=X-Nexus-OS;
