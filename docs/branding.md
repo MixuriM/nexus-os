@@ -15,7 +15,7 @@ A licença é a do repositório, GPL-3.0-or-later ([LICENSE](../LICENSE)). Os ca
 | Arquivo no repo | Arquivo na ISO | Origem | Licença | Onde é usado |
 | --- | --- | --- | --- | --- |
 | `live-build/config/includes.chroot/usr/share/pixmaps/nexus-os-logo.svg` | `/usr/share/pixmaps/nexus-os-logo.svg` | logo original do projeto (`assets/logo-nexus-os.svg`), copiada sem alteração | GPL-3.0-or-later | logo completa (marca e nome) para documentos e telas |
-| `live-build/config/includes.chroot/usr/share/icons/hicolor/scalable/apps/nexus-os.svg` | `/usr/share/icons/hicolor/scalable/apps/nexus-os.svg` | marca recortada da logo original (`scripts/gerar-identidade.py`) | GPL-3.0-or-later | ícone `nexus-os`: botão do menu da barra e imagem do usuário no login |
+| `live-build/config/includes.chroot/usr/share/icons/hicolor/scalable/apps/nexus-os.svg` | `/usr/share/icons/hicolor/scalable/apps/nexus-os.svg` | só a marca (losango com o N) da logo original, transparente e recortada nela (`scripts/gerar-identidade.py`) | GPL-3.0-or-later | ícone `nexus-os`: botão do menu da barra (36 a 40 px), grupo "Nexus OS" do menu e imagem do usuário no login |
 | `live-build/config/includes.chroot/usr/share/icons/hicolor/scalable/apps/nexus-terminal.svg` | `/usr/share/icons/hicolor/scalable/apps/nexus-terminal.svg` | criado para o projeto (`scripts/gerar-identidade.py`) | GPL-3.0-or-later | atalho "Terminal do Nexus OS" |
 | `live-build/config/includes.chroot/usr/share/icons/hicolor/scalable/apps/nexus-vm.svg` | `/usr/share/icons/hicolor/scalable/apps/nexus-vm.svg` | criado para o projeto | GPL-3.0-or-later | atalho "Gerenciador de máquinas virtuais" |
 | `live-build/config/includes.chroot/usr/share/icons/hicolor/scalable/apps/nexus-sdn.svg` | `/usr/share/icons/hicolor/scalable/apps/nexus-sdn.svg` | criado para o projeto | GPL-3.0-or-later | atalho "Laboratório Open vSwitch" |
@@ -52,6 +52,10 @@ A licença é a do repositório, GPL-3.0-or-later ([LICENSE](../LICENSE)). Os ca
 | `live-build/config/includes.chroot/usr/share/icons/Nexus/scalable/devices/computer.svg` | `/usr/share/icons/Nexus/scalable/devices/computer.svg` | criado para o projeto (`scripts/gerar-identidade.py`), no estilo dos ícones dos atalhos | GPL-3.0-or-later | sistema de arquivos e computador |
 | `live-build/config/includes.chroot/usr/share/icons/Nexus/scalable/apps/org.xfce.thunar.svg` | `/usr/share/icons/Nexus/scalable/apps/org.xfce.thunar.svg` | criado para o projeto (`scripts/gerar-identidade.py`), no estilo dos ícones dos atalhos | GPL-3.0-or-later | gerenciador de arquivos (Thunar) na barra e no menu |
 | `live-build/config/includes.chroot/usr/share/icons/Nexus/scalable/apps/system-file-manager.svg` | `/usr/share/icons/Nexus/scalable/apps/system-file-manager.svg` | criado para o projeto (`scripts/gerar-identidade.py`), no estilo dos ícones dos atalhos | GPL-3.0-or-later | ícone genérico de gerenciador de arquivos |
+| `live-build/config/includes.chroot/usr/share/icons/Nexus/scalable/apps/org.xfce.filemanager.svg` | `/usr/share/icons/Nexus/scalable/apps/org.xfce.filemanager.svg` | criado para o projeto (`scripts/gerar-identidade.py`), no estilo dos ícones dos atalhos | GPL-3.0-or-later | `Icon=` do `xfce4-file-manager.desktop`: gerenciador de arquivos fixado na barra e no menu |
+| `live-build/config/includes.chroot/usr/share/icons/Nexus/scalable/places/user-desktop.svg` | `/usr/share/icons/Nexus/scalable/places/user-desktop.svg` | criado para o projeto (`scripts/gerar-identidade.py`), no estilo dos ícones dos atalhos | GPL-3.0-or-later | pasta Desktop no gerenciador de arquivos |
+| `live-build/config/includes.chroot/usr/share/icons/hicolor/scalable/apps/nexus-barra.svg` | `/usr/share/icons/hicolor/scalable/apps/nexus-barra.svg` | criado para o projeto (`scripts/gerar-identidade.py`) | GPL-3.0-or-later | atalho "Posição da barra" (só no menu) |
+| `live-build/config/includes.chroot/usr/share/icons/hicolor/scalable/apps/nexus-icones.svg` | `/usr/share/icons/hicolor/scalable/apps/nexus-icones.svg` | criado para o projeto (`scripts/gerar-identidade.py`) | GPL-3.0-or-later | atalho "Ícones dos aplicativos" (só no menu) |
 | `live-build/config/includes.chroot/etc/xdg/xfce4/panel/default.xml` | `/etc/xdg/xfce4/panel/default.xml` | criado para o projeto (substitui o do pacote `xfce4-panel`) | GPL-3.0-or-later | barra única embaixo, como a do Windows: menu Nexus OS, lançadores, janelas abertas, bandeja, relógio; sem seletor de áreas de trabalho |
 | `live-build/config/includes.chroot/usr/share/firefox-esr/distribution/policies.json` | `/usr/share/firefox-esr/distribution/policies.json` | criado para o projeto | GPL-3.0-or-later | Firefox sem página de boas-vindas e sem verificar navegador padrão; a página inicial é a documentação em HTML (funciona sem internet) |
 | `live-build/config/includes.chroot/etc/xdg/mimeapps.list` | `/etc/xdg/mimeapps.list` | criado para o projeto | GPL-3.0-or-later | programa padrão por tipo de arquivo (`.md` e texto no Mousepad, PDF no Evince, imagens no Ristretto, HTML no Firefox) |
@@ -108,14 +112,26 @@ O que vem de pacote do Debian 13 `main` mantém a licença do pacote (lida em `/
 ## Como a identidade é aplicada
 
 - **Login:** `/etc/lightdm/lightdm-gtk-greeter.conf` aponta `background` para `tela-de-login.png` (a logo original), `theme-name` para Nexus-Dark, `icon-theme-name` para Nexus e `default-user-image` para a marca. O `gtk.css` estiliza a janela de login (`#login_window`). Com o login automático (padrão da ISO) a tela de login não aparece; para vê-la, inicie com o parâmetro de boot `live-config.noautologin`.
-- **Sessão:** o `xfce4-desktop.xml` do `/etc/xdg` é o padrão do XFCE para qualquer usuário novo, inclusive o `user` que o live-config cria no boot; o `xsettings.xml` (tema, ícones e fonte) e o painel (título "Nexus OS", ícone da marca e altura) são ajustados no hook; o `xfwm4.xml` define o tema das janelas. O live-config só cria o usuário a partir do `/etc/skel` e não toca nesses arquivos de `/etc/xdg`: o smoke `desktop` confirma em boot limpo, como o `user` recém-criado, o papel de parede, os temas, o título do menu e o nome completo.
+- **Sessão:** o `xfce4-desktop.xml` do `/etc/xdg` é o padrão do XFCE para qualquer usuário novo, inclusive o `user` que o live-config cria no boot; o `xsettings.xml` (tema, ícones e fonte) e o painel (menu whisker só com a marca, docklike, relógio de duas linhas e altura) são ajustados no hook; o `xfwm4.xml` define o tema das janelas. O live-config só cria o usuário a partir do `/etc/skel` e não toca nesses arquivos de `/etc/xdg`: o smoke `desktop` confirma em boot limpo, como o `user` recém-criado, o papel de parede, os temas, o título do menu e o nome completo.
 - **Papel de parede em outros monitores:** o xfdesktop guarda uma configuração por monitor e por área de trabalho. O padrão cobre o monitor `Virtual-1` (o vídeo das VMs do QEMU) e os blocos `monitor0` e `monitor1`; o hook também registra o papel de parede como alternativa `desktop-background` do Debian, o que cobre o caminho padrão `/usr/share/images/desktop-base/default`.
 - **Vídeo no Hyper-V:** na Geração 1 o Xorg não sobe sem o `20-hyperv.conf` (o log mostra `Cannot run in framebuffer mode`); com ele fixando `/dev/dri/card0` a sessão abriu na VM do Hyper-V.
 - **Debian:** `/etc/os-release` não tem arquivo em `includes.chroot` (o `tests/identidade.sh` confere).
 
+## Estilo da barra e do menu (rodada 5 da RC2)
+
+Tudo no `gtk.css` do `Nexus-Dark` (`usr/share/themes/Nexus-Dark/gtk-3.0/gtk.css`):
+
+- **Realce só no botão da logo:** `#whiskermenu-button:hover` (azul vivo da paleta a 30% de opacidade, cantos de 10 px) e `:active` ou `:checked` (55%, com o menu aberto). Os demais botões da barra não têm realce de passar o mouse; a janela em foco continua com a linha magenta (`.xfce4-panel button:checked`).
+- **Ícone do volume menor:** `#pulseaudio-button image { -gtk-icon-transform: scale(0.7); }`. O plugin usa o tamanho de ícone do painel (32 px, o mesmo da logo) e o tamanho não tem chave própria.
+- **Menu whisker:** `#whiskermenu-window` com fundo `#23253e` a 94% de opacidade, borda `#3d4075` e cantos de 16 px; busca, categorias e botões de sessão com cantos arredondados. A opacidade da janela vem da opção `menu-opacity` do plugin (94).
+
+## Marca do Firefox
+
+O ícone do Firefox não é redesenhado: a Mozilla permite o uso do logotipo do Firefox só nas condições de sua política de marcas (https://www.mozilla.org/en-US/foundation/trademarks/policy/, lida em 03/11/2026), que não deixa usar logotipos "confusamente semelhantes" aos da Mozilla nem sugerir afiliação, e só cita o produto sem alteração. O Nexus OS mantém o ícone oficial `firefox-esr` e o tema `Nexus` herda o do Papirus-Dark. Por isso o Firefox é o exemplo da opção de ícone padrão por aplicativo (`nexus-icone`, [gui.md](gui.md)): o ícone original dele já é o que aparece.
+
 ## Como regenerar
 
-O `scripts/gerar-identidade.py` copia a logo original, recorta a marca, desenha os 10 ícones dos atalhos, o tema de ícones Nexus, o fundo do menu de boot e os dois fundos e converte os fundos para PNG 1920x1080. Precisa de `python3` e `rsvg-convert` (pacote `librsvg2-bin`). Na VM de build, na raiz do repositório:
+O `scripts/gerar-identidade.py` copia a logo original, recorta a marca, desenha os 12 ícones dos atalhos, o tema de ícones Nexus, o fundo do menu de boot e os dois fundos e converte os fundos para PNG 1920x1080. Precisa de `python3` e `rsvg-convert` (pacote `librsvg2-bin`). Na VM de build, na raiz do repositório:
 
 ```bash
 sudo apt-get install -y librsvg2-bin

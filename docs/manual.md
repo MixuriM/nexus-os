@@ -259,12 +259,12 @@ A ISO tem boot BIOS e UEFI (`xorriso -indev <iso> -report_el_torito plain`), e a
 
 ### O que há no desktop
 
-- Barra única embaixo, como a do Windows: botão "Nexus OS" (menu com todos os aplicativos), lançadores (terminal, arquivos, Firefox, máquinas virtuais, configurações), a lista das janelas abertas, a bandeja com o applet de rede, o som, o relógio e o usuário. Não há barra em cima nem seletor de áreas de trabalho.
+- Barra única embaixo, como a do Windows: no centro, o botão do menu (só a logo; a tecla Windows, Super ou Command, também o abre) e os aplicativos fixados (terminal, arquivos, Firefox, máquinas virtuais, configurações) com as janelas abertas, todos só com ícone; à direita, a bandeja, o som e o relógio (hora em cima, data embaixo). Em notebook o ícone da bateria entra antes do relógio. Clique com o botão direito num ícone para fixar ou desafixar o aplicativo. Não há barra em cima nem seletor de áreas de trabalho.
 - Gerenciador de arquivos (Thunar), terminal gráfico (Xfce Terminal), navegador (Firefox ESR), configuração de rede (NetworkManager) e de vídeo (Configurações do Xfce).
 - Programas prontos para uso, sem instalar nada: LibreOffice (Writer, Calc e Impress), Mousepad (texto e `.md`), Evince (PDF), Ristretto (imagens), File Roller (zip e tar), Calculadora, VLC, GIMP, Inkscape, KeePassXC, Wireshark (captura sem `sudo`, o `user` está no grupo `wireshark`), Remmina, e no terminal `tcpdump`, `iperf3`, `mtr`, `nmap`, `traceroute`, `dig`, `nc`, `curl`, `wget`, `tmux`, `htop`, `vim` e `git`. A lista completa e o tamanho de cada grupo estão em [gui.md](gui.md), seção "Programas incluídos".
 - Português do Brasil, teclado ABNT2, horário de Brasília (`America/Sao_Paulo`) e nome de máquina `nexus-os`. A tela não apaga nem bloqueia.
 - Tecla Print: captura de tela (`xfce4-screenshooter`).
-- Menu "Nexus OS" e dez atalhos na área de trabalho, descritos abaixo.
+- Menu em grade de ícones grandes, com busca, categorias e os botões de sair, reiniciar e desligar; o grupo "Nexus OS" tem os atalhos descritos abaixo (dez deles também ficam na área de trabalho).
 - Papel de parede, tema escuro Nexus-Dark (na paleta da logo), ícones do tema Nexus (sobre o Papirus-Dark, com pasta pessoal, lixeira e unidades no estilo do projeto), fonte Inter e tela de login com a logo original do Nexus OS. O sistema continua sendo o Debian: `/etc/os-release` não muda.
 
 ### Atalhos
@@ -281,8 +281,24 @@ A ISO tem boot BIOS e UEFI (`xorriso -indev <iso> -report_el_torito plain`), e a
 | Topologia Containerlab: remover | Executa `containerlab destroy --cleanup` da mesma topologia |
 | Documentação do Nexus OS | Abre a documentação em HTML (`/usr/share/nexus-os/docs-html/index.html`) no Firefox, sem internet |
 | Configurações | Abre o gerenciador de configurações do Xfce (rede, aparência, teclado, vídeo) |
+| Posição da barra | Alterna o menu e os ícones da barra entre o centro (padrão) e o canto esquerdo (`nexus-barra centro`, `nexus-barra esquerda` ou `nexus-barra alternar`); só no menu |
+| Ícones dos aplicativos | Abre a janela em que se marca quais aplicativos usam o ícone original em vez do ícone do Nexus OS (`nexus-icone`); só no menu |
 
 Os atalhos de terminal mostram a saída, o código de saída e esperam Enter para fechar a janela. Tudo o que um atalho cria vive na RAM e some ao desligar a ISO.
+
+### Barra, tecla Windows e ícones
+
+- **Menu:** o botão da logo ou a tecla Windows (Super, ou Command no Mac) abre o menu de aplicativos; a mesma tecla ou `Esc` fecha. Os botões de sair, reiniciar e desligar ficam no menu.
+- **Posição da barra:** `nexus-barra esquerda` leva o menu e os ícones para o canto esquerdo, `nexus-barra centro` os devolve ao centro e `nexus-barra alternar` troca de um para o outro. Vale só até desligar a ISO (a live não guarda a configuração).
+- **Ícone original:** todo aplicativo do Nexus OS pode ficar com o ícone original dele (o do Papirus-Dark ou do próprio pacote) em vez do ícone do tema Nexus. `nexus-icone <aplicativo.desktop> padrao` faz isso para um aplicativo (por exemplo `nexus-icone xfce4-file-manager.desktop padrao`) e `nexus-icone <aplicativo.desktop> nexus` volta; `nexus-icones padrao` troca o tema de todos os aplicativos de uma vez e `nexus-icones nexus` volta; o atalho "Ícones dos aplicativos" do menu abre a janela para marcar os aplicativos. Também vale só até desligar. O ícone do Firefox já é o original: a marca da Mozilla não é redesenhada ([branding.md](branding.md)).
+
+### Copiar e colar no terminal
+
+No terminal gráfico copie com Ctrl+Shift+C e cole com Ctrl+Shift+V, como nos terminais Linux. O Ctrl+C continua interrompendo o comando em execução (por exemplo `sleep 100`), por isso ele não copia. Também funcionam Ctrl+Shift+Insert (cola), a seleção com o mouse (o botão do meio cola o texto selecionado) e o menu do botão direito com "Copiar" e "Colar". Ctrl+Insert não copia: o terminal guarda uma tecla por ação e a de copiar é Ctrl+Shift+C.
+
+### Programas instalados na sessão
+
+A ISO é live e não guarda nada ao desligar: programas instalados com `sudo apt install` na sessão (precisa de internet) somem ao desligar. O que se quer sempre fica na lista de pacotes da ISO (`live-build/config/package-lists/`). Por isso não há loja de aplicativos; em troca a ISO já traz os programas da lista de [gui.md](gui.md) ("Programas incluídos"): Thunderbird, GParted, Geany, FileZilla, Audacity e os demais.
 
 ### Verificar a sessão
 
@@ -399,7 +415,7 @@ Saída esperada: seis linhas `<atalho>: código 0`.
 
 ## Requisitos
 
-RAM recomendada 1536 MiB para o núcleo (RC1) e **2560 MiB com o desktop (RC2)**; o mínimo medido é 896 MiB sem desktop (o Docker precisa carregar a imagem FRR) e 1792 MiB com desktop (menos que isso o `all` falha). Disco do guest não é usado (a live roda na memória); a ISO da RC2 ocupa 1693 MiB de mídia. Tabelas medidas e método: [requisitos.md](requisitos.md).
+RAM recomendada 1536 MiB para o núcleo (RC1) e **2560 MiB com o desktop (RC2)**; o mínimo medido é 896 MiB sem desktop (o Docker precisa carregar a imagem FRR) e 1792 MiB com desktop (menos que isso o `all` falha). Disco do guest não é usado (a live roda na memória); a mídia é um pendrive (ou a ISO anexada em VM) com capacidade de pelo menos o tamanho da ISO (1960 MiB na rodada 5 da RC2). Tabelas medidas e método: [requisitos.md](requisitos.md).
 
 ## Solução de problemas
 

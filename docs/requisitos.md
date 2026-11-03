@@ -17,7 +17,7 @@ Medido em 2026-10-26, **com KVM**, ISO da RC1 (veja [rc1.md](rc1.md)), guest QEM
 | Data | 2026-10-26 | | dia da medição |
 | SHA256 | `6a194300113308bcf340759cd4cd5d5f471a99e7690ef5f378bcce9f97d3bfe1` | | `sha256sum` da ISO, o mesmo de [rc1.md](rc1.md) |
 
-Recomendação: **1536 MiB de RAM** e uma mídia (CD, DVD, pendrive ou ISO anexada) de pelo menos 879 MiB. A live não usa disco do guest: tudo o que a sessão grava fica na RAM e some ao desligar.
+Recomendação: **1536 MiB de RAM** e mídia: pendrive (ou ISO anexada em VM) com capacidade de pelo menos o tamanho da ISO (879 MiB). A ISO é feita só para pendrive e VM, por decisão do grupo. A live não usa disco do guest: tudo o que a sessão grava fica na RAM e some ao desligar.
 
 ## Com ambiente gráfico
 
@@ -36,7 +36,7 @@ Medido em 2026-10-28, **com KVM**, na ISO da RC2 (ISO do build limpo do commit `
 | Desktop: mínimo de RAM dos smokes (MiB) | 1792 | MiB | `NEXUS_SMOKE_MEM` com o `all`: 1792 passa (307 s, o `desktop` leva 202 s); 1536, 1280 e 1024 falham |
 | Desktop: SHA256 | `f5516d5635620276cf07013337a9cd7e42464c2a268c5c03850cc99b68acfe30` | | `sha256sum` da ISO, o mesmo de [rc2.md](rc2.md) |
 
-Recomendação com o desktop: **2560 MiB de RAM** para a VM e uma mídia de pelo menos 1693 MiB (cabe em DVD e pendrive, não em CD). O desktop e os programas somam 333 MiB ao repouso medido na RC1 (796 MiB) e 1014 MiB ao pico (813 MiB), por causa do XFCE, do tema de ícones, da fonte Inter e dos programas do desktop (LibreOffice, Wireshark, GIMP e outros; veja "Resultado").
+Recomendação com o desktop: **2560 MiB de RAM** para a VM e mídia: pendrive (ou ISO anexada em VM) com capacidade de pelo menos o tamanho da ISO (1693 MiB na rodada 4; a medida da rodada 5 está acima). A ISO é feita só para pendrive e VM, por decisão do grupo, e o tamanho dela não tem teto de mídia óptica. O desktop e os programas somam 333 MiB ao repouso medido na RC1 (796 MiB) e 1014 MiB ao pico (813 MiB), por causa do XFCE, do tema de ícones, da fonte Inter e dos programas do desktop (LibreOffice, Wireshark, GIMP e outros; veja "Resultado").
 
 ### Execuções completas do `all`
 
