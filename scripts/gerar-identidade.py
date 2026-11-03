@@ -58,15 +58,13 @@ def logo_sem_fundo(escala, cx, cy):
 
 
 def svg_marca():
-    """Ícone `nexus-os`: a logo original só com a marca (sem o texto), recentrada no quadrado."""
+    """Ícone `nexus-os`: só a marca (losango com o N) da logo original, sem texto e sem quadrado de fundo, recortada nela."""
     return (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1600" width="256" height="256" role="img" aria-labelledby="t">\n'
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="236 90 1130 1130" width="256" height="256" role="img" aria-labelledby="t">\n'
         '  <title id="t">Nexus OS</title>\n'
         # mesmo gradiente da logo, nos tons vivos da paleta: a marca pequena aparece na barra escura
         f'  <defs>{GRAD_LOGO.replace(MAGENTA, MAGENTA_VIVO).replace(AZUL, AZUL_VIVO)}</defs>\n'
-        f'  <path fill="{AZUL_ESCURO}" fill-rule="evenodd" d="{FUNDO_D}"/>\n'
-        # a marca ocupa y 95..1216 (centro 655): desce 145 para centrar no quadrado
-        f'  <path transform="translate(0 145)" fill="url(#gl)" fill-rule="evenodd" d="{MARCA_D}"/>\n'
+        f'  <path fill="url(#gl)" fill-rule="evenodd" d="{MARCA_D}"/>\n'
         "</svg>\n"
     )
 
@@ -106,6 +104,11 @@ ICONES_ATALHOS = {
     "nexus-docs": '    <path d="M78 58h66l40 40v100a8 8 0 0 1-8 8H78a8 8 0 0 1-8-8V66a8 8 0 0 1 8-8z"/>\n'
                   '    <polyline points="144,58 144,98 184,98"/>\n    <line x1="94" y1="132" x2="160" y2="132"/>\n'
                   '    <line x1="94" y1="158" x2="160" y2="158"/>',
+    # Posição da barra: a barra com o menu e três ícones; Ícones dos aplicativos: quatro quadrados
+    "nexus-barra": '    <rect x="40" y="150" width="176" height="52" rx="14"/>\n    <circle cx="96" cy="176" r="9"/>\n'
+                   '    <circle cx="128" cy="176" r="9"/>\n    <circle cx="160" cy="176" r="9"/>\n    <line x1="62" y1="96" x2="194" y2="96"/>',
+    "nexus-icones": '    <rect x="58" y="58" width="56" height="56" rx="14"/>\n    <rect x="142" y="58" width="56" height="56" rx="14"/>\n'
+                    '    <rect x="58" y="142" width="56" height="56" rx="14"/>\n    <rect x="142" y="142" width="56" height="56" rx="14"/>',
 }
 
 
@@ -127,7 +130,11 @@ ICONES_TEMA = {
     "devices/drive-harddisk": '    <rect x="50" y="92" width="156" height="84" rx="16"/>\n    <line x1="76" y1="134" x2="140" y2="134"/>\n'
                               '    <circle cx="178" cy="134" r="6"/>',
     "apps/org.xfce.thunar": '    <path d="M58 92a10 10 0 0 1 10-10h42l16 20h62a10 10 0 0 1 10 10v70a10 10 0 0 1-10 10H68a10 10 0 0 1-10-10z"/>\n    <line x1="58" y1="122" x2="198" y2="122"/>',
-    "apps/system-file-manager": '    <path d="M58 92a10 10 0 0 1 10-10h42l16 20h62a10 10 0 0 1 10 10v70a10 10 0 0 1-10 10H68a10 10 0 0 1-10-10z"/>\n    <line x1="58" y1="122" x2="198" y2="122"/>',
+    # org.xfce.filemanager é o ícone do xfce4-file-manager.desktop (o da barra e do menu); user-desktop, a pasta Desktop do Thunar
+    "apps/org.xfce.filemanager": '    <path d="M58 92a10 10 0 0 1 10-10h42l16 20h62a10 10 0 0 1 10 10v70a10 10 0 0 1-10 10H68a10 10 0 0 1-10-10z"/>\n    <line x1="58" y1="122" x2="198" y2="122"/>',
+    "places/user-desktop": '    <rect x="52" y="66" width="152" height="108" rx="14"/>\n    <line x1="52" y1="148" x2="204" y2="148"/>\n'
+                           '    <line x1="104" y1="196" x2="152" y2="196"/>',
+    "apps/system-file-manager":'    <path d="M58 92a10 10 0 0 1 10-10h42l16 20h62a10 10 0 0 1 10 10v70a10 10 0 0 1-10 10H68a10 10 0 0 1-10-10z"/>\n    <line x1="58" y1="122" x2="198" y2="122"/>',
     "devices/computer": '    <rect x="54" y="66" width="148" height="104" rx="14"/>\n    <line x1="128" y1="170" x2="128" y2="194"/>\n'
                         '    <line x1="92" y1="196" x2="164" y2="196"/>',
 }

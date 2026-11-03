@@ -1,0 +1,61 @@
+#!/bin/bash
+# nexus-icone <aplicativo.desktop> padrao|nexus: um aplicativo com o ícone original (Papirus-Dark ou do pacote)
+# ou com o ícone do tema Nexus (padrão de fábrica). "padrao" grava uma cópia do .desktop em
+# ~/.local/share/applications com Icon= apontando para o arquivo do ícone original; "nexus" apaga essa cópia.
+# Vale só para esta sessão: a live não guarda o perfil ao desligar. O docklike da barra só relê o .desktop quando o
+# painel reinicia: o comando reinicia o painel no fim (NEXUS_ICONE_SEM_PAINEL=1 pula isso, para quem troca vários).
+set -eu
+
+app=${1:-}
+modo=${2:-}
+marca="# nexus-icone"
+destino=$HOME/.local/share/applications/$app
+
+uso() {
+    echo "uso: nexus-icone <aplicativo.desktop> padrao|nexus" >&2
+    exit 2
+}
+case $app in *.desktop) ;; *) uso ;; esac
+case $app in */*) uso ;; esac
+
+# Arquivo do ícone original: caminho absoluto no Icon= ou, pelo nome, o primeiro achado no Papirus-Dark, no hicolor ou em pixmaps.
+acha_icone() {
+    local nome=$1 base padrao f
+    case $nome in /*) [ -f "$nome" ] && echo "$nome" && return 0 ;; esac
+    for base in /usr/share/icons/Papirus-Dark /usr/share/icons/hicolor; do
+        for padrao in '*/64x64/apps/' '*/scalable/apps/' '*/48x48/apps/' '*/64x64/*' '*/48x48/*' '*/scalable/*'; do
+            for ext in svg png; do
+                f=$(find -L "$base" -path "$padrao$nome.$ext" 2>/dev/null | head -n 1)
+                [ -z "$f" ] || { echo "$f"; return 0; }
+            done
+        done
+    done
+    for f in /usr/share/pixmaps/"$nome".svg /usr/share/pixmaps/"$nome".png /usr/share/pixmaps/"$nome".xpm; do
+        [ -f "$f" ] && { echo "$f"; return 0; }
+    done
+    return 1
+}
+
+case $modo in
+    padrao)
+        original=
+        for d in /usr/local/share/applications /usr/share/applications; do
+            [ -f "$d/$app" ] && { original=$d/$app; break; }
+        done
+        [ -n "$original" ] || { echo "FALHA: $app não existe em /usr/share/applications" >&2; exit 1; }
+        nome=$(grep -m1 '^Icon=' "$original" | cut -d= -f2-)
+        [ -n "$nome" ] || { echo "FALHA: $app sem Icon=" >&2; exit 1; }
+        caminho=$(acha_icone "$nome") || { echo "FALHA: ícone $nome de $app não encontrado" >&2; exit 1; }
+        mkdir -p "$HOME/.local/share/applications"
+        { echo "$marca"; sed "0,/^Icon=.*/s||Icon=$caminho|" "$original"; } >"$destino"
+        echo "$app: ícone original $caminho"
+        ;;
+    nexus)
+        if [ -f "$destino" ] && grep -qxF "$marca" "$destino"; then
+            rm -f "$destino"
+        fi
+        echo "$app: ícone do tema Nexus"
+        ;;
+    *) uso ;;
+esac
+[ "${NEXUS_ICONE_SEM_PAINEL:-0}" = 1 ] || xfce4-panel -r || true

@@ -1,0 +1,42 @@
+#!/bin/bash
+# Janela "Ícones dos aplicativos": lista os aplicativos do menu e deixa marcar os que usam o ícone original
+# (coluna "Ícone original"); os demais ficam com o ícone do tema Nexus. Aplica com o nexus-icone.
+set -u
+
+declare -A visto
+linhas=()
+ids=()
+for f in /usr/local/share/applications/*.desktop /usr/share/applications/*.desktop; do
+    [ -f "$f" ] || continue
+    id=${f##*/}
+    [ -z "${visto[$id]:-}" ] || continue
+    visto[$id]=1
+    grep -qiE '^(NoDisplay|Hidden)=true' "$f" && continue
+    nome=$(grep -m1 '^Name\[pt_BR\]=' "$f" || grep -m1 '^Name=' "$f")
+    nome=${nome#*=}
+    [ -n "$nome" ] || continue
+    marcado=FALSE
+    grep -qxF '# nexus-icone' "$HOME/.local/share/applications/$id" 2>/dev/null && marcado=TRUE
+    linhas+=("$marcado|$nome|$id")
+    ids+=("$id")
+done
+[ "${#linhas[@]}" -gt 0 ] || { echo "FALHA: nenhum aplicativo no menu" >&2; exit 1; }
+
+args=()
+while IFS='|' read -r m n i; do
+    args+=("$m" "$n" "$i")
+done < <(printf '%s\n' "${linhas[@]}" | sort -t'|' -k2,2 -f)
+
+escolha=$(GTK_THEME=Adwaita:dark zenity --list --checklist --title="Ícones dos aplicativos" \
+    --text="Marque os aplicativos que usam o ícone original. Vale só até desligar." \
+    --column="Ícone original" --column="Aplicativo" --column="Arquivo" --hide-column=3 --print-column=3 \
+    --separator='|' --width=560 --height=640 "${args[@]}") || exit 0
+
+for id in "${ids[@]}"; do
+    if [[ "|$escolha|" == *"|$id|"* ]]; then
+        NEXUS_ICONE_SEM_PAINEL=1 nexus-icone "$id" padrao >/dev/null 2>&1 || true
+    else
+        NEXUS_ICONE_SEM_PAINEL=1 nexus-icone "$id" nexus >/dev/null 2>&1 || true
+    fi
+done
+xfce4-panel -r || true
