@@ -1,0 +1,4 @@
+# O python3-pip recomenda o build-essential (gcc, g++, make): fora da ISO por decisão do grupo (peso)
+Package: build-essential
+Pin: release *
+Pin-Priority: -1
