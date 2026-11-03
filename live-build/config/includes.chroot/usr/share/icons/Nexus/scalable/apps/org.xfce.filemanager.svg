@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-labelledby="t">
+  <title id="t">Nexus OS</title>
+  <defs><linearGradient id="g" gradientUnits="userSpaceOnUse" x1="50" y1="60" x2="206" y2="200"><stop offset="0" stop-color="#62a8f8"/><stop offset="1" stop-color="#e262c4"/></linearGradient></defs>
+  <rect width="256" height="256" rx="58" fill="#23253e"/>
+  <rect x="3" y="3" width="250" height="250" rx="55" fill="none" stroke="#ffffff" stroke-opacity=".12" stroke-width="2"/>
+  <g fill="none" stroke="url(#g)" stroke-width="15" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M58 92a10 10 0 0 1 10-10h42l16 20h62a10 10 0 0 1 10 10v70a10 10 0 0 1-10 10H68a10 10 0 0 1-10-10z"/>
+    <line x1="58" y1="122" x2="198" y2="122"/>
+  </g>
+</svg>

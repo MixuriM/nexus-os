@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Ícones dos aplicativos
+Comment=Escolhe quais aplicativos usam o ícone original em vez do ícone do Nexus OS
+Icon=nexus-icones
+Exec=nexus-icones-janela
+Terminal=false
+Categories=X-Nexus-OS;

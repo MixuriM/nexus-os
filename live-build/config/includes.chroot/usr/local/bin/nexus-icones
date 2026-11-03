@@ -1,0 +1,17 @@
+#!/bin/sh
+# nexus-icones padrao|nexus: troca o tema de ícones de todos os aplicativos entre os ícones originais (Papirus-Dark)
+# e os do Nexus OS (padrão de fábrica). Reinicia o painel para ele recarregar os ícones. Vale só para esta sessão:
+# a live não guarda a configuração ao desligar.
+set -eu
+
+case ${1:-} in
+    padrao) tema=Papirus-Dark ;;
+    nexus) tema=Nexus ;;
+    *)
+        echo "uso: nexus-icones padrao|nexus" >&2
+        exit 2
+        ;;
+esac
+xfconf-query -c xsettings -p /Net/IconThemeName -s "$tema"
+xfce4-panel -r
+echo "tema de ícones: $tema"
