@@ -78,7 +78,20 @@ for pacote in mousepad evince ristretto file-roller galculator xfce4-screenshoot
     grep -qxF "$pacote" "$lista" || fail "$pacote fora de $lista"
 done
 for pacote in thunderbird gparted; do
-    ! grep -qxF "$pacote" "$lista" || fail "$pacote não deveria estar em $lista (fora do escopo decidido)"
+    ! grep -qxF "$pacote" "$lista" || fail "$pacote deveria estar só em nexus-apps.list.chroot, não em $lista"
+    grep -qxF "$pacote" live-build/config/package-lists/nexus-apps.list.chroot || fail "$pacote fora de nexus-apps.list.chroot"
+done
+# Atalhos só do menu (rodada 5 da RC2): posição da barra e ícones dos aplicativos; Exec com comando versionado e sem cópia na área de trabalho.
+for n in nexus-barra nexus-icones; do
+    f=$menu/$n.desktop
+    [ -f "$f" ] || { fail "atalho ausente no menu: $f"; continue; }
+    for k in Type Name Exec Icon Categories; do
+        [ -n "$(valor "$f" "$k")" ] || fail "$f sem a chave $k"
+    done
+    case $(valor "$f" Categories) in *X-Nexus-OS*) ;; *) fail "$f fora da categoria X-Nexus-OS" ;; esac
+    cmd=$(valor "$f" Exec | cut -d" " -f1)
+    [ -f "$inc/usr/local/bin/$cmd" ] || fail "$f: $inc/usr/local/bin/$cmd não versionado"
+    [ -f "$inc/usr/share/icons/hicolor/scalable/apps/$(valor "$f" Icon).svg" ] || fail "$f: ícone $(valor "$f" Icon) ausente"
 done
 
 # Nenhum .desktop (nem o wrapper) pode estar ignorado pelo .gitignore.
