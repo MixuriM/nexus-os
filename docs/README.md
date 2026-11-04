@@ -21,4 +21,5 @@ O relatório acadêmico do projeto não fica neste repositório.
 - [Identidade visual: marca, papel de parede, tema e licenças](branding.md)
 - [Modelo de manual](manual-modelo.md)
 - [Checklist de teste da documentação](checklist-teste-documentacao.md)
+- [Teste da RC2 no VirtualBox: passo a passo completo (rodada 2)](teste-virtualbox.md)
 - [Oficina de Git](oficina-git.md)

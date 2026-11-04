@@ -12,7 +12,7 @@ export LC_ALL=C.UTF-8
 erros=0
 fail() { echo "FALHA: $*" >&2; erros=$((erros + 1)); }
 
-docs=(sdn virtualizacao nfv containers integracao-iso requisitos rc1 gns3 manual gui branding rc2)
+docs=(sdn virtualizacao nfv containers integracao-iso requisitos rc1 gns3 manual gui branding rc2 teste-virtualbox)
 indice=docs/README.md
 [ -f "$indice" ] || fail "índice ausente: $indice"
 
