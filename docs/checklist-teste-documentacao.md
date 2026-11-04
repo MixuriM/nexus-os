@@ -362,7 +362,7 @@ vmconnect.exe localhost $vm
 
 ### H1-C: VirtualBox (sem KVM, o mais lento)
 
-Versão do manual conferida: VirtualBox 7.2 ([hyperv.md](hyperv.md) cita a 7.2.20). Com o hypervisor do Windows ligado, o VirtualBox roda sobre o Hyper-V e fica ainda mais lento; não deixe o Hyper-V rodando outra VM ao mesmo tempo. A virtualização aninhada fica **desligada** (`--nested-hw-virt off`): em CPU AMD o KVM aninhado derruba a VM (issue 25). Por isso a VM não tem `/dev/kvm`.
+Passo a passo detalhado, para quem nunca viu o projeto: [teste-virtualbox.md](teste-virtualbox.md). Versão do manual conferida: VirtualBox 7.2 ([hyperv.md](hyperv.md) cita a 7.2.20). Com o hypervisor do Windows ligado, o VirtualBox roda sobre o Hyper-V e fica ainda mais lento; não deixe o Hyper-V rodando outra VM ao mesmo tempo. A virtualização aninhada fica **desligada** (`--nested-hw-virt off`): em CPU AMD o KVM aninhado derruba a VM (issue 25). Por isso a VM não tem `/dev/kvm`.
 
 1. Confira o SHA256 da ISO como em H1-A, passo 2 (o arquivo em `C:\HyperV`).
 2. Crie a VM. Onde: PowerShell (não precisa ser administrador); o `VBoxManage.exe` fica em `C:\Program Files\Oracle\VirtualBox`:
@@ -402,7 +402,7 @@ Para cada linha: faça o que está escrito, compare com "O que deve aparecer" e 
 | --- | --- | --- | --- | --- | --- |
 | H3.1 | 1. Login automático | Já visto no H2.2 | Nenhuma tela de login | | |
 | H3.2 | 2. Sessão gráfica ativa | No terminal: `loginctl list-sessions` | Uma linha com `user` e `seat0`. Depois `loginctl show-session $(loginctl list-sessions --no-legend \| awk '$3=="user"{print $1;exit}') -p Type -p State` imprime `Type=x11` e `State=active` | | |
-| H3.3 | 3. Barra e menu de aplicativos | Clique no botão **Nexus OS** no canto inferior esquerdo | Um menu em português com as categorias de aplicativos (por exemplo **Escritório**, **Internet**, **Multimídia**, **Acessórios** e **Sistema**) e **Nexus OS**. Passe o mouse em **Nexus OS**: aparecem os dez atalhos. Abra o terminal e outro aplicativo: cada janela aberta ganha um botão na barra de baixo, como no Windows | | |
+| H3.3 | 3. Barra e menu de aplicativos | Clique no botão da logo do Nexus OS, no centro da barra | Um menu em português com as categorias de aplicativos (por exemplo **Escritório**, **Internet**, **Multimídia**, **Acessórios** e **Sistema**) e **Nexus OS**. Passe o mouse em **Nexus OS**: aparecem os dez atalhos. Abra o terminal e outro aplicativo: cada janela aberta ganha um botão na barra de baixo, como no Windows | | |
 | H3.4 | 4. Gerenciador de janelas | Abra o terminal, arraste a barra de título para outro lugar, clique em minimizar (botão da esquerda no título), reabra pela barra e clique em maximizar | A janela se move, some, volta e ocupa a tela inteira | | |
 | H3.5 | 5. Gerenciador de arquivos | No menu **Nexus OS**, clique em **File Manager** | Uma janela (Thunar) com as pastas do `user` | | |
 | H3.6 | 6. Terminal gráfico | No terminal: `echo ok` | `ok` | | |
@@ -415,7 +415,7 @@ Para cada linha: faça o que está escrito, compare com "O que deve aparecer" e 
 | # | O que fazer | O que deve aparecer | Passou ou falhou | O que aconteceu e saída |
 | --- | --- | --- | --- | --- |
 | H4.1 | Olhe o papel de parede | Fundo azul-escuro com reflexos azul e magenta, losangos finos e a **logo original do Nexus OS** (o losango com o N e o texto "NEXUS OS") no centro, sem faixas visíveis nos degradês | | |
-| H4.2 | Olhe o botão do menu na barra | O texto **Nexus OS** e o ícone da marca | | |
+| H4.2 | Olhe o botão do menu na barra | Só o ícone da marca (losango com o N), sem texto ao lado | | |
 | H4.3 | Olhe a aparência das janelas | Tema escuro azul-marinho (Nexus-Dark): barra de título, menus e janelas na cor da logo, com os ícones do tema Nexus (sobre o Papirus-Dark) | | |
 | H4.4 | No terminal: `head -n 3 /etc/os-release` | `PRETTY_NAME` e `NAME` com **Debian** (o sistema continua Debian; só a identidade visual é do Nexus OS) | | |
 | H4.5 | No terminal: `hostname`, `date` e `locale \| head -n 1` | `nexus-os`, a data e a hora de Brasília (UTC-3) e `LANG=pt_BR.UTF-8`. Digite `ç` e `~a` no teclado do computador e confira o teclado ABNT2 | | |
