@@ -24,7 +24,9 @@ Projeto Integrador acadêmico, em desenvolvimento.
 
 ## Estado atual
 
-A **RC1** é a primeira ISO integrada, só com o núcleo e sem ambiente gráfico ([docs/rc1.md](docs/rc1.md)). A **RC2** soma a ela o **desktop XFCE** com login automático do `user`, 10 atalhos para os componentes (F3.15 e F3.16, [docs/gui.md](docs/gui.md)), a identidade visual do Nexus OS (F3.17, [docs/branding.md](docs/branding.md)), barra única embaixo como a do Windows, em português do Brasil, e programas prontos para uso (LibreOffice, Wireshark, VLC, GIMP, Inkscape, KeePassXC e mais); identificação, SHA256 e testes em [docs/rc2.md](docs/rc2.md), requisitos com desktop em [docs/requisitos.md](docs/requisitos.md). O congelamento da ISO e a tag são da Fase 4.
+A **RC1** é a primeira ISO integrada, só com o núcleo e sem ambiente gráfico ([docs/rc1.md](docs/rc1.md)). A **RC2** soma a ela o **desktop XFCE** com login automático do `user`, 10 atalhos para os componentes (F3.15 e F3.16, [docs/gui.md](docs/gui.md)), a identidade visual do Nexus OS (F3.17, [docs/branding.md](docs/branding.md)), a barra única embaixo com o menu estilo macOS, o português do Brasil e programas prontos para uso (LibreOffice, Wireshark, VLC, GIMP, Inkscape, KeePassXC, Thunderbird, GParted, Geany, FileZilla, Audacity e mais). A **rodada 5 da RC2** (03/11/2026) trouxe as melhorias pedidas depois do teste no Hyper-V: menu `whiskermenu` aberto também pela tecla Windows, `docklike` com os aplicativos fixados e as janelas só com ícone, centralizados na barra (`nexus-barra` leva para a esquerda), relógio com a hora em cima e a data embaixo, ícone da bateria só em notebook, ícones novos no estilo do Nexus OS e a opção de usar o ícone original de cada aplicativo (`nexus-icone`, `nexus-icones` e a janela "Ícones dos aplicativos"), GIMP com o nome curto, 39 aplicativos novos e [dicas de copiar e colar no terminal](docs/manual.md). Não há loja de aplicativos: a ISO é live e o que se instala some ao desligar.
+
+**ISO atual da RC2:** `dist/nexus-os-rc2-amd64.iso`, SHA256 `bb6d89c68970fb24bb6e35ec3db0a74a88490b257eed166729edb941ce673e58`, 1990639616 bytes (1898 MiB), build limpo do commit `fc57261` ([docs/rc2.md](docs/rc2.md)). Testes: `tests/run-fase3.sh` com 9 testes e `all` com 4096 e 2560 MiB, com KVM; Hyper-V Geração 2 conferido à mão em 03/11/2026 (N1 a N20 passaram, com ressalvas registradas). **Falta** o teste no VirtualBox (rodada 2), que tem [passo a passo completo em docs/teste-virtualbox.md](docs/teste-virtualbox.md), e a execução do roteiro por uma segunda pessoa. O congelamento da ISO e a tag são da Fase 4.
 
 | Componente | Versão na ISO | Como usar | Smoke test |
 | --- | --- | --- | --- |
@@ -35,10 +37,11 @@ A **RC1** é a primeira ISO integrada, só com o núcleo e sem ambiente gráfico
 | Topologia: Containerlab | 0.81.1 | `containerlab deploy -t ...` | `nfv` |
 | NFVO/VNFM simplificado | script `nfv/nexus-vnf.sh` | `nexus-vnf up\|status\|down` | `orquestracao` |
 | Desktop: XFCE | `xfce4` 4.20.1 com `lightdm` 1.32.0-6+b2, `firefox-esr` e `virt-manager` | login automático do `user`; menu e área de trabalho com os atalhos "Nexus OS" | `desktop` |
+| Barra e menu | `xfce4-whiskermenu-plugin` 2.9.2-1, `xfce4-docklike-plugin` 0.4.3-1, `xfce4-power-manager-plugins` 4.20.0-1 | tecla Windows ou botão da logo; `nexus-barra centro|esquerda|alternar`; `nexus-icone` e `nexus-icones` | `desktop` |
 
 Fora da ISO: OpenDaylight (opcional, só depois que o núcleo estiver validado) e GNS3 (apenas documentado em [docs/gns3.md](docs/gns3.md)).
 
-O desktop é o **XFCE** com `lightdm`, escolhido por medição. Na ISO ele sobe sozinho no login do `user`: a sessão fica pronta 23 s depois do boot, com 1129 MiB de RAM em repouso e ISO de 1774911488 bytes (com KVM; sem KVM o smoke `desktop` também passa, mais lento). Comparação dos candidatos, atalhos e medições em [docs/gui.md](docs/gui.md). Rodada 5 da RC2: barra com menu estilo macOS (tecla Windows abre), aplicativos fixados no centro, relógio em duas linhas, opção de ícone original por aplicativo (`nexus-icone`) e 39 aplicativos novos (Thunderbird, GParted, Geany, FileZilla, Audacity e outros; lista em [docs/gui.md](docs/gui.md)); sem loja de aplicativos, porque a ISO é live e o que se instala some ao desligar.
+O desktop é o **XFCE** com `lightdm`, escolhido por medição. Na ISO ele sobe sozinho no login do `user`: a sessão fica pronta 23 s depois do boot (rodada 4), com 1095 MiB de RAM em repouso e pico de 2006 MiB, e ISO de 1990639616 bytes (rodada 5; com KVM; sem KVM o smoke `desktop` também passa, mais lento). Comparação dos candidatos, atalhos, a barra, o menu e as medições em [docs/gui.md](docs/gui.md). **Sem loja de aplicativos (decisão do grupo):** programas instalados com `sudo apt install` na sessão somem ao desligar; o que se quer sempre fica na lista de pacotes da ISO (`live-build/config/package-lists/`).
 
 ## Arquitetura
 
@@ -104,7 +107,9 @@ Preparo da VM: [docs/ambiente-de-build.md](docs/ambiente-de-build.md). Resultado
 | `nexus-vm criar <nome>\|listar\|remover <nome>` | VMs de teste do libvirt (funciona sem `sudo` para quem está no grupo `libvirt`, como o `user`) | [docs/virtualizacao.md](docs/virtualizacao.md) |
 | `sudo nexus-vnf up\|status\|down` | Ciclo da VNF FRR sobre o Containerlab | [docs/nfv.md](docs/nfv.md) |
 | `sudo containerlab deploy -t /usr/share/nexus-os/labs/containerlab/frr-duo.clab.yml` | Topologia de demonstração: dois nós FRR trocando rotas por OSPF | [docs/nfv.md](docs/nfv.md) |
-| `sudo nexus-smoke <nome>\|all` | Smoke tests dos componentes dentro da ISO, com medição de RAM e disco | [docs/integracao-iso.md](docs/integracao-iso.md) |
+| `sudo nexus-smoke <nome>|all` | Smoke tests dos componentes dentro da ISO, com medição de RAM e disco | [docs/integracao-iso.md](docs/integracao-iso.md) |
+| `nexus-barra centro|esquerda|alternar` | Menu e ícones da barra no centro (padrão) ou no canto esquerdo, só na sessão | [docs/gui.md](docs/gui.md) |
+| `nexus-icone <app.desktop> padrao|nexus` e `nexus-icones padrao|nexus` | Ícone original de um aplicativo ou de todos, ou o ícone do tema Nexus; também pela janela "Ícones dos aplicativos" do menu | [docs/manual.md](docs/manual.md) |\|all` | Smoke tests dos componentes dentro da ISO, com medição de RAM e disco | [docs/integracao-iso.md](docs/integracao-iso.md) |
 
 ## Requisitos medidos da RC1
 
@@ -179,6 +184,8 @@ nexus-os/
 - Componentes: [SDN](docs/sdn.md), [virtualização](docs/virtualizacao.md), [contêineres](docs/containers.md), [NFV](docs/nfv.md)
 - Integração: [como a ISO é montada](docs/integracao-iso.md), [RC1](docs/rc1.md), [requisitos de hardware](docs/requisitos.md)
 - Uso: [manual v1](docs/manual.md) e [GNS3, só documentado](docs/gns3.md)
+- Testes manuais: [checklist da documentação](docs/checklist-teste-documentacao.md) e [teste no VirtualBox, passo a passo completo](docs/teste-virtualbox.md)
+- RC2: [identificação, SHA256 e testes](docs/rc2.md) e [requisitos com desktop](docs/requisitos.md)
 - Ambiente gráfico: [escolha do desktop, instalação na ISO, atalhos e medições](docs/gui.md)
 
 ## Limitações conhecidas
