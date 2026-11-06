@@ -4,7 +4,7 @@
 # Estático: roda no Git Bash e no Linux. Uso: tests/evidencias.sh
 set -uo pipefail
 
-cd "$(dirname "${BASH_SOURCE[0]}")/.."
+cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
 export LC_ALL=C
 
 erros=0
@@ -70,7 +70,7 @@ fi
 if [ ! -f "$lib" ]; then
     fail "$lib ausente"
 else
-    # shellcheck source=lib-evidencia.sh
+    # shellcheck source=/dev/null
     . "$lib"
     tmp=$(mktemp -d)
     trap 'rm -rf "$tmp"' EXIT
@@ -95,7 +95,7 @@ else
     seq 1 1000 | evidencia_sanitizar >"$tmp/longo"
     [ "$(wc -l <"$tmp/longo")" -le 300 ] || fail "saída sanitizada passa de 300 linhas"
     grep -q 'omitidas' "$tmp/longo" || fail "corte de linhas não indicado"
-    grep -qx 1 "$tmp/longo" && grep -qx 1000 "$tmp/longo" || fail "corte não preserva início e fim"
+    if ! { grep -qx 1 "$tmp/longo" && grep -qx 1000 "$tmp/longo"; }; then fail "corte não preserva início e fim"; fi
 
     sha=$(printf 'ab%.0s' {1..32})
     ev="$tmp/ev"
