@@ -1,0 +1,28 @@
+--- tests/iso-smoke.sh --extra t4.sh <iso> t4
+--- últimas 15 linhas da serial ---
+[   28.406805] nexus-smoke[2247]: NEXUS-SMOKE-BEGIN t4
+[   28.418285] nexus-smoke[2278]: NEXUS-CENARIO-METRICA kvm_no_convidado: sim
+[   28.418357] nexus-smoke[2278]: tipo esperado do domínio: kvm
+[   28.421547] nexus-smoke[2278]: --- ciclo 1
+[   30.545341] nexus-smoke[2285]: OK: VM cen-t4 criada e iniciada (virt-type kvm)
+[   30.761308] nexus-smoke[2278]: NEXUS-CENARIO-METRICA criar_ate_running_s_ciclo1: 2.31
+[   31.257571] nexus-smoke[2278]: FALHA: o user usa a URI 'qemu:///session', esperado qemu:///system (ciclo 1)
+[   31.734377] nexus-smoke[2247]: NEXUS-SMOKE-TIME t4 3
+[   31.735599] nexus-smoke[2247]: NEXUS-SMOKE-END t4 1
+[   31.742512] nexus-smoke[2247]: NEXUS-SMOKE-MEM t4 1101
+[   31.754358] nexus-smoke[2247]: NEXUS-SMOKE-DISK fim:/ 28
+[   31.761541] nexus-smoke[2247]: NEXUS-SMOKE-DISK fim:/var/lib/docker 193
+[   31.766400] nexus-smoke[2247]: NEXUS-SMOKE-MEMPEAK 1123
+[   31.767622] nexus-smoke[2247]: NEXUS-SMOKE-DONE 1 1
+[!p]104FALHA: smoke com falhas: DONE 1 1, END com erro: NEXUS-SMOKE-END t4 1
+--- saída do convidado (t4)
+NEXUS-SMOKE-BEGIN t4
+NEXUS-CENARIO-METRICA kvm_no_convidado: sim
+tipo esperado do domínio: kvm
+--- ciclo 1
+OK: VM cen-t4 criada e iniciada (virt-type kvm)
+NEXUS-CENARIO-METRICA criar_ate_running_s_ciclo1: 2.31
+FALHA: o user usa a URI 'qemu:///session', esperado qemu:///system (ciclo 1)
+NEXUS-SMOKE-TIME t4 3
+NEXUS-SMOKE-END t4 1
+FALHA: o convidado falhou: veja a saída em evidencias/T4
