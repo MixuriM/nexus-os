@@ -100,6 +100,30 @@ Antes de cada cenário, registrar o modo: `ls -l /dev/kvm` e `lsmod | grep kvm`.
 - **Métricas:** tempo até a sessão (referência 23 s, [requisitos.md](requisitos.md)) e as capturas de tela.
 - **Evidência esperada:** `evidencias/T7/AAAA-MM-DD-<modo>.md`, `.txt` e capturas `.png` (até 1 MiB cada arquivo).
 
+## Como rodar T1, T2 e T4 e mutações
+
+Na VM de build, na raiz do clone, com a ISO em `dist/` (cada comando termina em `OK: cenário Tn` ou `FALHA: ...` e grava a evidência em `evidencias/Tn/`):
+
+```bash
+tests/cenario-t1.sh dist/nexus-os-rc2-amd64.iso   # cerca de 7 min: boot, all com 2560 MiB e controle negativo com 1536 MiB
+tests/cenario-t2.sh dist/nexus-os-rc2-amd64.iso   # cerca de 1 min
+tests/cenario-t4.sh dist/nexus-os-rc2-amd64.iso   # cerca de 1 min
+```
+
+Mutações (provam que o cenário falha de verdade): rode o cenário com `CENARIO_GUEST=<cópia modificada do script do convidado>` e `EVID_DIR=<pasta temporária>` (para não gravar em `evidencias/`). Para o T1, aponte para uma cópia da ISO por link simbólico com o `.sha256` alterado.
+
+| Mutação | Alteração | Falha esperada |
+| --- | --- | --- |
+| T1-M1 | `.sha256` com um dígito alterado | `o SHA256 da ISO não confere com o .sha256` |
+| T2-M1 | `t2.sh` sem a regra de descarte | `ping de A para C passou` |
+| T2-M2 | `t2.sh` com a regra de permissão A para B saindo pela porta 3 | `ping de A para B falhou` |
+| T4-M1 | `t4.sh` com `systemctl stop libvirtd` antes do criar | `libvirtd inativo antes do criar` |
+| T4-M2 | `t4.sh` com o `nexus-vm remover` trocado por `true` | `sobrou depois do remover` |
+
+## Problemas conhecidos
+
+- T4: o `user` da ISO usa `qemu:///session` no `virsh`, não `qemu:///system`. O libvirt só lê o `/etc/libvirt/libvirt.conf` para o root; o usuário comum lê `~/.config/libvirt/libvirt.conf`. Medido na RC2: `virsh uri` como `user` dá `qemu:///session`; com o arquivo `uri_default = "qemu:///system"` em `~/.config/libvirt/libvirt.conf` dá `qemu:///system`. O T4 fica sem ✅ até a correção (por exemplo, o arquivo em `/etc/skel/.config/libvirt/` na ISO, na F4.5). Sem esse ponto, o resto do T4 passou numa cópia de diagnóstico do script (3 ciclos, `type='kvm'`), que não é evidência.
+
 ## Fora do escopo
 
 - OpenDaylight (F3.1): opcional e fora da Fase 4; o T2 usa regras OpenFlow manuais, sem controlador.
