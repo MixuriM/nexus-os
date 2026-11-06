@@ -22,4 +22,5 @@ O relatório acadêmico do projeto não fica neste repositório.
 - [Modelo de manual](manual-modelo.md)
 - [Checklist de teste da documentação](checklist-teste-documentacao.md)
 - [Teste da RC2 no VirtualBox: passo a passo completo (rodada 2)](teste-virtualbox.md)
+- [Plano de testes funcionais (Fase 4: T1 a T7, evidência e métricas)](plano-de-testes.md)
 - [Oficina de Git](oficina-git.md)
