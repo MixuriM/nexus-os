@@ -1,8 +1,20 @@
-# Manual v1 do Nexus OS (RC2, núcleo e ambiente gráfico)
+# Manual v2 do Nexus OS (RC2 final)
 
-Manual de instalação, boot e uso de cada componente da ISO. Cobre o núcleo (RC1) e, a partir da RC2, o ambiente gráfico.
+Manual de instalação, boot e uso de cada componente da ISO. Cobre o núcleo (RC1) e, a partir da RC2, o ambiente gráfico. Esta é a v2, escrita depois dos testes funcionais da Fase 4.
 Os blocos marcados `bash nexus-exec` são executados por `tests/manual.sh` dentro da ISO, sem rede, em ordem, e cada um limpa o que criou. Os demais blocos são exemplos que o teste não executa.
 Roteiro para quem vai executar o manual do zero: [checklist-teste-documentacao.md](checklist-teste-documentacao.md), parte "Manual v1 por componente".
+
+## O que mudou da v1
+
+| Seção | O que mudou |
+| --- | --- |
+| Gerar a ISO | Comandos exatos, do clone até o `.sha256` da RC2 final, com tempo e espaço medidos |
+| Iniciar a ISO | A Geração 2 do Hyper-V (Secure Boot desligada) também inicia a ISO; antes o texto dizia só Geração 1 |
+| libvirt (nexus-vm) | O `virsh` do `user` usa `qemu:///system` sem `sudo` (antes caía em `qemu:///session`, issue 74) |
+| Containerlab | A convergência vem contada de dois jeitos (depois e desde o início do `deploy`) e o aviso do `vtysh` deixou de ser citado onde o bloco não o mostra (lacunas do T5, issue 76) |
+| Cenário integrado | Os arquivos do cenário já estão na ISO; tempos medidos no T6 (convergência, queda e recuperação) e contadores esperados das regras |
+| Ambiente gráfico | O Enter fecha o terminal dos atalhos de forma confiável (antes o terminal podia ficar em modo cru, issue 78) |
+| Verificação | Os comandos usam a ISO da RC2 final (`dist/nexus-os-rc2-amd64.iso`) |
 
 ## Visão geral
 
@@ -23,18 +35,22 @@ O ambiente gráfico entra na RC2. Fora da ISO: OpenDaylight (opcional, trabalho 
 
 ## Gerar a ISO
 
-A ISO só se constrói em Linux (VM Debian 13), com `sudo`, Docker e internet. Passo a passo, tempo e espaço em disco: seção "Como gerar a ISO" do [README.md](../README.md) e [ambiente-de-build.md](ambiente-de-build.md). Em resumo, na raiz do repositório clonado na VM:
+A ISO só se constrói em Linux (VM Debian 13 com `sudo`, Docker e internet; o disco do Linux, nunca pasta do Windows nem `/mnt/*`). O build limpo leva cerca de 23 minutos com KVM e ocupa cerca de 5,3 GiB ([ambiente-de-build.md](ambiente-de-build.md) e [rc2.md](rc2.md)). Os comandos abaixo são os da RC2 final, na ordem, num clone novo. Para gerar a ISO de um ramo que ainda não está na `main`, use `git clone -b <ramo> ...` no primeiro comando.
 
 ```bash
+git clone https://github.com/MixuriM/nexus-os.git
+cd nexus-os
 sudo scripts/build-iso.sh
 tests/iso.sh dist/nexus-os-poc-amd64.iso
+cp dist/nexus-os-poc-amd64.iso dist/nexus-os-rc2-amd64.iso
+(cd dist && sha256sum nexus-os-rc2-amd64.iso > nexus-os-rc2-amd64.iso.sha256)
 ```
 
-O build gera `dist/nexus-os-poc-amd64.iso` e o `.sha256`. A RC1 validada é a cópia `dist/nexus-os-rc1-amd64.iso` (identificação e SHA256 em [rc1.md](rc1.md)). A ISO e o `.sha256` não vão para o Git.
+O `build-iso.sh` grava o log em `live-build/build.log` e termina com `OK: dist/nexus-os-poc-amd64.iso, <bytes> bytes, <segundos> s` e o SHA256. O `tests/iso.sh` confere o `.sha256` e inicia a ISO até aparecer `login:`. As duas últimas linhas copiam a ISO para o nome da RC2 e gravam o `.sha256` dela. A RC1 validada é a cópia `dist/nexus-os-rc1-amd64.iso` (identificação em [rc1.md](rc1.md)). A ISO e o `.sha256` não vão para o Git.
 
 ## Iniciar a ISO
 
-Use pelo menos **1536 MiB de RAM** com a ISO da RC1 e **2560 MiB** com a da RC2, que tem o desktop ([requisitos.md](requisitos.md)). A ISO tem boot BIOS (isolinux), então no Hyper-V use VM de Geração 1. Na tela do isolinux, aperte Enter.
+Use pelo menos **1536 MiB de RAM** com a ISO da RC1 e **2560 MiB** com a da RC2, que tem o desktop ([requisitos.md](requisitos.md)). A ISO tem boot BIOS (isolinux) e UEFI: no Hyper-V use a Geração 1 ou a Geração 2 com a Secure Boot desligada (`Set-VMFirmware -VMName $vm -EnableSecureBoot Off`). Na tela do menu de boot, aperte Enter.
 
 **QEMU no Linux** (com KVM se `/dev/kvm` existir; sem `-enable-kvm -cpu host` a emulação por software é bem mais lenta):
 
@@ -113,7 +129,7 @@ if LC_ALL=C virsh -c qemu:///system dominfo manual1 >/dev/null 2>&1; then
 fi
 ```
 
-Saída esperada: `OK: VM manual1 criada e iniciada (virt-type kvm)` (ou `qemu`), a VM `running` na listagem e `OK: VM manual1 removida`.
+Saída esperada: `OK: VM manual1 criada e iniciada (virt-type kvm)` (ou `qemu`), a VM `running` na listagem e `OK: VM manual1 removida`. O `user` também enxerga o domínio sem `sudo`: `virsh uri` mostra `qemu:///system` (arquivo `~/.config/libvirt/libvirt.conf`, vindo do `/etc/skel`).
 
 ## Contêineres e imagens offline
 
@@ -163,7 +179,7 @@ Saída esperada: `FRRouting 10.3` na primeira linha e `exemplo aplicado: sim`.
 
 ## Containerlab
 
-Um comando sobe a topologia de demonstração: dois nós FRR (`r1` e `r2`, imagem já na ISO) trocando rotas por OSPF. O Containerlab precisa de root. Sem rede, o `deploy` imprime `Failed fetching latest version information`, que não afeta o resultado. O `vtysh` imprime o aviso `Can't open configuration file /etc/frr/vtysh.conf`, também inofensivo. Detalhes: [nfv.md](nfv.md).
+Um comando sobe a topologia de demonstração: dois nós FRR (`r1` e `r2`, imagem já na ISO) trocando rotas por OSPF. O Containerlab precisa de root. Sem rede, o `deploy` imprime `Failed fetching latest version information`, que não afeta o resultado. Rodado à mão, o `docker exec ... vtysh` imprime o aviso `Can't open configuration file /etc/frr/vtysh.conf`, também inofensivo; o bloco abaixo manda esse erro para `/dev/null`, então o aviso não aparece na saída dele. Detalhes: [nfv.md](nfv.md).
 
 ```bash nexus-exec
 topo=/usr/share/nexus-os/labs/containerlab/frr-duo.clab.yml
@@ -184,7 +200,7 @@ sudo containerlab destroy -t "$topo" --cleanup
 [ "$r1" = sim ] && [ "$r2" = sim ]
 ```
 
-Saída esperada: `O>* 198.51.100.2/32` em `r1` e `O>* 198.51.100.1/32` em `r2`. A convergência levou de 12 s a 16 s nas medições.
+Saída esperada: `O>* 198.51.100.2/32` em `r1` e `O>* 198.51.100.1/32` em `r2`. A convergência levou de 12 s a 16 s contada depois do `deploy` (como no `tests/nfv.sh`) e 19 s contada desde o início do `deploy` (T5, com KVM, limite do teste de 120 s).
 
 ## Orquestração (nexus-vnf)
 
@@ -204,7 +220,7 @@ Saída esperada: `OK: VNF vnf1 rodando` no `status` com a VNF no ar, e código d
 
 ## Cenário integrado
 
-O cenário integrado junta as três peças: uma ponte Open vSwitch com regras OpenFlow escritas à mão, dois nós FRR do Containerlab ligados a ela e a subida pelo `nexus-vnf`. `r1` e `r2` fazem OSPF área 0 pela ponte `br-integrado`, e só as regras de `sdn/flows/integrado.flows` deixam o ARP, o IP e o OSPF (protocolo IP 89) passar. O Containerlab não cria a ponte: o bloco a cria antes (mecanismo `kind: ovs-bridge`, veja [nfv.md](nfv.md)). Os arquivos deste cenário entram na ISO a partir da primeira ISO gerada depois do commit que os traz (a RC2 não os tem). Detalhes: [nfv.md](nfv.md) e [sdn.md](sdn.md).
+O cenário integrado junta as três peças: uma ponte Open vSwitch com regras OpenFlow escritas à mão, dois nós FRR do Containerlab ligados a ela e a subida pelo `nexus-vnf`. `r1` e `r2` fazem OSPF área 0 pela ponte `br-integrado`, e só as regras de `sdn/flows/integrado.flows` deixam o ARP, o IP e o OSPF (protocolo IP 89) passar. O Containerlab não cria a ponte: o bloco a cria antes (mecanismo `kind: ovs-bridge`, veja [nfv.md](nfv.md)). Os arquivos deste cenário estão na ISO da RC2 final. Medido no T6 com KVM, em 3 execuções seguidas: `nexus-vnf up` em cerca de 7 s, OSPF `Full` em cerca de 14 s, queda em cerca de 4,5 s com o descarte do protocolo 89 e recuperação em cerca de 6 s. Detalhes: [nfv.md](nfv.md) e [sdn.md](sdn.md).
 
 ```bash nexus-exec
 topo=/usr/share/nexus-os/labs/containerlab/integrado.clab.yml
@@ -316,7 +332,7 @@ A ISO tem boot BIOS e UEFI (`xorriso -indev <iso> -report_el_torito plain`), e a
 | Posição da barra | Alterna o menu e os ícones da barra entre o centro (padrão) e o canto esquerdo (`nexus-barra centro`, `nexus-barra esquerda` ou `nexus-barra alternar`); só no menu |
 | Ícones dos aplicativos | Abre a janela em que se marca quais aplicativos usam o ícone original em vez do ícone do Nexus OS (`nexus-icone`); só no menu |
 
-Os atalhos de terminal mostram a saída, o código de saída e esperam Enter para fechar a janela. Tudo o que um atalho cria vive na RAM e some ao desligar a ISO.
+Os atalhos de terminal mostram a saída, o código de saída e esperam Enter para fechar a janela (o `nexus-atalho` restaura o terminal antes do prompt, então o Enter sempre fecha). Tudo o que um atalho cria vive na RAM e some ao desligar a ISO.
 
 ### Barra, tecla Windows e ícones
 
@@ -470,7 +486,7 @@ Na VM de build, sem rede e fora do manual:
 
 ```bash
 tests/docs.sh
-tests/manual.sh dist/nexus-os-rc1-amd64.iso
+tests/manual.sh dist/nexus-os-rc2-amd64.iso
 ```
 
 Saída esperada: `OK: tests/docs.sh ...` e `OK: tests/manual.sh ...` (com o número de blocos executados dentro da ISO e o modo, com ou sem KVM). Cada falha ou limitação encontrada ao seguir o manual vira uma issue ([checklist-teste-documentacao.md](checklist-teste-documentacao.md), parte E).

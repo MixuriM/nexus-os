@@ -16,7 +16,7 @@ O relatório acadêmico do projeto não fica neste repositório.
 - [Requisitos mínimos de hardware da ISO](requisitos.md)
 - [RC1: ISO integrada do núcleo](rc1.md)
 - [RC2: ISO integrada com o ambiente gráfico](rc2.md)
-- [Manual v1 (RC2, núcleo e ambiente gráfico)](manual.md)
+- [Manual v2 (RC2 final)](manual.md)
 - [Ambiente gráfico: escolha do desktop, instalação na ISO, atalhos e medições](gui.md)
 - [Identidade visual: marca, papel de parede, tema e licenças](branding.md)
 - [Modelo de manual](manual-modelo.md)
