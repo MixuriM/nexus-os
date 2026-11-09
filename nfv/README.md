@@ -26,4 +26,6 @@ Infraestrutura usada: **Containerlab com contêiner FRR** (Docker, imagem `quay.
 | `down` | destrói a topologia com `--cleanup` e confere que nenhum contêiner nem a rede `clab` sobrou; pode repetir | 0 em sucesso, 1 em falha |
 | outro argumento | imprime a ajuda | 2 |
 
+Cada comando aceita um arquivo de topologia depois do nome (`nexus-vnf up|status|down [topologia.clab.yml]`, F4.3): sem ele vale a VNF padrão; com ele, o laboratório daquele arquivo (todos os nós FRR). Arquivo inexistente ou argumento a mais sai com 2. O cenário integrado (`labs/containerlab/integrado.clab.yml`, com a ponte Open vSwitch `br-integrado` e `sdn/flows/integrado.flows`) usa isso: veja [docs/nfv.md](../docs/nfv.md), seção "Cenário integrado (F4.3)".
+
 Todos exigem root. Mensagens começam com `OK:` ou `FALHA:`. Teste: `sudo tests/orquestracao.sh` (na VM de laboratório) ou o smoke `orquestracao` na ISO. Detalhes em [docs/nfv.md](../docs/nfv.md).

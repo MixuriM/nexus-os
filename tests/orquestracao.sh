@@ -9,6 +9,8 @@ raiz=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 script=$raiz/nfv/nexus-vnf.sh
 topo=$raiz/labs/containerlab/vnf-frr.clab.yml
 filtro=label=containerlab=vnf-frr
+duo=$raiz/labs/containerlab/frr-duo.clab.yml
+filtro_duo=label=containerlab=frr-duo
 
 [ "$(id -u)" -eq 0 ] || fail "rode como root: sudo tests/orquestracao.sh"
 [ -f "$script" ] || fail "script ausente: nfv/nexus-vnf.sh"
@@ -24,7 +26,10 @@ else
 fi
 
 # shellcheck disable=SC2317  # chamada indiretamente pelo trap
-cleanup() { containerlab destroy -t "$topo" --cleanup >/dev/null 2>&1 || true; }
+cleanup() {
+    containerlab destroy -t "$topo" --cleanup >/dev/null 2>&1 || true
+    containerlab destroy -t "$duo" --cleanup >/dev/null 2>&1 || true
+}
 trap cleanup EXIT
 
 # Executa o nexus-vnf e guarda a saída em $saida e o código em $rc.
@@ -63,4 +68,40 @@ roda down
 roda invalido
 [ "$rc" -eq 2 ] || fail "uso inválido devia sair com 2, saiu com $rc"
 
-echo "OK: tests/orquestracao.sh (up, status, down e idempotência da VNF FRR)"
+# Topologia opcional (F4.3): arquivo inexistente e argumento a mais saem com 2; a topologia padrão passada
+# por extenso se comporta como sem argumento; com a frr-duo o ciclo vale para os dois nós.
+roda up /nao/existe.clab.yml
+[ "$rc" -eq 2 ] || fail "topologia inexistente devia sair com 2, saiu com $rc: $saida"
+grep -q 'topologia não encontrada' <<<"$saida" || fail "a saída não explica a topologia inexistente: $saida"
+sobrou && fail "up com topologia inexistente subiu a VNF padrão"
+roda up "$topo" extra
+[ "$rc" -eq 2 ] || fail "argumento a mais devia sair com 2, saiu com $rc: $saida"
+
+roda up "$topo"
+[ "$rc" -eq 0 ] || fail "up com a topologia padrão por extenso saiu com $rc: $saida"
+roda status "$topo"
+[ "$rc" -eq 0 ] || fail "status com a topologia padrão por extenso saiu com $rc: $saida"
+grep -q '198\.51\.100\.11/32' <<<"$saida" || fail "status com a topologia padrão não mostra o loopback: $saida"
+roda down "$topo"
+[ "$rc" -eq 0 ] || fail "down com a topologia padrão por extenso saiu com $rc: $saida"
+
+roda up "$duo"
+[ "$rc" -eq 0 ] || fail "up da frr-duo saiu com $rc: $saida"
+roda status "$duo"
+[ "$rc" -eq 0 ] || fail "status da frr-duo saiu com $rc: $saida"
+for t in clab-frr-duo-r1 clab-frr-duo-r2 '198\.51\.100\.1/32' '198\.51\.100\.2/32'; do
+    grep -q "$t" <<<"$saida" || fail "status da frr-duo não mostra $t: $saida"
+done
+[ -z "$(docker ps -aq --filter "$filtro")" ] || fail "a VNF padrão apareceu junto com a frr-duo"
+ids2=$(docker ps -aq --filter "$filtro_duo")
+roda up "$duo"
+[ "$rc" -eq 0 ] || fail "segundo up da frr-duo saiu com $rc: $saida"
+[ "$(docker ps -aq --filter "$filtro_duo")" = "$ids2" ] || fail "o segundo up da frr-duo recriou os contêineres"
+roda down "$duo"
+[ "$rc" -eq 0 ] || fail "down da frr-duo saiu com $rc: $saida"
+[ -z "$(docker ps -aq --filter "$filtro_duo")" ] || fail "contêiner da frr-duo sobrou depois do down"
+! docker network inspect clab >/dev/null 2>&1 || fail "rede clab sobrou depois do down da frr-duo"
+roda status "$duo"
+[ "$rc" -eq 1 ] || fail "status da frr-duo depois do down devia sair com 1, saiu com $rc: $saida"
+
+echo "OK: tests/orquestracao.sh (up, status, down e idempotência da VNF FRR, com topologia opcional)"
