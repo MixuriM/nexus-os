@@ -1,0 +1,9 @@
+# Regras OpenFlow do cenário integrado (F4.3): as portas ovsp1 (r1) e ovsp2 (r2) da ponte br-integrado só trocam
+# ARP e IP entre si; o OSPF (protocolo IP 89) tem regra própria, de prioridade maior que a do IP em geral.
+# Fora destas regras o modo secure descarta tudo. Formato aceito por: ovs-ofctl add-flows
+priority=100,arp,in_port=ovsp1,actions=output:ovsp2
+priority=100,arp,in_port=ovsp2,actions=output:ovsp1
+priority=100,ip,nw_proto=89,in_port=ovsp1,actions=output:ovsp2
+priority=100,ip,nw_proto=89,in_port=ovsp2,actions=output:ovsp1
+priority=90,ip,in_port=ovsp1,actions=output:ovsp2
+priority=90,ip,in_port=ovsp2,actions=output:ovsp1
