@@ -104,6 +104,9 @@ else
     ! grep -q 'nexus-vnf' <<<"$sec" || fail "a seção Containerlab trouxe bloco de outra seção (nexus-vnf)"
     manual_extrair docs/manual.md "Seção que não existe" >/dev/null 2>&1
     [ $? -eq 3 ] || fail "manual_extrair devia sair com 3 para seção inexistente"
+    integ=$(manual_extrair docs/manual.md "Cenário integrado") || fail "o manual não tem a seção '## Cenário integrado' com bloco 'bash nexus-exec'"
+    grep -q 'integrado.clab.yml' <<<"$integ" || fail "o bloco da seção 'Cenário integrado' não usa integrado.clab.yml"
+    grep -q 'nexus-vnf' <<<"$integ" || fail "o bloco da seção 'Cenário integrado' não sobe pelo nexus-vnf"
     iso_falsa=$(mktemp)
     saida=$(bash tests/manual.sh "$iso_falsa" "Seção que não existe" 2>&1) && fail "tests/manual.sh aceitou seção inexistente"
     grep -q '^FALHA: seção' <<<"$saida" || fail "tests/manual.sh sem 'FALHA: seção' para seção inexistente: $saida"
