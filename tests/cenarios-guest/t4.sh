@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Cenário T4 no convidado (F4.2d): nexus-vm criar, listar e remover em 3 ciclos seguidos. A VM chega a running,
 # o XML do domínio tem type='kvm' com /dev/kvm no convidado (senão 'qemu'), libvirtd está ativo, o usuário
-# "user" vê o domínio sem sudo (uri_default do libvirt.conf da ISO) e depois do remover não sobra domínio,
+# "user" vê o domínio sem sudo (uri_default do ~/.config/libvirt/libvirt.conf, vindo do /etc/skel) e depois do remover não sobra domínio,
 # processo, XML nem arquivo temporário. Só para a ISO: o tests/cenario-t4.sh o roda por "iso-smoke --extra"
 # como o teste "t4".
 set -euo pipefail
@@ -57,7 +57,7 @@ for i in 1 2 3; do
     listagem=$(nexus-vm listar)
     grep -qE "[[:space:]]${nome}[[:space:]]+running" <<<"$listagem" || fail "nexus-vm listar não mostra $nome running (ciclo $i)"
 
-    # O user vê o domínio do sistema sem sudo: só o uri_default do /etc/libvirt/libvirt.conf leva ao qemu:///system.
+    # O user vê o domínio do sistema sem sudo: o uri_default do ~/.config/libvirt/libvirt.conf (do /etc/skel) leva ao qemu:///system.
     visto=$(runuser -u user -- env -i HOME=/home/user PATH=/usr/sbin:/usr/bin:/sbin:/bin LC_ALL=C virsh uri) ||
         fail "virsh uri falhou para o user (ciclo $i)"
     [ "$visto" = "$uri" ] || fail "o user usa a URI '$visto', esperado $uri (ciclo $i)"
