@@ -56,8 +56,8 @@ Antes de cada cenário, registrar o modo: `ls -l /dev/kvm` e `lsmod | grep kvm`.
 - **Pré-condições:** ISO com Docker, imagem FRR e Containerlab; script do convidado `tests/cenarios-guest/t3.sh`.
 - **Executor:** dono nominal conforme a tabela "Acompanhamento" da Fase 4; executor real: Marcos.
 - **Comando:** `tests/cenario-t3.sh dist/nexus-os-rc2-amd64.iso`
-- **Critério de sucesso:** o ciclo de `tests/orquestracao.sh` (`up`, `status` com código 0, `down`, `status` com código 1, `up` e `down` repetidos sem recriar nem falhar, nada sobra, uso inválido sai com 2) passa dentro da ISO.
-- **Métricas:** tempo de `up` e de `down`.
+- **Critério de sucesso:** com a imagem FRR carregada pelo `nexus-images.service`, o ciclo de `tests/orquestracao.sh` passa dentro da ISO em 3 ciclos seguidos. Por ciclo: `up` sai com 0 e o contêiner `clab-vnf-frr-vnf1` está em execução; `up` repetido sai com 0 e não cria nem recria contêiner; `status` sai com 0 e informa o loopback `198.51.100.11/32`; `down` sai com 0 e não sobra contêiner nem a rede `clab`; `down` repetido sai com 0; `status` depois do `down` sai com 1 (código documentado em `nfv/nexus-vnf.sh`). No fim, o uso inválido sai com 2.
+- **Métricas:** tempo de `up` e de `down`, por ciclo.
 - **Evidência esperada:** `evidencias/T3/AAAA-MM-DD-<modo>.md` e `.txt`.
 
 ### T4: KVM e libvirt pelo `nexus-vm` (F4.2d)
@@ -76,8 +76,9 @@ Antes de cada cenário, registrar o modo: `ls -l /dev/kvm` e `lsmod | grep kvm`.
 - **Pré-condições:** ISO e manual; script do convidado `tests/cenarios-guest/t5.sh`.
 - **Executor:** dono nominal conforme a tabela "Acompanhamento" da Fase 4; executor real: Marcos.
 - **Comando:** `tests/cenario-t5.sh dist/nexus-os-rc2-amd64.iso`
-- **Critério de sucesso:** os comandos do manual, na ordem, criam a topologia `frr-duo`; cada nó aprende o loopback do outro por OSPF em até 90 s (limite de `tests/nfv.sh`); a topologia é removida no fim. Lacuna do manual vira issue.
-- **Métricas:** tempo de convergência do OSPF.
+- **Parte automática (bloco 3):** `tests/cenario-t5.sh` roda, dentro da ISO e sem rede, só os blocos `bash nexus-exec` da seção "Containerlab" do manual (`tests/manual.sh <iso> Containerlab` faz o mesmo sem as conferências extras). A rodada humana "sem ajuda externa" é do bloco 7: por isso o F4.2e fica 🟡.
+- **Critério de sucesso:** os comandos do manual, na ordem, criam a topologia `frr-duo`; a vizinhança OSPF fica `Full` nos dois lados e cada nó aprende o loopback do outro em até 120 s (parâmetro `T5_LIMITE`, consulta a cada 1 s); antes do `containerlab destroy` a adjacência e as rotas continuam; depois dele não sobra contêiner, rede `clab` nem netns. Lacuna do manual (bloco que falha ou depende de algo que o manual não diz) não se corrige no teste: vai para `evidencias/T5/lacunas.md` e vira issue; a correção é do manual v2.
+- **Métricas:** tempo do `deploy` até a convergência do OSPF e o limite usado.
 - **Evidência esperada:** `evidencias/T5/AAAA-MM-DD-<modo>.md` e `.txt`.
 
 ### T6: cenário integrado ponta a ponta (F4.3)
@@ -100,25 +101,33 @@ Antes de cada cenário, registrar o modo: `ls -l /dev/kvm` e `lsmod | grep kvm`.
 - **Métricas:** tempo até a sessão (referência 23 s, [requisitos.md](requisitos.md)) e as capturas de tela.
 - **Evidência esperada:** `evidencias/T7/AAAA-MM-DD-<modo>.md`, `.txt` e capturas `.png` (até 1 MiB cada arquivo).
 
-## Como rodar T1, T2 e T4 e mutações
+## Como rodar T1 a T5 e mutações
 
 Na VM de build, na raiz do clone, com a ISO em `dist/` (cada comando termina em `OK: cenário Tn` ou `FALHA: ...` e grava a evidência em `evidencias/Tn/`):
 
 ```bash
 tests/cenario-t1.sh dist/nexus-os-rc2-amd64.iso   # cerca de 7 min: boot, all com 2560 MiB e controle negativo com 1536 MiB
 tests/cenario-t2.sh dist/nexus-os-rc2-amd64.iso   # cerca de 1 min
+tests/cenario-t3.sh dist/nexus-os-rc2-amd64.iso   # cerca de 1 min: 3 ciclos de up, status e down da VNF
 tests/cenario-t4.sh dist/nexus-os-rc2-amd64.iso   # cerca de 1 min
+tests/cenario-t5.sh dist/nexus-os-rc2-amd64.iso   # cerca de 1 min: seção Containerlab do manual
+T5_LIMITE=90 tests/cenario-t5.sh dist/nexus-os-rc2-amd64.iso   # outro limite de convergência (padrão 120 s)
+tests/manual.sh dist/nexus-os-rc2-amd64.iso Containerlab       # só os blocos de uma seção do manual
 ```
 
-Mutações (provam que o cenário falha de verdade): rode o cenário com `CENARIO_GUEST=<cópia modificada do script do convidado>` e `EVID_DIR=<pasta temporária>` (para não gravar em `evidencias/`). Para o T1, aponte para uma cópia da ISO por link simbólico com o `.sha256` alterado.
+Mutações (provam que o cenário falha de verdade): rode o cenário com `CENARIO_GUEST=<cópia modificada do script do convidado>` e `EVID_DIR=<pasta temporária>` (para não gravar em `evidencias/`). Para o T1, aponte para uma cópia da ISO por link simbólico com o `.sha256` alterado. Para o T5 também vale `MANUAL_FONTE=<cópia modificada do manual>`; o script do convidado do T5 tem a linha `#@MANUAL@`, trocada pelos blocos da seção.
 
 | Mutação | Alteração | Falha esperada |
 | --- | --- | --- |
 | T1-M1 | `.sha256` com um dígito alterado | `o SHA256 da ISO não confere com o .sha256` |
 | T2-M1 | `t2.sh` sem a regra de descarte | `ping de A para C passou` |
 | T2-M2 | `t2.sh` com a regra de permissão A para B saindo pela porta 3 | `ping de A para B falhou` |
+| T3-M1 | `t3.sh` com a função `nexus-vnf` ignorando o `down` | `contêiner da VNF sobrou depois do down` |
+| T3-M2 | `t3.sh` com `docker kill` do contêiner antes do `status` | `status saiu com 1 depois do up` |
 | T4-M1 | `t4.sh` com `systemctl stop libvirtd` antes do criar | `libvirtd inativo antes do criar` |
 | T4-M2 | `t4.sh` com o `nexus-vm remover` trocado por `true` | `sobrou depois do remover` |
+| T5-M1 | manual sem a linha do `containerlab deploy` (`MANUAL_FONTE`, `T5_LIMITE=30`) | `a adjacência OSPF Full ou as rotas sumiram antes do destroy` |
+| T5-M2 | `t5.sh` com o IP de `r2` em `eth1` trocado pelo de `r1` (203.0.113.1/30), `T5_LIMITE=30` | `OSPF não chegou a Full` |
 
 ## Problemas conhecidos
 
