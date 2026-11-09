@@ -1,0 +1,82 @@
+--- tests/iso-smoke.sh --extra t7.sh <iso> t7
+--- últimas 15 linhas da serial ---
+thermal_sys: Registered thermal governor 'fair_share'
+thermal_sys: Registered thermal governor 'bang_bang'
+thermal_sys: Registered thermal governor 'step_wise'
+thermal_sys: Registered thermal governor 'user_space'
+thermal_sys: Registered thermal governor 'power_allocator'
+cpuidle: using governor ladder
+cpuidle: using governor menu
+acpiphp: ACPI Hot Plug PCI Controller Driver version: 0.5
+PCI: Using configuration type 1 for base access
+PCI: Using configuration type 1 for extended access
+kprobes: kprobe jump-optimization is enabled. All kprobes are optimized if possible.
+HugeTLB: registered 1.00 GiB page size, pre-allocated 0 pages
+HugeTLB: 16380 KiB vmemmap can be freed for a 1.00 GiB page
+HugeTLB: registered 2.00 MiB page size, pre-allocated 0 pages
+HugeTLB: 28 KiB vmemmapFALHA: smoke com falhas: DONE 1 1, END com erro: NEXUS-SMOKE-END t7 1
+--- saída do convidado (t7)
+NEXUS-SMOKE-BEGIN t7
+sem rota padrão e sem resolução de nomes
+NEXUS-CENARIO-METRICA tempo_ate_sessao_s: 22.4
+sessão 1 de user ativa: xfce4-session xfce4-panel xfwm4 xfdesktop
+NEXUS-SMOKE-PONTO desktop-pronto
+OK: VM cen-t7 criada e iniciada (virt-type kvm)
+atalho nexus-virt-manager: janela \("virt-manager" aberta em 4 s
+NEXUS-SMOKE-PONTO virt-manager-com-vm
+[   82.217784] br-d6adc200a3bc: port 1(veth98779b3) entered blocking state
+[   82.218809] br-d6adc200a3bc: port 1(veth98779b3) entered disabled state
+[   82.223635] veth98779b3: entered allmulticast mode
+[   82.224684] veth98779b3: entered promiscuous mode
+[   82.828038] eth0: renamed from veth8ca23da
+[   82.832500] br-d6adc200a3bc: port 1(veth98779b3) entered blocking state
+[   82.833760] br-d6adc200a3bc: port 1(veth98779b3) entered forwarding state
+atalho nexus-vnf-up: código 0 em 7 s
+NEXUS-CENARIO-METRICA atalho_nexus-vnf-up_s: 7
+NEXUS-SMOKE-PONTO vnf-acima
+NEXUS-SMOKE-TECLA 1 ret
+[   96.723309] br-d6adc200a3bc: port 1(veth98779b3) entered disabled state
+[   96.727260] veth8ca23da: renamed from eth0
+[   96.748414] br-d6adc200a3bc: port 1(veth98779b3) entered disabled state
+[   96.751216] veth98779b3 (unregistering): left allmulticast mode
+[   96.752040] veth98779b3 (unregistering): left promiscuous mode
+[   96.752804] br-d6adc200a3bc: port 1(veth98779b3) entered disabled state
+atalho nexus-vnf-down: código 0 em 2 s
+NEXUS-CENARIO-METRICA atalho_nexus-vnf-down_s: 2
+NEXUS-SMOKE-TECLA 2 ret
+[  100.048331] br-f223281e7d37: port 1(vethf019448) entered blocking state
+[  100.049408] br-f223281e7d37: port 1(vethf019448) entered disabled state
+[  100.053011] vethf019448: entered allmulticast mode
+[  100.054044] vethf019448: entered promiscuous mode
+[  100.067093] br-f223281e7d37: port 2(veth46d87d6) entered blocking state
+[  100.068177] br-f223281e7d37: port 2(veth46d87d6) entered disabled state
+[  100.074420] veth46d87d6: entered allmulticast mode
+[  100.076227] veth46d87d6: entered promiscuous mode
+[  100.285562] eth0: renamed from vethaa76bb7
+[  100.288655] br-f223281e7d37: port 1(vethf019448) entered blocking state
+[  100.289722] br-f223281e7d37: port 1(vethf019448) entered forwarding state
+[  100.316239] eth0: renamed from veth0d93938
+[  100.318011] br-f223281e7d37: port 2(veth46d87d6) entered blocking state
+[  100.319045] br-f223281e7d37: port 2(veth46d87d6) entered forwarding state
+[  100.400046] eth1: renamed from clab-1c9ac903
+[  100.423362] eth1: renamed from clab-6da9f51f
+atalho nexus-clab-deploy: código 0 em 5 s
+NEXUS-CENARIO-METRICA atalho_nexus-clab-deploy_s: 5
+NEXUS-SMOKE-PONTO clab-acima
+NEXUS-SMOKE-TECLA 3 ret
+FALHA: o Enter não fechou o terminal do atalho: xfce4-terminal ainda aberto 15 s depois
+[  127.080125] veth0d93938: renamed from eth0
+[  127.081918] br-f223281e7d37: port 2(veth46d87d6) entered disabled state
+[  127.101736] br-f223281e7d37: port 2(veth46d87d6) entered disabled state
+[  127.103701] veth46d87d6 (unregistering): left allmulticast mode
+[  127.104597] veth46d87d6 (unregistering): left promiscuous mode
+[  127.105713] br-f223281e7d37: port 2(veth46d87d6) entered disabled state
+[  127.109393] vethaa76bb7: renamed from eth0
+[  127.110432] br-f223281e7d37: port 1(vethf019448) entered disabled state
+[  127.149201] br-f223281e7d37: port 1(vethf019448) entered disabled state
+[  127.151137] vethf019448 (unregistering): left allmulticast mode
+[  127.152275] vethf019448 (unregistering): left promiscuous mode
+[  127.153294] br-f223281e7d37: port 1(vethf019448) entered disabled state
+NEXUS-SMOKE-TIME t7 99
+NEXUS-SMOKE-END t7 1
+FALHA: o script do convidado falhou ou não imprimiu NEXUS-CENARIO-OK t7

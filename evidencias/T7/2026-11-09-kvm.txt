@@ -1,0 +1,69 @@
+--- tests/iso-smoke.sh --extra t7.sh <iso> t7
+OK: 1 teste(s) sem falha em 154 s, com KVM, por teste: t7=117s, RAM usada: repouso 1014 MiB, pico 1599 MiB de 2560 MiB, disco: repouso:/=27 MiB, repouso:/var/lib/docker=193 MiB, fim:/=68 MiB, fim:/var/lib/docker=193 MiB
+--- saída do convidado (t7)
+NEXUS-SMOKE-BEGIN t7
+sem rota padrão e sem resolução de nomes
+NEXUS-CENARIO-METRICA tempo_ate_sessao_s: 22.1
+sessão 1 de user ativa: xfce4-session xfce4-panel xfwm4 xfdesktop
+NEXUS-SMOKE-PONTO desktop-pronto
+OK: VM cen-t7 criada e iniciada (virt-type kvm)
+atalho nexus-virt-manager: janela \("virt-manager" aberta em 4 s
+NEXUS-SMOKE-PONTO virt-manager-com-vm
+[   82.237166] br-9dec346d5900: port 1(vethb526466) entered blocking state
+[   82.238278] br-9dec346d5900: port 1(vethb526466) entered disabled state
+[   82.240094] vethb526466: entered allmulticast mode
+[   82.241034] vethb526466: entered promiscuous mode
+[   82.838020] eth0: renamed from veth0d78cce
+[   82.843425] br-9dec346d5900: port 1(vethb526466) entered blocking state
+[   82.844881] br-9dec346d5900: port 1(vethb526466) entered forwarding state
+atalho nexus-vnf-up: código 0 em 7 s
+NEXUS-CENARIO-METRICA atalho_nexus-vnf-up_s: 7
+NEXUS-SMOKE-PONTO vnf-acima
+[   97.773010] br-9dec346d5900: port 1(vethb526466) entered disabled state
+[   97.775621] veth0d78cce: renamed from eth0
+[   97.797226] br-9dec346d5900: port 1(vethb526466) entered disabled state
+[   97.800308] vethb526466 (unregistering): left allmulticast mode
+[   97.801231] vethb526466 (unregistering): left promiscuous mode
+[   97.802097] br-9dec346d5900: port 1(vethb526466) entered disabled state
+atalho nexus-vnf-down: código 0 em 2 s
+NEXUS-CENARIO-METRICA atalho_nexus-vnf-down_s: 2
+[  102.060718] br-77c7ad8a5528: port 1(vethf666d45) entered blocking state
+[  102.061733] br-77c7ad8a5528: port 1(vethf666d45) entered disabled state
+[  102.063026] vethf666d45: entered allmulticast mode
+[  102.064161] vethf666d45: entered promiscuous mode
+[  102.081544] br-77c7ad8a5528: port 2(vethb741cd6) entered blocking state
+[  102.082574] br-77c7ad8a5528: port 2(vethb741cd6) entered disabled state
+[  102.083711] vethb741cd6: entered allmulticast mode
+[  102.087328] vethb741cd6: entered promiscuous mode
+[  102.281598] eth0: renamed from veth7bf1eaf
+[  102.286017] br-77c7ad8a5528: port 1(vethf666d45) entered blocking state
+[  102.287028] br-77c7ad8a5528: port 1(vethf666d45) entered forwarding state
+[  102.358354] eth1: renamed from clab-77e52108
+[  102.385735] eth0: renamed from vethaf1a33b
+[  102.389178] br-77c7ad8a5528: port 2(vethb741cd6) entered blocking state
+[  102.390050] br-77c7ad8a5528: port 2(vethb741cd6) entered forwarding state
+[  102.440902] eth1: renamed from clab-6399dc49
+atalho nexus-clab-deploy: código 0 em 5 s
+NEXUS-CENARIO-METRICA atalho_nexus-clab-deploy_s: 5
+NEXUS-SMOKE-PONTO clab-acima
+[  117.092766] veth7bf1eaf: renamed from eth0
+[  117.096476] br-77c7ad8a5528: port 1(vethf666d45) entered disabled state
+[  117.112446] br-77c7ad8a5528: port 2(vethb741cd6) entered disabled state
+[  117.117677] vethaf1a33b: renamed from eth0
+[  117.121371] br-77c7ad8a5528: port 1(vethf666d45) entered disabled state
+[  117.122794] vethf666d45 (unregistering): left allmulticast mode
+[  117.123704] vethf666d45 (unregistering): left promiscuous mode
+[  117.124521] br-77c7ad8a5528: port 1(vethf666d45) entered disabled state
+[  117.160752] br-77c7ad8a5528: port 2(vethb741cd6) entered disabled state
+[  117.162997] vethb741cd6 (unregistering): left allmulticast mode
+[  117.163808] vethb741cd6 (unregistering): left promiscuous mode
+[  117.164672] br-77c7ad8a5528: port 2(vethb741cd6) entered disabled state
+atalho nexus-clab-destroy: código 0 em 2 s
+NEXUS-CENARIO-METRICA atalho_nexus-clab-destroy_s: 2
+atalho nexus-docs: janela "[^"]*Nexus OS[^"]*": \("(Navigator|firefox-esr)" aberta em 8 s
+NEXUS-SMOKE-PONTO docs-abertos
+limpeza: sem contêiner, rede clab nem VM
+NEXUS-CENARIO-OK t7
+NEXUS-SMOKE-TIME t7 117
+NEXUS-SMOKE-END t7 0
+OK: 5 pontos com captura válida

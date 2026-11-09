@@ -94,14 +94,17 @@ Antes de cada cenário, registrar o modo: `ls -l /dev/kvm` e `lsmod | grep kvm`.
 ### T7: sessão gráfica na RC2 (F4.2f)
 
 - **Objetivo:** provar o desktop XFCE da RC2 em VM com vídeo e sem internet.
-- **Pré-condições:** RC2; VM com vídeo (`-vga std`) e sem rede; capturas de tela.
+- **Pré-condições:** RC2; VM com vídeo (`-vga std`) e sem rede; capturas de tela; `python3` na VM de build (o `tests/png-info.py` confere as capturas).
 - **Executor:** Marcos (tarefa dele no plano); a reprodução por outra pessoa continua pendente.
 - **Comando:** `tests/cenario-t7.sh dist/nexus-os-rc2-amd64.iso`
-- **Critério de sucesso:** boot até o desktop com login automático; abrir o `virt-manager` e ver a VM criada por `nexus-vm`; subir a VNF FRR e a topologia Containerlab pelos atalhos; abrir a documentação local; capturas de tela em `evidencias/T7/`.
-- **Métricas:** tempo até a sessão (referência 23 s, [requisitos.md](requisitos.md)) e as capturas de tela.
-- **Evidência esperada:** `evidencias/T7/AAAA-MM-DD-<modo>.md`, `.txt` e capturas `.png` (até 1 MiB cada arquivo).
+- **Critério de sucesso:** boot até o desktop com login automático; abrir o `virt-manager` e ver a VM criada por `nexus-vm`; subir a VNF FRR e a topologia Containerlab pelos atalhos e fechar cada terminal com Enter; abrir a documentação local; 5 capturas de tela válidas em `evidencias/T7/`; parte automática e rodada humana OK.
+- **Parte automática** (`tests/cenario-t7.sh` no host e `tests/cenarios-guest/t7.sh` no convidado, QEMU com `-vga std`, sem rede, 2560 MiB): o convidado confere que não há rota padrão nem resolução de nomes, espera a sessão `x11` do `user` com os processos do desktop, cria a VM `cen-t7` pelo `nexus-vm`, abre o `virt-manager` pelo atalho, sobe a VNF FRR pelo atalho `nexus-vnf-up`, a derruba pelo `nexus-vnf-down`, sobe e derruba a topologia pelos atalhos `nexus-clab-deploy` e `nexus-clab-destroy` e abre a documentação pelo atalho `nexus-docs`. Cada terminal de atalho fica aberto em "Pressione Enter para fechar..." e é fechado com um Enter de verdade (`NEXUS-SMOKE-TECLA`, `sendkey` do monitor do QEMU): o `xfce4-terminal` tem de sumir em 15 s. Em cada momento o convidado imprime `NEXUS-SMOKE-PONTO <nome>` (`desktop-pronto`, `virt-manager-com-vm`, `vnf-acima`, `clab-acima`, `docs-abertos`) e o `tests/iso-smoke.sh` (variável `NEXUS_SMOKE_CAPTURAS`) tira a captura pelo `screendump -f png` do monitor do QEMU 10.0. No fim a limpeza roda e não pode sobrar contêiner, rede `clab` nem VM.
+- **Critério das capturas:** 5 arquivos `PNG` (8 bits, RGB ou RGBA) com largura e altura maiores que zero, pelo menos 2000 cores distintas (parâmetro `T7_CORES`; o desktop pintado tem de 4000 a 20000 e só a barra sobre fundo preto tem cerca de 570, uma tela preta tem 1) e até 1 MiB cada. Captura ausente, vazia, inválida ou grande demais falha o cenário.
+- **Rodada humana:** Hyper-V Geração 2, 2560 MiB estáticos, 2 vCPU, sem rede, Secure Boot desligado, a ISO como DVD. Marcos faz o boot até o desktop com login automático (cronômetro até a barra), o `nexus-vm criar` no terminal, o `virt-manager` com a VM, a VNF FRR e a topologia pelos atalhos (com o Enter para fechar cada terminal e os atalhos de remover) e a documentação local, com capturas pelo Windows + Shift + S recortadas na janela da VM, sem dado pessoal. O T7 é ✅ só com a parte automática OK e a rodada humana OK.
+- **Métricas:** tempo até a sessão (início do último processo do desktop em segundos de uptime, referência 23 s, [requisitos.md](requisitos.md)), tempo de cada atalho de terminal e as 5 capturas (dimensão e tamanho).
+- **Evidência esperada:** `evidencias/T7/AAAA-MM-DD-<modo>.md`, `.txt` e uma captura `AAAA-MM-DD-<modo>-<ponto>.png` por ponto (até 1 MiB cada arquivo); da rodada humana, `humano-AAAA-MM-DD.md` e `humano-AAAA-MM-DD-<ponto>.png`.
 
-## Como rodar T1 a T6 e mutações
+## Como rodar T1 a T7 e mutações
 
 Na VM de build, na raiz do clone, com a ISO em `dist/` (cada comando termina em `OK: cenário Tn` ou `FALHA: ...` e grava a evidência em `evidencias/Tn/`):
 
@@ -115,6 +118,9 @@ T5_LIMITE=90 tests/cenario-t5.sh dist/nexus-os-rc2-amd64.iso   # outro limite de
 tests/manual.sh dist/nexus-os-rc2-amd64.iso Containerlab       # só os blocos de uma seção do manual
 tests/cenario-t6.sh dist/nexus-os-rc2-amd64.iso   # cerca de 4 min: 3 execuções, cada uma num QEMU novo, 2560 MiB
 T6_EXECUCOES=1 T6_LIMITE=90 tests/cenario-t6.sh dist/nexus-os-rc2-amd64.iso   # uma execução, outro limite de convergência
+tests/cenario-t7.sh dist/nexus-os-rc2-amd64.iso   # cerca de 3 min: sessão gráfica, 5 capturas, 2560 MiB
+T7_CORES=1000000 EVID_DIR=/tmp/evid tests/cenario-t7.sh dist/nexus-os-rc2-amd64.iso   # limiar de cores impossível: tem de falhar por captura vazia
+python3 -I tests/png-info.py --teste   # autoteste do contador de cores das capturas
 ```
 
 Mutações (provam que o cenário falha de verdade): rode o cenário com `CENARIO_GUEST=<cópia modificada do script do convidado>` e `EVID_DIR=<pasta temporária>` (para não gravar em `evidencias/`). Para o T1, aponte para uma cópia da ISO por link simbólico com o `.sha256` alterado. Para o T5 também vale `MANUAL_FONTE=<cópia modificada do manual>`; o script do convidado do T5 tem a linha `#@MANUAL@`, trocada pelos blocos da seção.
@@ -133,8 +139,15 @@ Mutações (provam que o cenário falha de verdade): rode o cenário com `CENARI
 | T6-M1 | `T6_FLOWS` com as regras sem as duas linhas do protocolo 89 (`T6_EXECUCOES=1`) | `esperava 2 regras do protocolo 89` |
 | T6-M2 | `t6.sh` sem a linha que insere a regra de descarte (`T6_EXECUCOES=1`) | `não caíram com o descarte do protocolo 89` |
 | T6-M3 | `t6.sh` com `desfaz_ponte` trocada por `true`, ou seja, a ponte não é removida (`T6_EXECUCOES=1`) | `sobrou depois do cenário` |
+| T7-M1 | `t7.sh` com o atalho `nexus-docs` trocado por `nexus-docs-inexistente` | `gtk-launch nexus-docs-inexistente falhou` |
+| T7-M2 | `t7.sh` sem a linha `nexus-vm criar` | `a VM cen-t7 não está em execução` |
+| T7-M3 | `T7_CORES=1000000` (nenhuma captura pode ter tantas cores) | `captura vazia: desktop-pronto tem só ... cor(es) distinta(s)` |
+
+T7-M1 e T7-M2 foram provadas com o script do convidado antes da etapa do Enter. Com a etapa do Enter, o defeito real abaixo derruba a execução antes do `docs-abertos` na RC2 `bb6d89c6`, e o T7-M1 deixa de ser prova isolada até a correção.
 
 ## Problemas conhecidos
+
+- T7: o Enter não fecha o terminal dos atalhos ("Pressione Enter para fechar...") de forma intermitente. Medido no QEMU e no Hyper-V: depois do `sudo` o terminal fica com `-icrnl -opost -isig -icanon -echo` (o `read` do `nexus-atalho` espera uma quebra de linha e o Enter manda um retorno de carro; a saída também sai em escada). Em execuções seguidas o estado ficou normal em umas e em modo cru em outras, então é uma corrida. A execução `evidencias/T7/2026-11-09-kvm-2.md` falha por isso (`o Enter não fechou o terminal do atalho`); a `2026-11-09-kvm.md` é do roteiro sem a etapa do Enter. A correção é da F4.5 (por exemplo `stty sane` no `nexus-atalho` antes do prompt). O T7 fica sem ✅ até lá.
 
 - T4: o `user` da ISO usa `qemu:///session` no `virsh`, não `qemu:///system`. O libvirt só lê o `/etc/libvirt/libvirt.conf` para o root; o usuário comum lê `~/.config/libvirt/libvirt.conf`. Medido na RC2: `virsh uri` como `user` dá `qemu:///session`; com o arquivo `uri_default = "qemu:///system"` em `~/.config/libvirt/libvirt.conf` dá `qemu:///system`. O T4 fica sem ✅ até a correção (por exemplo, o arquivo em `/etc/skel/.config/libvirt/` na ISO, na F4.5). Sem esse ponto, o resto do T4 passou numa cópia de diagnóstico do script (3 ciclos, `type='kvm'`), que não é evidência.
 
