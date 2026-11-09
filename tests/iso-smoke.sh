@@ -7,6 +7,12 @@
 # NEXUS_SMOKE_KVM=0 (força a emulação por software mesmo com /dev/kvm),
 # NEXUS_SMOKE_FLOPPY=0 (não anexa o disquete vazio; padrão 1, reproduz o hardware do Hyper-V Geração 1),
 # NEXUS_SMOKE_SERIAL (arquivo onde guardar a serial inteira, para diagnóstico).
+# NEXUS_SMOKE_CAPTURAS (opt-in; prefixo absoluto, por exemplo /tmp/cap/captura): a cada linha "NEXUS-SMOKE-PONTO <nome>" nova
+# na serial o monitor do QEMU grava a tela do convidado em <prefixo>-<nome>.png (screendump -f png, aceito pelo QEMU 10.0).
+# O convidado espera alguns segundos depois do marcador; com a variável, a serial é lida a cada 1 s e o Enter do menu de
+# boot para quando o primeiro NEXUS-SMOKE-BEGIN aparece. Com ela também vale "NEXUS-SMOKE-TECLA <n> <tecla>" (por exemplo
+# "NEXUS-SMOKE-TECLA 1 ret"): o monitor manda a tecla ao convidado, uma vez por <n>. Sem a variável nada disso muda (usado
+# por tests/cenario-t7.sh).
 set -euo pipefail
 
 fail() { echo "FALHA: $*" >&2; exit 1; }
@@ -51,6 +57,9 @@ smp=${NEXUS_SMOKE_SMP:-2}
 [[ $smp =~ ^[0-9]+$ ]] || fail "NEXUS_SMOKE_SMP inválido: $smp"
 floppy=${NEXUS_SMOKE_FLOPPY:-1}
 [[ $floppy =~ ^[01]$ ]] || fail "NEXUS_SMOKE_FLOPPY inválido: $floppy"
+
+capturas=${NEXUS_SMOKE_CAPTURAS:-}
+[ -z "$capturas" ] || [[ $capturas =~ ^/[A-Za-z0-9_./-]+$ ]] || fail "NEXUS_SMOKE_CAPTURAS precisa ser um caminho absoluto sem espaço: $capturas"
 
 tmp=$(mktemp -d)
 qpid=
@@ -106,20 +115,49 @@ ultimas() {
     tr -d '\r' <"$serial" | tail -n 15 >&2 || true
 }
 
+# Captura de tela por ponto e teclas pedidas pelo convidado (só com NEXUS_SMOKE_CAPTURAS): um screendump para cada
+# marcador de ponto novo e um sendkey para cada marcador de tecla novo.
+capturados=
+teclados=
+captura() {
+    local p arq
+    for p in $(tr -d '\r' <"$serial" | grep -aoE 'NEXUS-SMOKE-PONTO [A-Za-z0-9_-]+' | awk '{print $2}' | sort -u); do
+        case " $capturados " in *" $p "*) continue ;; esac
+        arq=$capturas-$p.png
+        printf 'screendump %s -f png\n' "$arq" >&3
+        for _ in 1 2 3 4 5 6 7 8 9 10; do
+            [ -s "$arq" ] && break
+            sleep 0.5
+        done
+        capturados="$capturados $p"
+    done
+    # "NEXUS-SMOKE-TECLA <n> <tecla>": o convidado pede uma tecla de verdade pelo monitor (sendkey), uma vez por <n>.
+    local id tecla
+    while read -r _ id tecla; do
+        case " $teclados " in *" $id "*) continue ;; esac
+        printf 'sendkey %s
+' "$tecla" >&3
+        teclados="$teclados $id"
+    done < <(tr -d '\r' <"$serial" | grep -aoE 'NEXUS-SMOKE-TECLA [0-9]+ [a-z0-9_-]+' | sort -u)
+}
+
 # O menu do isolinux tem contagem de 5 s (timeout 50): manda Enter nos primeiros 60 s para adiantar o boot.
 start=$SECONDS
 done_line=
+espera=3
+[ -z "$capturas" ] || espera=1
 while [ $((SECONDS - start)) -lt "$limit" ]; do
+    [ -z "$capturas" ] || captura
     done_line=$(tr -d '\r' <"$serial" | grep -aoE 'NEXUS-SMOKE-DONE [0-9]+ [0-9]+' | tail -n 1 || true)
     [ -z "$done_line" ] || break
     if ! kill -0 "$qpid" 2>/dev/null; then
         ultimas
         fail "QEMU terminou antes do DONE: $(tail -n 3 "$tmp/qemu.err")"
     fi
-    if [ $((SECONDS - start)) -lt 60 ]; then
+    if [ $((SECONDS - start)) -lt 60 ] && { [ -z "$capturas" ] || ! grep -aq 'NEXUS-SMOKE-BEGIN' "$serial"; }; then
         printf 'sendkey ret\n' >&3
     fi
-    sleep 3
+    sleep "$espera"
 done
 total_s=$((SECONDS - start))
 if [ -z "$done_line" ]; then
