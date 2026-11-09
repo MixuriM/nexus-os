@@ -66,6 +66,25 @@ if [ -f docs/manual.md ]; then
     done
 fi
 
+# Manual v2 (F4.4): título, seção "O que mudou da v1" com tabela, comandos exatos de "Gerar a ISO" e lacunas do T5 corrigidas.
+if [ -f docs/manual.md ]; then
+    [ "$(head -n 1 docs/manual.md)" = '# Manual v2 do Nexus OS (RC2 final)' ] || fail "docs/manual.md: o título devia ser '# Manual v2 do Nexus OS (RC2 final)' (achei: $(head -n 1 docs/manual.md))"
+    grep -qxF '## O que mudou da v1' docs/manual.md || fail "docs/manual.md sem a seção '## O que mudou da v1'"
+    mudou=$(awk '/^## /{dentro = ($0 == "## O que mudou da v1")} dentro' docs/manual.md)
+    [ "$(grep -c '^| ' <<<"$mudou")" -ge 4 ] || fail "a seção 'O que mudou da v1' devia ter uma tabela com pelo menos 3 linhas de mudança"
+    gerar=$(awk '/^## /{dentro = ($0 == "## Gerar a ISO")} dentro' docs/manual.md)
+    for cmd in 'git clone https://github.com/MixuriM/nexus-os.git' 'cd nexus-os' 'sudo scripts/build-iso.sh' 'tests/iso.sh dist/nexus-os-poc-amd64.iso' 'cp dist/nexus-os-poc-amd64.iso dist/nexus-os-rc2-amd64.iso' 'sha256sum nexus-os-rc2-amd64.iso'; do
+        grep -qF -- "$cmd" <<<"$gerar" || fail "a seção 'Gerar a ISO' do manual sem o comando exato: $cmd"
+    done
+    cl=$(awk '/^## /{dentro = ($0 == "## Containerlab")} dentro' docs/manual.md)
+    ! grep -qF "O \`vtysh\` imprime o aviso" <<<"$cl" || fail "a seção Containerlab ainda diz que o bloco imprime o aviso do vtysh (lacuna do T5)"
+    # shellcheck disable=SC2016  # o texto procurado tem crases literais
+    grep -qF 'desde o início do `deploy`' <<<"$cl" || fail "a seção Containerlab sem a convergência medida desde o início do deploy (lacuna do T5)"
+fi
+if [ -f docs/README.md ]; then
+    grep -qF '[Manual v2 (RC2 final)](manual.md)' docs/README.md || fail "docs/README.md sem o índice do Manual v2"
+fi
+
 # A seção do desktop precisa de blocos que a máquina executa e do roteiro humano (checklist, parte H).
 if [ -f docs/manual.md ]; then
     blocos_gui=$(awk '/^## /{dentro = ($0 == "## Ambiente gráfico")} dentro && /^```bash nexus-exec/{n++} END{print n+0}' docs/manual.md)
