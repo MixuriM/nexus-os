@@ -2,15 +2,19 @@
 # Executa o manual dentro da ISO (F3.12): extrai de docs/manual.md os blocos marcados "bash nexus-exec",
 # em ordem, junta num script com "set -e" e o roda dentro da ISO, sem rede, como o teste "manual" do
 # tests/iso-smoke.sh (--extra). Sai com 0 só se todos os blocos passarem e o script chegar ao fim.
-# Uso: tests/manual.sh <iso>   (precisa de qemu-system-x86 e xorriso; limite NEXUS_SMOKE_LIMIT)
+# Com o segundo argumento (nome da seção, por exemplo Containerlab), executa só os blocos daquela seção.
+# Uso: tests/manual.sh <iso> [seção]   (precisa de qemu-system-x86 e xorriso; limite NEXUS_SMOKE_LIMIT)
 set -euo pipefail
 
 fail() { echo "FALHA: $*" >&2; exit 1; }
 
 raiz=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+# shellcheck source=/dev/null
+. "$raiz/tests/lib-manual.sh"
 manual=$raiz/docs/manual.md
-[ $# -eq 1 ] || fail "uso: tests/manual.sh <iso>"
+{ [ $# -ge 1 ] && [ $# -le 2 ]; } || fail "uso: tests/manual.sh <iso> [seção]"
 iso=$1
+secao=${2:-}
 [ -f "$manual" ] || fail "docs/manual.md ausente"
 [ -f "$iso" ] || fail "ISO não encontrada: $iso"
 
@@ -18,14 +22,11 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
 # Só a cerca "```bash nexus-exec" abre um bloco; a próxima cerca "```" fecha.
-awk '
-    /^```bash nexus-exec[[:space:]]*$/ { dentro = 1; n++; printf "echo \"MANUAL-BLOCO %d\"\n", n; next }
-    /^```[[:space:]]*$/ && dentro { dentro = 0; next }
-    dentro { print }
-    END { printf "echo \"MANUAL-FIM %d\"\n", n }
-' "$manual" >"$tmp/corpo.sh"
+rc=0
+manual_extrair "$manual" "$secao" >"$tmp/corpo.sh" || rc=$?
+[ "$rc" -ne 3 ] || fail "seção '$secao' não encontrada em docs/manual.md"
+[ "$rc" -ne 4 ] || fail "docs/manual.md não tem nenhum bloco 'bash nexus-exec' (seção: ${secao:-todas})"
 blocos=$(grep -c '^echo "MANUAL-BLOCO ' "$tmp/corpo.sh" || true)
-[ "$blocos" -ge 1 ] || fail "docs/manual.md não tem nenhum bloco 'bash nexus-exec'"
 
 {
     echo '#!/usr/bin/env bash'

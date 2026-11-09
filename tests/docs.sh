@@ -88,6 +88,28 @@ for arq in docs/manual.md docs/checklist-teste-documentacao.md README.md docs/hy
     grep -qF 'Connect-VMNetworkAdapter' "$arq" || fail "$arq sem o comando Connect-VMNetworkAdapter (internet na VM do Hyper-V)"
 done
 
+# Extração por seção do manual (F4.2e): tests/lib-manual.sh e o segundo argumento de tests/manual.sh.
+if [ ! -f tests/lib-manual.sh ]; then
+    fail "tests/lib-manual.sh ausente"
+else
+    # shellcheck source=/dev/null
+    . tests/lib-manual.sh
+    cerca='^```bash nexus-exec[[:space:]]*$'
+    esperado=$(grep -c "$cerca" docs/manual.md)
+    todos=$(manual_extrair docs/manual.md | grep -c '^echo "MANUAL-BLOCO ')
+    [ "$todos" -eq "$esperado" ] || fail "manual_extrair sem seção achou $todos bloco(s), esperado $esperado"
+    sec=$(manual_extrair docs/manual.md Containerlab) || fail "manual_extrair não achou a seção Containerlab"
+    [ "$(grep -c '^echo "MANUAL-BLOCO ' <<<"$sec")" -eq 1 ] || fail "a seção Containerlab devia ter 1 bloco"
+    grep -q 'containerlab deploy' <<<"$sec" || fail "o bloco da seção Containerlab não tem 'containerlab deploy'"
+    ! grep -q 'nexus-vnf' <<<"$sec" || fail "a seção Containerlab trouxe bloco de outra seção (nexus-vnf)"
+    manual_extrair docs/manual.md "Seção que não existe" >/dev/null 2>&1
+    [ $? -eq 3 ] || fail "manual_extrair devia sair com 3 para seção inexistente"
+    iso_falsa=$(mktemp)
+    saida=$(bash tests/manual.sh "$iso_falsa" "Seção que não existe" 2>&1) && fail "tests/manual.sh aceitou seção inexistente"
+    grep -q '^FALHA: seção' <<<"$saida" || fail "tests/manual.sh sem 'FALHA: seção' para seção inexistente: $saida"
+    rm -f "$iso_falsa"
+fi
+
 if [ "$erros" -ne 0 ]; then
     echo "FALHA: tests/docs.sh com $erros erro(s)" >&2
     exit 1
