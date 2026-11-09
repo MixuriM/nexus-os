@@ -11,5 +11,5 @@ Status: ✅ executado com evidência; 🟡 depende de outra pessoa ou de rodada 
 | T3 | F4.2c | ✅ | [2026-11-09-kvm.md](T3/2026-11-09-kvm.md): OK, com KVM, 3 ciclos; reprodução por outra pessoa pendente |
 | T4 | F4.2d | 🟡 | [2026-11-06-kvm.md](T4/2026-11-06-kvm.md): FALHA por defeito real (`virsh` do `user` usa `qemu:///session`), aguarda a correção da F4.5 |
 | T5 | F4.2e | 🟡 | [2026-11-09-kvm.md](T5/2026-11-09-kvm.md): parte automática OK, com KVM, convergência em 19,01 s; lacunas em [lacunas.md](T5/lacunas.md); falta a rodada humana "sem ajuda externa" (bloco 7) |
-| T6 | F4.3 | ⏳ | (nenhuma ainda) |
+| T6 | F4.3 | ✅ | [2026-11-09-kvm.md](T6/2026-11-09-kvm.md), [-2](T6/2026-11-09-kvm-2.md) e [-3](T6/2026-11-09-kvm-3.md): OK, com KVM, 3 de 3 execuções seguidas, cada uma num QEMU novo; reprodução por outra pessoa pendente |
 | T7 | F4.2f | ⏳ | (nenhuma ainda) |
