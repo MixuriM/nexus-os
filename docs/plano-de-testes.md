@@ -84,12 +84,12 @@ Antes de cada cenário, registrar o modo: `ls -l /dev/kvm` e `lsmod | grep kvm`.
 ### T6: cenário integrado ponta a ponta (F4.3)
 
 - **Objetivo:** provar o conjunto: topologia Containerlab, OVS com regras OpenFlow, FRR roteando e subida pelo script, do zero, três vezes seguidas.
-- **Pré-condições:** T1 a T5 verdes; script do convidado `tests/cenarios-guest/t6.sh`; ISO RC2 em máquina limpa (convidado novo a cada execução).
+- **Pré-condições:** T1, T2, T3 e T5 executados (o T4 não entra no T6); script do convidado `tests/cenarios-guest/t6.sh`; ISO RC2 em máquina limpa (convidado novo a cada execução).
 - **Executor:** dono nominal conforme a tabela "Acompanhamento" da Fase 4; executor real: Marcos.
 - **Comando:** `tests/cenario-t6.sh dist/nexus-os-rc2-amd64.iso`
-- **Critério de sucesso:** em cada uma das 3 execuções seguidas, `nexus-vnf up`, a topologia no Containerlab, as regras no OVS e a rota OSPF entre os nós passam e tudo é removido no fim; 3 de 3.
-- **Métricas:** tempo total e tempo de convergência, por execução.
-- **Evidência esperada:** `evidencias/T6/AAAA-MM-DD-<modo>.md` e `.txt`, com as 3 execuções.
+- **Critério de sucesso:** em cada uma das 3 execuções seguidas, cada uma num QEMU novo, sem persistência e com 2560 MiB (RAM recomendada com o desktop): (1) boot limpo; (2) `nexus-vnf up` da topologia `labs/containerlab/integrado.clab.yml` e `status` saem com 0, com a ponte Open vSwitch `br-integrado` criada antes pelo cenário (modo `secure`, sem controlador); (3) OSPF `Full` entre `r1` e `r2` e a rota do loopback do outro nos dois lados em até 120 s (parâmetro `T6_LIMITE`), mais ping entre os loopbacks; (4) as 6 regras de `sdn/flows/integrado.flows` com `n_packets` maior que zero, inclusive as duas do protocolo 89; (5) prova de controle: a regra `priority=200,ip,nw_proto=89,actions=drop` derruba a adjacência e remove as rotas em até 3 vezes o `dead-interval` configurado (4 s, limite de 12 s), com pacotes contados na regra, e removê-la restaura tudo em até 30 s; (6) `nexus-vnf down` sai com 0 e não sobra contêiner, rede `clab`, porta nem a ponte (removida pelo cenário), nem netns. 3 de 3. A RC2 não traz os arquivos do cenário nem o `nexus-vnf` com topologia opcional: o `tests/cenario-t6.sh` os leva dentro do script do convidado.
+- **Métricas:** por execução, `nexus-vnf up`, convergência inicial, tempo de queda, tempo de recuperação, `down`, tempo no convidado e tempo total (do boot ao desligamento do QEMU).
+- **Evidência esperada:** `evidencias/T6/AAAA-MM-DD-<modo>.md` e `.txt`, um par por execução (a segunda e a terceira com sufixo `-2` e `-3`).
 
 ### T7: sessão gráfica na RC2 (F4.2f)
 
@@ -101,7 +101,7 @@ Antes de cada cenário, registrar o modo: `ls -l /dev/kvm` e `lsmod | grep kvm`.
 - **Métricas:** tempo até a sessão (referência 23 s, [requisitos.md](requisitos.md)) e as capturas de tela.
 - **Evidência esperada:** `evidencias/T7/AAAA-MM-DD-<modo>.md`, `.txt` e capturas `.png` (até 1 MiB cada arquivo).
 
-## Como rodar T1 a T5 e mutações
+## Como rodar T1 a T6 e mutações
 
 Na VM de build, na raiz do clone, com a ISO em `dist/` (cada comando termina em `OK: cenário Tn` ou `FALHA: ...` e grava a evidência em `evidencias/Tn/`):
 
@@ -113,6 +113,8 @@ tests/cenario-t4.sh dist/nexus-os-rc2-amd64.iso   # cerca de 1 min
 tests/cenario-t5.sh dist/nexus-os-rc2-amd64.iso   # cerca de 1 min: seção Containerlab do manual
 T5_LIMITE=90 tests/cenario-t5.sh dist/nexus-os-rc2-amd64.iso   # outro limite de convergência (padrão 120 s)
 tests/manual.sh dist/nexus-os-rc2-amd64.iso Containerlab       # só os blocos de uma seção do manual
+tests/cenario-t6.sh dist/nexus-os-rc2-amd64.iso   # cerca de 4 min: 3 execuções, cada uma num QEMU novo, 2560 MiB
+T6_EXECUCOES=1 T6_LIMITE=90 tests/cenario-t6.sh dist/nexus-os-rc2-amd64.iso   # uma execução, outro limite de convergência
 ```
 
 Mutações (provam que o cenário falha de verdade): rode o cenário com `CENARIO_GUEST=<cópia modificada do script do convidado>` e `EVID_DIR=<pasta temporária>` (para não gravar em `evidencias/`). Para o T1, aponte para uma cópia da ISO por link simbólico com o `.sha256` alterado. Para o T5 também vale `MANUAL_FONTE=<cópia modificada do manual>`; o script do convidado do T5 tem a linha `#@MANUAL@`, trocada pelos blocos da seção.
@@ -128,6 +130,9 @@ Mutações (provam que o cenário falha de verdade): rode o cenário com `CENARI
 | T4-M2 | `t4.sh` com o `nexus-vm remover` trocado por `true` | `sobrou depois do remover` |
 | T5-M1 | manual sem a linha do `containerlab deploy` (`MANUAL_FONTE`, `T5_LIMITE=30`) | `a adjacência OSPF Full ou as rotas sumiram antes do destroy` |
 | T5-M2 | `t5.sh` com o IP de `r2` em `eth1` trocado pelo de `r1` (203.0.113.1/30), `T5_LIMITE=30` | `OSPF não chegou a Full` |
+| T6-M1 | `T6_FLOWS` com as regras sem as duas linhas do protocolo 89 (`T6_EXECUCOES=1`) | `esperava 2 regras do protocolo 89` |
+| T6-M2 | `t6.sh` sem a linha que insere a regra de descarte (`T6_EXECUCOES=1`) | `não caíram com o descarte do protocolo 89` |
+| T6-M3 | `t6.sh` com `desfaz_ponte` trocada por `true`, ou seja, a ponte não é removida (`T6_EXECUCOES=1`) | `sobrou depois do cenário` |
 
 ## Problemas conhecidos
 

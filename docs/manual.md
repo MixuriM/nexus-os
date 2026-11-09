@@ -202,6 +202,38 @@ fi
 
 Saída esperada: `OK: VNF vnf1 rodando` no `status` com a VNF no ar, e código de saída 1 no `status` depois do `down`.
 
+## Cenário integrado
+
+O cenário integrado junta as três peças: uma ponte Open vSwitch com regras OpenFlow escritas à mão, dois nós FRR do Containerlab ligados a ela e a subida pelo `nexus-vnf`. `r1` e `r2` fazem OSPF área 0 pela ponte `br-integrado`, e só as regras de `sdn/flows/integrado.flows` deixam o ARP, o IP e o OSPF (protocolo IP 89) passar. O Containerlab não cria a ponte: o bloco a cria antes (mecanismo `kind: ovs-bridge`, veja [nfv.md](nfv.md)). Os arquivos deste cenário entram na ISO a partir da primeira ISO gerada depois do commit que os traz (a RC2 não os tem). Detalhes: [nfv.md](nfv.md) e [sdn.md](sdn.md).
+
+```bash nexus-exec
+topo=/usr/share/nexus-os/labs/containerlab/integrado.clab.yml
+regras=/usr/share/nexus-os/sdn/flows/integrado.flows
+sudo ovs-vsctl add-br br-integrado -- set bridge br-integrado fail_mode=secure
+sudo nexus-vnf up "$topo"
+sudo ovs-ofctl add-flows br-integrado "$regras"
+ok=nao
+for i in $(seq 1 60); do
+    vizinhos=$(sudo docker exec clab-integrado-r1 vtysh -c 'show ip ospf neighbor' 2>/dev/null || true)
+    rotas=$(sudo docker exec clab-integrado-r1 vtysh -c 'show ip route ospf' 2>/dev/null || true)
+    if [[ $vizinhos == *Full/* && $rotas == *198.51.100.22/32* ]]; then ok=sim; break; fi
+    sleep 2
+done
+echo "$vizinhos"
+echo "$rotas"
+sudo ovs-ofctl dump-flows br-integrado
+sudo nexus-vnf down "$topo"
+sudo ovs-vsctl del-br br-integrado
+[ "$ok" = sim ]
+```
+
+Saída esperada: vizinho `198.51.100.22` em `Full/-` e a rota `O>* 198.51.100.22/32` em `r1`; seis regras no `dump-flows`, com `n_packets` maior que zero nas de ARP e nas duas do protocolo 89 (as de IP em geral só contam pacotes com tráfego além do OSPF, por exemplo um `ping` entre os loopbacks). Com o laboratório no ar (antes do `nexus-vnf down`), a regra abaixo descarta o OSPF e derruba a adjacência em cerca de 5 s; remover a regra a restaura:
+
+```bash
+sudo ovs-ofctl add-flow br-integrado 'priority=200,ip,nw_proto=89,actions=drop'
+sudo ovs-ofctl --strict del-flows br-integrado 'priority=200,ip,nw_proto=89'
+```
+
 ## Testes (nexus-smoke)
 
 O `nexus-smoke` roda dentro da ISO os testes de `/usr/share/nexus-os/tests`, na ordem de `smoke.list`, e imprime a RAM usada. Só root.
