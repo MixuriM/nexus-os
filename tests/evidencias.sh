@@ -143,10 +143,22 @@ campos=(
     '^- Saída sanitizada: \[.+\]\(.+\)$'
     '^## Métricas$'
 )
+# Rodada humana (humano-AAAA-MM-DD.md): campos próprios, sem comando nem saída sanitizada.
+campos_humano=(
+    '^- Data: [0-9]{4}-[0-9]{2}-[0-9]{2}$'
+    '^- ISO \(SHA256, 12 primeiros\): [0-9a-f]{12}( .*)?$'
+    '^- Ambiente: .+'
+    '^- Executor: .+'
+    '^- Resultado: (OK|FALHA|parcial)( .*)?$'
+)
 if [ -d evidencias ]; then
     while IFS= read -r -d '' f; do
         [ "$(wc -c <"$f")" -le 1048576 ] || fail "$f passa de 1 MiB"
-        if [[ $f == evidencias/T[1-7]/*.md && $f != */lacunas.md ]]; then
+        if [[ $f == evidencias/T[1-7]/humano-*.md ]]; then
+            for c in "${campos_humano[@]}"; do
+                grep -qE -- "$c" "$f" || fail "$f sem o campo /$c/"
+            done
+        elif [[ $f == evidencias/T[1-7]/*.md && $f != */lacunas.md ]]; then
             for c in "${campos[@]}"; do
                 grep -qE -- "$c" "$f" || fail "$f sem o campo /$c/"
             done
