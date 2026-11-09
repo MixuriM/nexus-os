@@ -60,6 +60,13 @@ done
 
 grep -qE '^\s*uri_default\s*=\s*"qemu:///system"' "$inc/etc/libvirt/libvirt.conf" 2>/dev/null \
     || fail "$inc/etc/libvirt/libvirt.conf sem uri_default = \"qemu:///system\""
+# #74: o libvirt só lê o /etc/libvirt/libvirt.conf para o root; o user lê ~/.config/libvirt/libvirt.conf (vem do /etc/skel).
+grep -qE '^\s*uri_default\s*=\s*"qemu:///system"' "$inc/etc/skel/.config/libvirt/libvirt.conf" 2>/dev/null     || fail "$inc/etc/skel/.config/libvirt/libvirt.conf sem uri_default = \"qemu:///system\" (o user cairia em qemu:///session)"
+# #78: o sudo pode deixar o terminal em modo cru e o Enter não fecharia o atalho: stty sane antes do prompt.
+na=$inc/usr/local/bin/nexus-atalho
+sane=$(grep -n '^[[:space:]]*\[ -t 0 \] && stty sane$' "$na" | head -n 1 | cut -d: -f1)
+prompt=$(grep -n 'Pressione Enter' "$na" | head -n 1 | cut -d: -f1)
+{ [ -n "$sane" ] && [ -n "$prompt" ] && [ "$sane" -lt "$prompt" ]; }     || fail "$na sem '[ -t 0 ] && stty sane' antes de 'Pressione Enter' (o terminal do atalho pode ficar em modo cru)"
 [ -f "$inc/etc/xdg/menus/applications-merged/nexus-os.menu" ] || fail "menu Nexus OS ausente (nexus-os.menu)"
 [ -f "$inc/usr/share/desktop-directories/nexus-os.directory" ] || fail "nexus-os.directory ausente"
 
