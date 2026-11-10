@@ -1,2 +1,0 @@
-# Sem a colagem em bloco ("bracketed paste"): ao colar comandos o terminal às vezes escrevia ^[[200~ e ~ (rodada H1).
-set enable-bracketed-paste off

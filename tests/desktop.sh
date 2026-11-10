@@ -330,8 +330,46 @@ for h in index manual; do [ -f "/usr/share/nexus-os/docs-html/$h.html" ] || fail
 html_manual=/usr/share/nexus-os/docs-html/manual.html
 ! grep -qF '```' "$html_manual" || fail "$html_manual tem cerca de código crua: a marca nexus-exec impediu a conversão em <pre>"
 grep -qF '<pre><code' "$html_manual" || fail "$html_manual sem nenhuma caixa de código (<pre><code)"
-# Rodada humana H1 (defeito 6): o bash do user não usa a colagem em bloco, que escrevia ^[[200~ e ~ no terminal.
-como_user bash -ic 'bind -v' 2>/dev/null | grep -qx 'set enable-bracketed-paste off' || fail "o bash do $usuario ainda usa a colagem em bloco (~/.inputrc sem 'set enable-bracketed-paste off')"
+# Rodada humana H1 (2ª tentativa): colar no terminal um bloco de várias linhas com sudo roda o bloco inteiro. Com a colagem em
+# bloco desligada o sudo (use_pty) repassa as linhas seguintes ao comando e elas somem. O teste faz o papel do terminal: manda o
+# bloco entre as marcas de colagem se o bash as pediu (ESC[?2004h) e, se não, como linhas soltas.
+colagem=$(como_user python3 - 2>&1 <<'PY'
+import os, pty, select, time
+pid, fd = pty.fork()
+if pid == 0:
+    os.environ["TERM"] = "xterm-256color"
+    os.execvp("bash", ["bash", "-i"])
+buf = b""
+def le(limite, ate):
+    global buf
+    fim = time.time() + limite
+    while time.time() < fim:
+        if select.select([fd], [], [], 0.5)[0]:
+            try:
+                d = os.read(fd, 4096)
+            except OSError:
+                return ate in buf
+            if not d:
+                return ate in buf
+            buf += d
+        if ate in buf:
+            return True
+    return False
+if not le(30, b"$ "):
+    print("COLA-FALHA: o bash não mostrou o prompt")
+    raise SystemExit
+bloco = b"sudo sleep 1\recho COLA-FIM-$((1+1))\r"
+if b"\x1b[?2004h" in buf:
+    modo = "colagem em bloco"
+    os.write(fd, b"\x1b[200~" + bloco + b"\x1b[201~\r")
+else:
+    modo = "linhas soltas"
+    os.write(fd, bloco)
+print("COLA-OK" if le(30, b"COLA-FIM-2") else "COLA-FALHA: a linha depois do sudo não rodou", "(" + modo + ")")
+os.write(fd, b"exit\r")
+PY
+)
+case $colagem in COLA-OK*) ;; *) fail "colar bloco com sudo no terminal: $colagem" ;; esac
 id -nG "$usuario" | tr ' ' '\n' | grep -qx wireshark || fail "$usuario fora do grupo wireshark (captura sem root)"
 { [ -n "$(getcap /usr/bin/dumpcap 2>/dev/null)" ] || [ -u /usr/bin/dumpcap ]; } || fail "dumpcap sem permissão de captura para o grupo wireshark"
 # Disquete virtual (Hyper-V Geração 1): o módulo floppy fica bloqueado, sem /dev/fd0 e sem unidade na sessão.
