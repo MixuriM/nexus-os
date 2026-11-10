@@ -34,7 +34,9 @@ Medido em 2026-11-03, **com KVM**, na ISO da RC2 (ISO do build limpo do commit `
 | Desktop: tempo até a sessão (s) | 23 | s | (rodada 4) início do último processo do desktop (`xfce4-session`, `xfce4-panel`, `xfwm4`, `xfdesktop`) em segundos de uptime do guest: 23,7 e 22,6 |
 | Desktop: mínimo de RAM do tests/iso.sh (MiB) | 512 | MiB | `NEXUS_ISO_MEM`: 1024, 768 e 512 chegam ao `login:` em 36 s; valores abaixo de 512 não foram testados |
 | Desktop: mínimo de RAM dos smokes (MiB) | 1792 | MiB | `NEXUS_SMOKE_MEM` com o `all`: 1792 passa (307 s, o `desktop` leva 202 s); 1536, 1280 e 1024 falham |
-| Desktop: SHA256 | `bb6d89c68970fb24bb6e35ec3db0a74a88490b257eed166729edb941ce673e58` | | `sha256sum` da ISO, o mesmo de [rc2.md](rc2.md) |
+| Desktop: SHA256 | `5f47083bfd5a009a7c11b093e98edfd3bdf21ac593f80f4d549bfe3310c10dbe` | | `sha256sum` da ISO, o mesmo de [rc2.md](rc2.md) |
+
+Para gerar a ISO (RC2 final, 09/11/2026): 1134 s com KVM e 14098 MiB de disco no clone (`live-build/` com 10273 MiB mais as duas cópias da ISO em `dist/`), então deixe pelo menos 20 GiB livres ([ambiente-de-build.md](ambiente-de-build.md)). A RC1, sem desktop, ocupou 5383 MiB.
 
 Recomendação com o desktop: **2560 MiB de RAM** para a VM e mídia: pendrive (ou ISO anexada em VM) com capacidade de pelo menos o tamanho da ISO (1898 MiB na rodada 5). A ISO é feita só para pendrive e VM, por decisão do grupo, e o tamanho dela não tem teto de mídia óptica. O desktop e os programas somam 299 MiB ao repouso medido na RC1 (796 MiB) e 1193 MiB ao pico (813 MiB), por causa do XFCE, do tema de ícones, da fonte Inter e dos programas do desktop (LibreOffice, Wireshark, GIMP e outros; veja "Resultado").
 
@@ -42,6 +44,8 @@ Recomendação com o desktop: **2560 MiB de RAM** para a VM e mídia: pendrive (
 
 | RAM do guest (MiB) | Resultado | Repouso | Pico |
 | --- | --- | --- | --- |
+| 4096 (RC2 final, 09/11/2026, `5f47083b`) | `OK: 8 teste(s) sem falha em 226 s`, `desktop=135s` | 1095 MiB | 2016 MiB |
+| 2560 (RC2 final, T1, 09/11/2026) | `OK: all` em 228 s | 976 MiB | 1866 MiB |
 | 4096 (coleta do pico, rodada 5) | `OK: 8 teste(s) sem falha em 216 s`, `desktop=133s` | 1095 MiB | 2006 MiB |
 | 2560 (recomendada, rodada 5) | `OK: 8 teste(s) sem falha em 219 s`, `desktop=141s` | 909 MiB | 1863 MiB |
 | 4096 (coleta do pico, rodada 3) | `OK: 8 teste(s) sem falha em 181 s`, `desktop=64s` | 1115 MiB | 1827 MiB |

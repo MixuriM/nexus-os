@@ -84,6 +84,8 @@ Medidos no build limpo da RC1 (clone novo, um comando `sudo scripts/build-iso.sh
 | RAM usada no pico | 1332 MiB (amostra a cada 5 s) |
 | Internet | `.deb` do Containerlab (26197450 bytes), pacotes do Debian e, na primeira vez, a imagem FRR (`docker pull`) |
 
+Com o desktop (RC2 final, 09/11/2026, mesma VM): tempo 1134 s e disco 14098 MiB no clone (`live-build/` com 10273 MiB, mais as duas cópias da ISO em `dist/`); deixe pelo menos 20 GiB livres.
+
 Não é preciso 8 GB de RAM: o build e todos os testes da RC1 rodaram com 6 GB. Para o `tests/run-fase2.sh` na VM de build (testes de laboratório no host), instale também os pacotes do Open vSwitch: `sudo apt-get install -y openvswitch-switch iproute2 iputils-ping`.
 
 ## VM de build no Hyper-V (com KVM)

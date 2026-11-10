@@ -8,7 +8,7 @@ Roteiro para quem vai executar o manual do zero: [checklist-teste-documentacao.m
 
 | Seção | O que mudou |
 | --- | --- |
-| Gerar a ISO | Comandos exatos, do clone até o `.sha256` da RC2 final, com tempo e espaço medidos |
+| Gerar a ISO | Comandos exatos, do clone até o `.sha256` da RC2 final, com tempo e espaço medidos (o espaço da RC1, 5,3 GiB, estava abaixo do real com o desktop: 14 GiB) |
 | Iniciar a ISO | A Geração 2 do Hyper-V (Secure Boot desligada) também inicia a ISO; antes o texto dizia só Geração 1 |
 | libvirt (nexus-vm) | O `virsh` do `user` usa `qemu:///system` sem `sudo` (antes caía em `qemu:///session`, issue 74) |
 | Containerlab | A convergência vem contada de dois jeitos (depois e desde o início do `deploy`) e o aviso do `vtysh` deixou de ser citado onde o bloco não o mostra (lacunas do T5, issue 76) |
@@ -35,7 +35,7 @@ O ambiente gráfico entra na RC2. Fora da ISO: OpenDaylight (opcional, trabalho 
 
 ## Gerar a ISO
 
-A ISO só se constrói em Linux (VM Debian 13 com `sudo`, Docker e internet; o disco do Linux, nunca pasta do Windows nem `/mnt/*`). O build limpo leva cerca de 23 minutos com KVM e ocupa cerca de 5,3 GiB ([ambiente-de-build.md](ambiente-de-build.md) e [rc2.md](rc2.md)). Os comandos abaixo são os da RC2 final, na ordem, num clone novo. Para gerar a ISO de um ramo que ainda não está na `main`, use `git clone -b <ramo> ...` no primeiro comando.
+A ISO só se constrói em Linux (VM Debian 13 com `sudo`, Docker e internet; o disco do Linux, nunca pasta do Windows nem `/mnt/*`). O build limpo leva de 19 a 23 minutos com KVM (1134 s e 1355 s medidos) e o clone ocupa cerca de 14 GiB ao fim (cache e chroot do live-build mais as duas cópias da ISO); tenha pelo menos 20 GiB livres ([ambiente-de-build.md](ambiente-de-build.md) e [rc2.md](rc2.md)). Os comandos abaixo são os da RC2 final, na ordem, num clone novo. Para gerar a ISO de um ramo que ainda não está na `main`, use `git clone -b <ramo> ...` no primeiro comando.
 
 ```bash
 git clone https://github.com/MixuriM/nexus-os.git

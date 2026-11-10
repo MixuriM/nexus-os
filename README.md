@@ -26,7 +26,7 @@ Projeto Integrador acadêmico, em desenvolvimento.
 
 A **RC1** é a primeira ISO integrada, só com o núcleo e sem ambiente gráfico ([docs/rc1.md](docs/rc1.md)). A **RC2** soma a ela o **desktop XFCE** com login automático do `user`, 10 atalhos para os componentes (F3.15 e F3.16, [docs/gui.md](docs/gui.md)), a identidade visual do Nexus OS (F3.17, [docs/branding.md](docs/branding.md)), a barra única embaixo com o menu estilo macOS, o português do Brasil e programas prontos para uso (LibreOffice, Wireshark, VLC, GIMP, Inkscape, KeePassXC, Thunderbird, GParted, Geany, FileZilla, Audacity e mais). A **rodada 5 da RC2** (03/11/2026) trouxe as melhorias pedidas depois do teste no Hyper-V: menu `whiskermenu` aberto também pela tecla Windows, `docklike` com os aplicativos fixados e as janelas só com ícone, centralizados na barra (`nexus-barra` leva para a esquerda), relógio com a hora em cima e a data embaixo, ícone da bateria só em notebook, ícones novos no estilo do Nexus OS e a opção de usar o ícone original de cada aplicativo (`nexus-icone`, `nexus-icones` e a janela "Ícones dos aplicativos"), GIMP com o nome curto, 39 aplicativos novos e [dicas de copiar e colar no terminal](docs/manual.md). Não há loja de aplicativos: a ISO é live e o que se instala some ao desligar.
 
-**ISO atual da RC2:** `dist/nexus-os-rc2-amd64.iso`, SHA256 `bb6d89c68970fb24bb6e35ec3db0a74a88490b257eed166729edb941ce673e58`, 1990639616 bytes (1898 MiB), build limpo do commit `fc57261` ([docs/rc2.md](docs/rc2.md)). Testes: `tests/run-fase3.sh` com 9 testes e `all` com 4096 e 2560 MiB, com KVM; Hyper-V Geração 2 conferido à mão em 03/11/2026 (N1 a N20 passaram, com ressalvas registradas). **Falta** o teste no VirtualBox (rodada 2), que tem [passo a passo completo em docs/teste-virtualbox.md](docs/teste-virtualbox.md), e a execução do roteiro por uma segunda pessoa. O congelamento da ISO e a tag são da Fase 4.
+**ISO atual da RC2:** `dist/nexus-os-rc2-amd64.iso`, SHA256 `5f47083bfd5a009a7c11b093e98edfd3bdf21ac593f80f4d549bfe3310c10dbe`, 1990639616 bytes (1898 MiB), build limpo do commit `d3bf729` ([docs/rc2.md](docs/rc2.md)). Testes: `tests/run-fase3.sh` com 9 testes e `all` com 4096 e 2560 MiB, com KVM; Hyper-V Geração 2 conferido à mão em 03/11/2026 (N1 a N20 passaram, com ressalvas registradas). **Falta** o teste no VirtualBox (rodada 2), que tem [passo a passo completo em docs/teste-virtualbox.md](docs/teste-virtualbox.md), e a execução do roteiro por uma segunda pessoa. O congelamento da ISO e a tag são da Fase 4.
 
 | Componente | Versão na ISO | Como usar | Smoke test |
 | --- | --- | --- | --- |
@@ -67,7 +67,7 @@ Como foram medidas: [docs/ambiente-de-build.md](docs/ambiente-de-build.md).
 
 ## Como gerar a ISO
 
-**Exige** Linux (VM Debian 13), usuário com `sudo`, Docker, internet e espaço livre: o build limpo ocupou 5383 MiB (medido em 26/10/2026, veja [docs/rc1.md](docs/rc1.md)).
+**Exige** Linux (VM Debian 13), usuário com `sudo`, Docker, internet e espaço livre: o build limpo da RC2 ocupou 14098 MiB no clone (medido em 09/11/2026, veja [docs/rc2.md](docs/rc2.md)); o da RC1, sem desktop, 5383 MiB (26/10/2026, [docs/rc1.md](docs/rc1.md)). Deixe pelo menos 20 GiB livres.
 Preparo da VM: [docs/ambiente-de-build.md](docs/ambiente-de-build.md). Resultado esperado e medições: [docs/iso-poc.md](docs/iso-poc.md).
 
 1. Clone o repositório no disco do Linux (nunca em pasta compartilhada com o Windows nem em `/mnt/*`):
