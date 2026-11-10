@@ -106,7 +106,21 @@ Antes de cada cenário, registrar o modo: `ls -l /dev/kvm` e `lsmod | grep kvm`.
 
 ## Como rodar T1 a T7 e mutações
 
-Na VM de build, na raiz do clone, com a ISO em `dist/` (cada comando termina em `OK: cenário Tn` ou `FALHA: ...` e grava a evidência em `evidencias/Tn/`):
+**O que é:** cada cenário é um script que inicia a ISO num QEMU, roda um roteiro dentro dela e registra a evidência. Este roteiro é para quem **nunca viu o projeto** e só precisa rodar os cenários: cada passo diz **onde fazer**, **o que fazer**, **por que fazer**, **o que deve aparecer** e **o que fazer se não aparecer**.
+
+**Você precisa de:**
+
+| # | Item | Por quê | Como conseguir |
+| --- | --- | --- | --- |
+| 1 | A **VM de build** (Debian 13 com `qemu-system-x86`, `xorriso`, `python3`, `sudo`, Docker e Containerlab) | Os cenários iniciam a ISO com o QEMU da própria VM | [ambiente-de-build.md](ambiente-de-build.md) e [hyperv.md](hyperv.md) |
+| 2 | O repositório clonado em `~/nexus-os` e a ISO em `dist/nexus-os-rc2-amd64.iso` com o `.sha256` | É o que os cenários testam | [manual.md](manual.md), seção "Gerar a ISO" |
+| 3 | `/dev/kvm` na VM (`ls -l /dev/kvm`) | Sem ele os cenários rodam em emulação (`emul`), muito mais lenta; a evidência diz qual modo foi usado | [hyperv.md](hyperv.md), seção "Conferir o KVM" |
+| 4 | O SHA256 da ISO igual ao de [rc2.md](rc2.md) | O T1 confere; sem isso o teste não começa | `sha256sum -c dist/nexus-os-rc2-amd64.iso.sha256` e compare com `rc2.md` |
+
+**Regras:** rode um cenário de cada vez (cada um inicia um QEMU); não rode dois ao mesmo tempo; no fim confira que nada sobrou na VM (`pgrep -a qemu`, `sudo docker ps -aq` e `sudo virsh -c qemu:///system list --all --name` devem ficar vazios).
+
+**Onde:** terminal da VM de build, na raiz do clone, com a ISO em `dist/`. **O que fazer:** cada comando abaixo termina em `OK: cenário Tn` ou `FALHA: ...` e grava a evidência em `evidencias/Tn/`. **Deve aparecer:** a linha `OK: cenário Tn (...)` e o caminho `evidência: .../evidencias/Tn/AAAA-MM-DD-<modo>.md`. **Se não aparecer:** a linha `FALHA: cenário Tn: <motivo>` diz o que falhou (SHA256 diferente do `rc2.md`, script do convidado ausente, o convidado imprimiu `FALHA:`, captura ausente ou vazia no T7); a evidência da falha também é gravada. Relate com essa linha (seção "Como relatar uma falha" de [manual.md](manual.md)).
+
 
 ```bash
 tests/cenario-t1.sh dist/nexus-os-rc2-amd64.iso   # cerca de 7 min: boot, all com 2560 MiB e controle negativo com 1536 MiB
@@ -119,6 +133,7 @@ tests/manual.sh dist/nexus-os-rc2-amd64.iso Containerlab       # só os blocos d
 tests/cenario-t6.sh dist/nexus-os-rc2-amd64.iso   # cerca de 4 min: 3 execuções, cada uma num QEMU novo, 2560 MiB
 T6_EXECUCOES=1 T6_LIMITE=90 tests/cenario-t6.sh dist/nexus-os-rc2-amd64.iso   # uma execução, outro limite de convergência
 tests/cenario-t7.sh dist/nexus-os-rc2-amd64.iso   # cerca de 3 min: sessão gráfica, 5 capturas, 2560 MiB
+tests/run-fase4.sh dist/nexus-os-rc2-amd64.iso   # T1 a T7 em ordem, para no primeiro erro (cerca de 20 min com KVM)
 T7_CORES=1000000 EVID_DIR=/tmp/evid tests/cenario-t7.sh dist/nexus-os-rc2-amd64.iso   # limiar de cores impossível: tem de falhar por captura vazia
 python3 -I tests/png-info.py --teste   # autoteste do contador de cores das capturas
 ```
@@ -148,7 +163,7 @@ T7-M1 e T7-M2 foram provadas duas vezes: com o script do convidado anterior à e
 ## Problemas conhecidos
 
 - Nenhum defeito de T1 a T7 aberto na RC2 final. Os dois defeitos reais achados na RC2 da rodada 5 foram corrigidos na F4.5 e provados pelos próprios cenários: T4 (o `user` usava `qemu:///session`, issue 74; agora o `~/.config/libvirt/libvirt.conf` vem do `/etc/skel` e o T4 passa em 3 ciclos) e T7 (o Enter não fechava o terminal dos atalhos de forma intermitente, o terminal ficava em modo cru depois do `sudo`, issue 78; agora o `nexus-atalho` faz `stty sane` antes do prompt e o T7 passou em 3 execuções seguidas, com o Enter fechando os 4 terminais em cada uma). As execuções com `FALHA:` na RC2 da rodada 5 ficam como histórico (`evidencias/T4/2026-11-06-kvm.md` e `evidencias/T7/2026-11-09-kvm-2.md`).
-- T7: a rodada humana de 09/11/2026 foi parcial (4 de 5 capturas, sem a documentação nem os atalhos de remover) e foi na RC2 da rodada 5; o T7 só vira ✅ com a rodada humana completa na RC2 final (bloco 7).
+- T7: a primeira rodada humana (09/11/2026, RC2 da rodada 5) foi parcial; a segunda, na RC2 final (`humano-2026-11-09-2.md`), passou completa, com o Enter fechando os 4 terminais, e o T7 fica ✅ (parte automática e rodada humana OK). A reprodução por outra pessoa continua pendente.
 
 ## Fora do escopo
 

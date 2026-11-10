@@ -31,14 +31,19 @@ Não vale como reprodução por segunda pessoa: quem validou é o autor do build
 
 ## Como gerar
 
-Na VM de build ([ambiente-de-build.md](ambiente-de-build.md)), com o repositório clonado no disco da VM:
+**O que é:** a ISO é gerada por um único script. O passo a passo completo, com o que deve aparecer e o que fazer se algo falhar, está na seção "Gerar a ISO" do [manual v2](manual.md); abaixo está o resumo.
+
+**Onde:** na VM de build ([ambiente-de-build.md](ambiente-de-build.md)), num terminal, com o repositório clonado no disco da VM (nunca em `/mnt/*`).
+
+**O que fazer:**
 
 ```bash
 sudo scripts/build-iso.sh
 ```
 
-O script recusa rodar fora de Linux, em `/mnt/*` ou sem root. Ele entra em `live-build/`, roda `lb clean`, `lb config` (via `live-build/auto/config`) e `lb build`,
-grava o log em `live-build/build.log`, move a ISO para `dist/nexus-os-poc-amd64.iso` e gera `dist/nexus-os-poc-amd64.iso.sha256`.
+**Por quê:** o script recusa rodar fora de Linux, em `/mnt/*` ou sem root. Ele entra em `live-build/`, roda `lb clean`, `lb config` (via `live-build/auto/config`) e `lb build`, grava o log em `live-build/build.log`, move a ISO para `dist/nexus-os-poc-amd64.iso` e gera `dist/nexus-os-poc-amd64.iso.sha256`.
+
+**Deve aparecer:** `P: Build completed successfully`, `OK: dist/nexus-os-poc-amd64.iso, <bytes> bytes, <segundos> s` e o SHA256. **Se não aparecer:** `FALHA: precisa de root` (faltou o `sudo`), `FALHA: o build não roda em /mnt/*` (clone fora do disco do Linux) ou `FALHA: o build falhou, veja live-build/build.log` (leia o fim do log e relate).
 
 ## ISO integrada (Fase 3)
 
@@ -63,13 +68,17 @@ O live-config cria o usuário `user` com a senha `live` (lida em `/usr/lib/live/
 
 ## Teste de boot
 
+**Onde:** na VM de build, na raiz do repositório, depois de gerar a ISO.
+
+**O que fazer:**
+
 ```bash
 tests/iso.sh dist/nexus-os-poc-amd64.iso
 ```
 
-O teste confere o SHA256 contra o `.sha256`, inicia a ISO em QEMU sem interface, com a serial gravada em arquivo temporário, e espera `login:` por até 300 s com KVM ou 900 s sem KVM.
-O menu do isolinux espera uma tecla (`timeout 0` em `isolinux.cfg`), então o teste envia Enter pelo monitor do QEMU nos primeiros 60 s.
-O monitor usa FIFOs dentro do diretório temporário (modo 0700), e não uma porta TCP, para que outro usuário da máquina não consiga mandar comandos ao QEMU.
+**Por quê:** o teste confere o SHA256 contra o `.sha256`, inicia a ISO em QEMU sem interface, com a serial gravada em arquivo temporário, e espera `login:` por até 300 s com KVM ou 900 s sem KVM. O menu do isolinux espera uma tecla (`timeout 0` em `isolinux.cfg`), então o teste envia Enter pelo monitor do QEMU nos primeiros 60 s. O monitor usa FIFOs dentro do diretório temporário (modo 0700), e não uma porta TCP, para que outro usuário da máquina não consiga mandar comandos ao QEMU.
+
+**Deve aparecer:** `OK: ISO chegou ao login ("<máquina> login: ") em <segundos> s, com KVM, SHA256 conferido`. **Se não aparecer:** `FALHA: SHA256 da ISO não confere com ...` (ISO corrompida: gere de novo), `FALHA: login: não apareceu em <segundos> s` ou `FALHA: QEMU terminou antes do login` (a ISO não inicia: relate com a saída) e `FALHA: qemu-system-x86_64 não instalado` (`sudo apt install qemu-system-x86`). `NEXUS_ISO_MEM` muda a RAM do convidado (padrão 2048 MiB).
 
 Medido na VM de build, `/dev/kvm` ausente, QEMU 10.0.13 em emulação por software:
 

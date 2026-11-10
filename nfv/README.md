@@ -10,6 +10,16 @@ Status: libvirt validado em VM Debian 13, em emulação por software (F2.6). Pas
 O FRRouting com Containerlab foi validado em [labs/containerlab/](../labs/containerlab/README.md) (F2.7). Passos em [docs/nfv.md](../docs/nfv.md). Teste: `sudo tests/nfv.sh`.
 Na ISO (F3.5 e F3.7): pacote `frr` e Containerlab 0.81.1 incluídos, smokes `frr` e `nfv` passam com KVM e sem rede (seção "Na ISO" de [docs/nfv.md](../docs/nfv.md)). Topologia na ISO: `sudo containerlab deploy -t /usr/share/nexus-os/labs/containerlab/frr-duo.clab.yml`. Reprodução por segunda pessoa pendente.
 
+## Como usar, passo a passo
+
+**Onde:** na raiz do repositório, numa VM Debian 13 com Docker, Containerlab e `sudo` (ou, dentro da ISO, com `nexus-vm` e `nexus-vnf` no lugar dos scripts).
+
+1. **Criar uma VM de teste (libvirt):** `nexus-vm criar minha-vm` (na ISO) ou os comandos `virsh` de [docs/virtualizacao.md](../docs/virtualizacao.md). **Deve aparecer:** `OK: VM minha-vm criada e iniciada (virt-type kvm)` (ou `qemu`). **Remover:** `nexus-vm remover minha-vm`.
+2. **Instanciar a VNF FRR:** `sudo nexus-vnf up`. **Deve aparecer:** `OK: VNF vnf1 instanciada (...)`. **Conferir:** `sudo nexus-vnf status` com `OK: VNF vnf1 rodando`. **Remover:** `sudo nexus-vnf down`.
+3. **Testar:** `sudo tests/virtualizacao.sh` (libvirt), `sudo tests/nfv.sh` (FRR com Containerlab) e `sudo tests/orquestracao.sh` (orquestração). **Deve aparecer:** `OK:` em cada um. **Se algo falhar:** a mensagem `FALHA:` diz o que falhou; limpe com `sudo nexus-vnf down` e repita.
+
+O passo a passo completo, com cada comando explicado, está em [docs/virtualizacao.md](../docs/virtualizacao.md) e [docs/nfv.md](../docs/nfv.md).
+
 ## Orquestração (F3.6)
 
 `nexus-vnf.sh` é o NFVO/VNFM simplificado do Nexus OS: um script único que instancia, consulta e remove a VNF FRR. Sem Ansible.

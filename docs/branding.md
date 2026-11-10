@@ -134,12 +134,31 @@ O ícone do Firefox não é redesenhado: a Mozilla permite o uso do logotipo do 
 
 O `scripts/gerar-identidade.py` copia a logo original, recorta a marca, desenha os 12 ícones dos atalhos, o tema de ícones Nexus, o fundo do menu de boot e os dois fundos e converte os fundos para PNG 1920x1080. Precisa de `python3` e `rsvg-convert` (pacote `librsvg2-bin`). Na VM de build, na raiz do repositório:
 
+**Passo 1: instalar a ferramenta de conversão.**
+
 ```bash
 sudo apt-get install -y librsvg2-bin
+```
+
+**Por quê:** o `rsvg-convert` converte os desenhos SVG em PNG. **Deve aparecer:** o `apt-get` termina sem erro; `rsvg-convert --version` imprime uma versão. **Se não aparecer:** sem internet o `apt-get` falha; conecte a VM.
+
+**Passo 2: gerar as imagens.**
+
+```bash
 python3 scripts/gerar-identidade.py
 ```
 
-A saída é determinística. O tema das janelas sai de `scripts/gerar-tema-xfwm4.py`, que lê a pasta `xfwm4` do `Greybird-dark` (`apt-get download greybird-gtk-theme` e `dpkg -x`). Depois de gerar, rode `tests/identidade.sh` e refaça a ISO.
+**Por quê:** recria os arquivos de identidade (ícones, tema de ícones e fundos) em `live-build/config/includes.chroot/` e o fundo do menu de boot em `live-build/config/bootloaders/`. A saída é determinística: rodar duas vezes dá os mesmos arquivos. **Deve aparecer:** o script termina sem erro e `git status` mostra só os arquivos que de fato mudaram (nenhum, se nada mudou). **Se não aparecer:** `rsvg-convert` ausente indica que o passo 1 não foi feito.
+
+**Passo 3: o tema das janelas.** Sai de `scripts/gerar-tema-xfwm4.py`, que lê a pasta `xfwm4` do `Greybird-dark` (`apt-get download greybird-gtk-theme` e `dpkg -x`).
+
+**Passo 4: conferir e refazer a ISO.**
+
+```bash
+tests/identidade.sh
+```
+
+**Deve aparecer:** `OK: tests/identidade.sh (...)`. Depois de gerar, refaça a ISO (seção "Gerar a ISO" do [manual](manual.md)). **Se não aparecer:** a mensagem `FALHA:` diz qual arquivo ou licença falta; relate com ela.
 
 ## Capturas de tela
 

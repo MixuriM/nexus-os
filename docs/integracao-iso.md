@@ -2,6 +2,21 @@
 
 Contrato entre a receita do live-build e os componentes da Fase 3. Cada componente entra na ISO por PR, com um teste em `tests/<nome>.sh` que roda **dentro da ISO** pelo runner `nexus-smoke`.
 
+Este documento foi escrito para quem **nunca viu o projeto**: cada passo diz **onde fazer**, **o que fazer**, **por que fazer**, **o que deve aparecer** e **o que fazer se não aparecer**. **O que é:** a ISO é montada pelo **live-build** a partir de uma receita (listas de pacotes, arquivos e *hooks*, scripts que rodam durante a montagem). Um **smoke test** é um teste rápido que só confere se o componente liga e funciona. O **runner `nexus-smoke`** roda esses testes dentro da ISO e imprime marcadores na serial; o `tests/iso-smoke.sh` inicia a ISO e lê esses marcadores.
+
+## Sumário
+
+1. [Layout dentro da ISO](#layout-dentro-da-iso)
+2. [Regras que valem o tempo todo](#regras-que-valem-o-tempo-todo)
+3. [O que você precisa ter antes](#o-que-você-precisa-ter-antes)
+4. [Runner `nexus-smoke`](#runner-nexus-smoke)
+5. [Serviço `nexus-smoke.service`](#serviço-nexus-smokeservice)
+6. [Como rodar no host (VM de build)](#como-rodar-no-host-vm-de-build)
+7. [Como adicionar um componente](#como-adicionar-um-componente)
+8. [Componentes](#componentes)
+9. [Problemas conhecidos](#problemas-conhecidos)
+10. [Como relatar uma falha](#como-relatar-uma-falha)
+
 ## Layout dentro da ISO
 
 | Caminho na ISO | Origem | Como chega |
@@ -22,7 +37,24 @@ O `tests/lint-repo.sh` falha se um arquivo versionável dessas pastas estiver ig
 
 No live-build instalado na VM de build (`20250505+deb13u1`), `includes.chroot` é aceito como nome antigo de `includes.chroot_after_packages` (função `select_includes_chroot`), desde que a pasta nova esteja vazia. Os hooks `*.hook.chroot` em `config/hooks/live/` rodam depois dos de `config/hooks/normal/`, e o live-build torna o hook executável se ele não for.
 
+## Regras que valem o tempo todo
+
+1. **Faça só o que está escrito aqui** e confira o "Deve aparecer" de cada passo antes de seguir.
+2. **O `nexus-smoke` só roda como root** (`sudo`) e só dentro da ISO; o `tests/iso-smoke.sh` roda no host (a VM de build).
+3. **O smoke do host roda sem rede** (`-nic none`): um teste que precise de internet falha de propósito.
+4. **O repositório é público:** nunca cole em issue senha, chave, token ou dado pessoal.
+
+## O que você precisa ter antes
+
+| # | Item | Por quê | Como conseguir |
+| --- | --- | --- | --- |
+| 1 | A VM de build com `qemu-system-x86` e `xorriso` | O `tests/iso-smoke.sh` cria o CD de comando e inicia a ISO | [ambiente-de-build.md](ambiente-de-build.md) |
+| 2 | A ISO gerada em `dist/` | É o que o smoke inicia | [manual.md](manual.md), seção "Gerar a ISO" |
+| 3 | Opcional: `/dev/kvm` | Sem ele o smoke leva muito mais tempo (limite de 2400 s) | [hyperv.md](hyperv.md) |
+
 ## Runner `nexus-smoke`
+
+**Onde:** num terminal **dentro da ISO**, como `user` com `sudo`. **O que fazer:**
 
 ```bash
 sudo nexus-smoke sdn        # um teste
@@ -30,7 +62,7 @@ sudo nexus-smoke sdn nfv    # vários, em ordem
 sudo nexus-smoke all        # os nomes de /usr/share/nexus-os/tests/smoke.list, um por linha
 ```
 
-Cada nome roda `/usr/share/nexus-os/tests/<nome>.sh` com `bash`. Teste ausente conta como falha (código 127). O uso manual não desliga a máquina. Só root.
+**Por quê:** cada nome roda `/usr/share/nexus-os/tests/<nome>.sh` com `bash`. Teste ausente conta como falha (código 127). O uso manual não desliga a máquina. Só root. **Deve aparecer:** para cada teste, as linhas `NEXUS-SMOKE-BEGIN <nome>` e `NEXUS-SMOKE-END <nome> 0`, e no fim `NEXUS-SMOKE-DONE <total> 0`. **Se não aparecer:** `NEXUS-SMOKE-END <nome> <código diferente de 0>` indica o teste que falhou (a saída dele está entre o `BEGIN` e o `END`); `FALHA: teste ausente` indica nome errado.
 
 Marcadores impressos (a saída do teste fica entre `BEGIN` e `END`):
 
@@ -63,6 +95,8 @@ Ordenação: o `After=` lista só os serviços de componente existentes (hoje `o
 
 ## Como rodar no host (VM de build)
 
+**Onde:** terminal da VM de build, na raiz do repositório, com a ISO em `dist/`. **O que fazer:**
+
 ```bash
 tests/iso-smoke.sh [--extra arq.sh]... <iso> <nome[,nome]...|all>
 tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso sdn
@@ -73,14 +107,20 @@ Limite de tempo `NEXUS_SMOKE_LIMIT`: 900 s com KVM, 2400 s sem. `NEXUS_SMOKE_KVM
 Sai com 0 só se o `DONE` apareceu com 0 falhas, todos os `END` têm código 0 e cada teste pedido tem `END <nome> 0`. Senão imprime `FALHA:` e as últimas 15 linhas da serial. Em sucesso imprime `OK:` com o tempo total e o tempo de cada teste.
 `--extra` leva um script para dentro do CD (útil para provar que uma falha é detectada). `NEXUS_SMOKE_SERIAL=<arquivo>` guarda a serial inteira, para diagnóstico: sem isso o script mostra só as últimas 15 linhas.
 
+**Capturas de tela e teclas (opt-in, usado pelo T7):** com `NEXUS_SMOKE_CAPTURAS=<prefixo absoluto>`, a cada linha `NEXUS-SMOKE-PONTO <nome>` que o convidado imprime na serial o monitor do QEMU grava a tela em `<prefixo>-<nome>.png` (`screendump -f png`, aceito pelo QEMU 10.0), e a cada linha `NEXUS-SMOKE-TECLA <n> <tecla>` ele envia a tecla (`sendkey`), uma vez por `<n>`. Com a variável a serial é lida a cada 1 s e o Enter do menu de boot para quando aparece o primeiro `NEXUS-SMOKE-BEGIN`. Sem a variável nada disso muda.
+
+**Deve aparecer:** `OK: <n> teste(s) sem falha em <segundos> s, com KVM (ou sem KVM), por teste: <nome>=<s>s...`, com a RAM de repouso e de pico. **Se não aparecer:** `FALHA: smoke com falhas: DONE <total> <falhas>, END com erro: ...` com as últimas 15 linhas da serial; `FALHA: NEXUS-SMOKE-DONE não apareceu em <limite> s` indica ISO que não terminou (sem KVM o limite é de 2400 s); `FALHA: ISO não encontrada` indica caminho errado.
+
 ## Como adicionar um componente
+
+**Quando:** ao integrar um componente novo na ISO. **Onde:** o repositório clonado, na VM de build. Cada passo abaixo diz o que fazer; o resultado de cada um é conferido no passo 6.
 
 1. Pacotes: crie `live-build/config/package-lists/nexus-<componente>.list.chroot`. Confira o nome com `apt-cache policy` e o que a base já traz em `live-build/chroot.packages.install` do último build.
 2. Arquivos do componente: coloque nas pastas do repositório (`sdn/`, `nfv/`, `labs/`, `docs/`). O stage as copia para `/usr/share/nexus-os/`.
 3. Teste: `tests/<nome>.sh`, que sai com 0 em sucesso e roda como root dentro da ISO. Acrescente `<nome>` a `tests/smoke.list`.
 4. Hook `live-build/config/hooks/live/0500-nexus-servicos.hook.chroot`: acrescente as linhas que habilitam o serviço (`systemctl enable ...`) e criam os links em `/usr/local/bin`.
 5. Serviço do componente: acrescente `After=<serviço>` em `nexus-smoke.service`.
-6. Rode `sudo scripts/build-iso.sh`, depois `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso <nome>` e `tests/lint-repo.sh`.
+6. Rode `sudo scripts/build-iso.sh`, depois `tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso <nome>` e `tests/lint-repo.sh`. **Deve aparecer:** `OK: dist/nexus-os-poc-amd64.iso ...` no build, `OK: 1 teste(s) sem falha em <s> s` no smoke e `OK: lint-repo ...`. **Se não aparecer:** `FALHA: teste ausente: /usr/share/nexus-os/tests/<nome>.sh` indica que o teste não foi criado ou o stage não o copiou (confira o passo 3); `NEXUS-SMOKE-END <nome> 1` indica que o próprio teste falhou (leia a mensagem entre `BEGIN` e `END`).
 7. Atualize a linha do componente na tabela abaixo.
 
 ## Componentes
@@ -166,3 +206,7 @@ RC2 (F3.17 e F3.18): identificação, build limpo e resultado do `tests/run-fase
 - Na VM de build (VirtualBox com Hyper-V no Windows), o QEMU sem KVM às vezes sufoca a VM: o kernel dela mostra `soft lockup` de 23 s a 713 s, o SSH deixa de responder e o teste termina em `FALHA: NEXUS-SMOKE-DONE não apareceu`. Aconteceu 5 vezes em 23/10/2026, também durante o `mksquashfs` do build, e uma vez o guest parou em `Bringing up secondary CPUs` com 2 vCPU. Reiniciar a VM resolve. O que funcionou: `NEXUS_SMOKE_SMP=1 NEXUS_SMOKE_MEM=2048 NEXUS_SMOKE_LIMIT=900`, um teste por vez, sem consultar a VM por SSH nos primeiros minutos.
 - Com KVM no Hyper-V o smoke padrão (2 vCPU, 4096 MiB) passou 2 vezes seguidas (24 s), então o contorno acima não é necessário lá. No VirtualBox 7.2.20 com AMD o KVM aninhado derruba a VM de build (`VERR_SVM_UNKNOWN_EXIT`): nesse ambiente fica a emulação com o contorno (`NEXUS_SMOKE_SMP=1`, 2048 MiB). Veja [virtualizacao.md](virtualizacao.md).
 - Sem rede (`-nic none`) o smoke não baixa nada. Testes que dependam de imagens de contêiner usam as que vão dentro da ISO (F3.4, veja [containers.md](containers.md)).
+
+## Como relatar uma falha
+
+**Quando:** para cada falha que se repete, para qualquer erro de comando deste documento e para tudo que ele não explicou. **Onde:** uma **issue** no repositório no GitHub. **Título:** `<tarefa>: <passo>: <resumo curto>`. **Corpo:** **Passos** (comandos exatos), **Saída** (texto exato copiado e colado, incluindo as últimas linhas da serial), **Esperado** (o que o documento dizia) e **Ambiente** (com ou sem KVM, RAM e vCPU do convidado, SHA256 da ISO, commit). Uma issue por falha, sem dado pessoal.
