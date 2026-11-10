@@ -173,8 +173,42 @@ if [ -d evidencias ]; then
     fi
 fi
 
+# (f) índice final (F4.7): cada Tn tem evidência OK com o SHA256 curto da ISO congelada (docs/congelamento.md), T5 e T7 têm as
+# rodadas humanas, T6 tem 3 execuções, a linha de cada Tn traz o SHA256 curto e todo arquivo de evidencias/ está no índice.
+cong=docs/congelamento.md
+if [ ! -f "$cong" ]; then
+    fail "$cong ausente (o índice final precisa do SHA256 da ISO congelada)"
+else
+    sha12=$(sed -n 's/^| SHA256 | `\([0-9a-f]\{12\}\)[0-9a-f]*` |.*/\1/p' "$cong" | head -n 1)
+    if [[ ! $sha12 =~ ^[0-9a-f]{12}$ ]]; then
+        fail "$cong: SHA256 da ISO congelada não lido"
+    else
+        for n in 1 2 3 4 5 6 7; do
+            ok=0
+            for f in evidencias/T$n/*.md; do
+                case $f in */humano-*.md | */lacunas.md) continue ;; esac
+                if grep -qx -- "- ISO (SHA256, 12 primeiros): $sha12" "$f" && grep -qx -- '- Resultado: OK' "$f"; then ok=$((ok + 1)); fi
+            done
+            [ "$ok" -ge 1 ] || fail "T$n sem arquivo de evidência com Resultado OK e SHA256 curto $sha12 (o da ISO congelada)"
+            if [ "$n" -eq 6 ] && [ "$ok" -lt 3 ]; then fail "T6 com $ok execução(ões) na ISO congelada, esperado 3"; fi
+            linha=$(grep "^| T$n |" "$indice" | head -n 1)
+            grep -qF -- "$sha12" <<<"$linha" || fail "$indice: a linha de T$n não traz o SHA256 curto $sha12"
+        done
+        for n in 5 7; do
+            compgen -G "evidencias/T$n/humano-*.md" >/dev/null || fail "T$n sem arquivo de rodada humana (evidencias/T$n/humano-*.md)"
+        done
+    fi
+fi
+if [ -d evidencias ] && [ -f "$indice" ]; then
+    while IFS= read -r -d '' f; do
+        rel=${f#evidencias/}
+        case $rel in README.md | MODELO.md) continue ;; esac
+        grep -qF -- "$rel" "$indice" || fail "$f não está no índice $indice"
+    done < <(find evidencias -type f -print0)
+fi
+
 if [ "$erros" -gt 0 ]; then
     echo "FALHA: $erros problema(s) em tests/evidencias.sh" >&2
     exit 1
 fi
-echo "OK: tests/evidencias.sh (plano T1 a T7, modelo, índice, sanitização, registro, runner e varredura)"
+echo "OK: tests/evidencias.sh (plano T1 a T7, modelo, índice final, sanitização, registro, runner e varredura)"
