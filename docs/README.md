@@ -16,6 +16,7 @@ O relatório acadêmico do projeto não fica neste repositório.
 - [Requisitos mínimos de hardware da ISO](requisitos.md)
 - [RC1: ISO integrada do núcleo](rc1.md)
 - [RC2: ISO integrada com o ambiente gráfico](rc2.md)
+- [Congelamento da ISO (F4.6): SHA256, tag, riscos aceitos](congelamento.md)
 - [Manual v2.1 (RC2 final)](manual.md)
 - [Ambiente gráfico: escolha do desktop, instalação na ISO, atalhos e medições](gui.md)
 - [Identidade visual: marca, papel de parede, tema e licenças](branding.md)
