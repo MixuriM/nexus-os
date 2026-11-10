@@ -8,8 +8,8 @@ Cada cenário é o script `tests/cenario-tN.sh <iso>`, rodado no host (a VM de b
 
 | Item | Valor |
 | --- | --- |
-| ISO | `dist/nexus-os-rc2-amd64.iso` (RC2 final v2, commit `ccb55f0`, [rc2.md](rc2.md); a ISO anterior, `61e02b9`, SHA256 `28efa045...de97`, foi a testada pela rodada humana H1; a de `d3bf729`, SHA256 `5f47083b...0dbe`, ficou em `dist/nexus-os-rc2-d3bf729-amd64.iso`; as execuções de T1 a T7 de 06/11 e 09/11/2026 até o bloco 5 são da RC2 da rodada 5, `bb6d89c68970...3e58`, guardada como `dist/nexus-os-rc2-r5-amd64.iso`) |
-| SHA256 | `ac33affde6892b578cd716ac4736ae976d11c7221b672e12eb90ef083b126176` (um `.sha256` ao lado da ISO) |
+| ISO | `dist/nexus-os-rc2-amd64.iso` (RC2 final v2, commit `480e5d8`, [rc2.md](rc2.md); a ISO `61e02b9`, SHA256 `28efa045...de97`, foi a da primeira rodada humana H1 e a de `ccb55f0`, SHA256 `ac33affd...6176`, foi descartada; a de `d3bf729`, SHA256 `5f47083b...0dbe`, ficou em `dist/nexus-os-rc2-d3bf729-amd64.iso`; as execuções de T1 a T7 de 06/11 e 09/11/2026 até o bloco 5 são da RC2 da rodada 5, `bb6d89c68970...3e58`, guardada como `dist/nexus-os-rc2-r5-amd64.iso`) |
+| SHA256 | `cb13d258153162f4ebe6d1d81cf507357e754152b1eef27d3b33ac74d4be876e` (um `.sha256` ao lado da ISO) |
 | Host dos testes | VM Debian 13 no Hyper-V Geração 2, com `/dev/kvm` exposto ([hyperv.md](hyperv.md)); clone do repositório em `~/nexus-os` |
 | Convidado | QEMU dentro da VM, sem rede, com 2 vCPU; RAM por `NEXUS_SMOKE_MEM` ou `NEXUS_ISO_MEM` |
 | Modo | `kvm` quando `/dev/kvm` existe e `lsmod` mostra `kvm`; `emul` caso contrário (`NEXUS_SMOKE_KVM=0 NEXUS_SMOKE_SMP=1`, 2048 MiB) |
