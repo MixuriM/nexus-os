@@ -1,0 +1,60 @@
+--- tests/iso-smoke.sh --extra t3.sh <iso> t3
+OK: 1 teste(s) sem falha em 60 s, com KVM, por teste: t3=17s, RAM usada: repouso 1083 MiB, pico 1316 MiB de 4096 MiB, disco: repouso:/=28 MiB, repouso:/var/lib/docker=193 MiB, fim:/=28 MiB, fim:/var/lib/docker=193 MiB
+--- saída do convidado (t3)
+NEXUS-SMOKE-BEGIN t3
+--- ciclo 1
+[   33.310243] br-ce10059d7c64: port 1(veth49117ac) entered blocking state
+[   33.311437] br-ce10059d7c64: port 1(veth49117ac) entered disabled state
+[   33.312548] veth49117ac: entered allmulticast mode
+[   33.313712] veth49117ac: entered promiscuous mode
+[   34.294688] eth0: renamed from veth33c346f
+[   34.299692] br-ce10059d7c64: port 1(veth49117ac) entered blocking state
+[   34.300944] br-ce10059d7c64: port 1(veth49117ac) entered forwarding state
+NEXUS-CENARIO-METRICA up_s_ciclo1: 6.74
+[   38.312358] br-ce10059d7c64: port 1(veth49117ac) entered disabled state
+[   38.314223] veth33c346f: renamed from eth0
+[   38.331546] br-ce10059d7c64: port 1(veth49117ac) entered disabled state
+[   38.333288] veth49117ac (unregistering): left allmulticast mode
+[   38.334315] veth49117ac (unregistering): left promiscuous mode
+[   38.335175] br-ce10059d7c64: port 1(veth49117ac) entered disabled state
+NEXUS-CENARIO-METRICA down_s_ciclo1: 0.49
+ciclo 1: up, up repetido, status, down, down repetido e status ausente ok
+--- ciclo 2
+[   39.205668] br-ecbe7c30046f: port 1(veth75cf0db) entered blocking state
+[   39.206829] br-ecbe7c30046f: port 1(veth75cf0db) entered disabled state
+[   39.207806] veth75cf0db: entered allmulticast mode
+[   39.208619] veth75cf0db: entered promiscuous mode
+[   39.398824] eth0: renamed from veth117fb9b
+[   39.403324] br-ecbe7c30046f: port 1(veth75cf0db) entered blocking state
+[   39.404381] br-ecbe7c30046f: port 1(veth75cf0db) entered forwarding state
+NEXUS-CENARIO-METRICA up_s_ciclo2: 3.61
+[   42.994839] br-ecbe7c30046f: port 1(veth75cf0db) entered disabled state
+[   42.996456] veth117fb9b: renamed from eth0
+[   43.010216] br-ecbe7c30046f: port 1(veth75cf0db) entered disabled state
+[   43.011757] veth75cf0db (unregistering): left allmulticast mode
+[   43.012558] veth75cf0db (unregistering): left promiscuous mode
+[   43.013353] br-ecbe7c30046f: port 1(veth75cf0db) entered disabled state
+NEXUS-CENARIO-METRICA down_s_ciclo2: 0.44
+ciclo 2: up, up repetido, status, down, down repetido e status ausente ok
+--- ciclo 3
+[   43.756210] br-a8412ceb2bba: port 1(veth5ba6384) entered blocking state
+[   43.757187] br-a8412ceb2bba: port 1(veth5ba6384) entered disabled state
+[   43.759099] veth5ba6384: entered allmulticast mode
+[   43.760993] veth5ba6384: entered promiscuous mode
+[   43.936286] eth0: renamed from veth1bfe728
+[   43.941182] br-a8412ceb2bba: port 1(veth5ba6384) entered blocking state
+[   43.942515] br-a8412ceb2bba: port 1(veth5ba6384) entered forwarding state
+NEXUS-CENARIO-METRICA up_s_ciclo3: 3.55
+[   47.502250] br-a8412ceb2bba: port 1(veth5ba6384) entered disabled state
+[   47.503715] veth1bfe728: renamed from eth0
+[   47.515292] br-a8412ceb2bba: port 1(veth5ba6384) entered disabled state
+[   47.516803] veth5ba6384 (unregistering): left allmulticast mode
+[   47.517727] veth5ba6384 (unregistering): left promiscuous mode
+[   47.518700] br-a8412ceb2bba: port 1(veth5ba6384) entered disabled state
+NEXUS-CENARIO-METRICA down_s_ciclo3: 0.44
+ciclo 3: up, up repetido, status, down, down repetido e status ausente ok
+NEXUS-CENARIO-METRICA ciclos_ok: 3
+NEXUS-CENARIO-OK t3
+NEXUS-SMOKE-TIME t3 17
+NEXUS-SMOKE-END t3 0
+OK: ciclo de vida da VNF FRR pelo nexus-vnf
