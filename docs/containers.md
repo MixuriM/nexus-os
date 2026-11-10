@@ -2,6 +2,20 @@
 
 F3.4. A ISO traz o Docker e a imagem do FRRouting já dentro dela: depois do boot, sem internet, `docker image ls` mostra a imagem e um contêiner roda. O Containerlab (parte 4 da Fase 3) usa essa mesma imagem.
 
+Este documento foi escrito para quem **nunca viu o projeto**: cada passo diz **onde fazer**, **o que fazer**, **por que fazer**, **o que deve aparecer** e **o que fazer se não aparecer**. **O que é:** um **contêiner** é um programa que roda isolado, empacotado com tudo o que precisa; o **Docker** é o programa que cria e roda contêineres; uma **imagem** é o pacote pronto do qual o contêiner nasce. Normalmente o Docker baixa a imagem da internet; na ISO a imagem já vem **dentro** da ISO (modo offline).
+
+## Sumário
+
+1. [Como funciona](#como-funciona)
+2. [Driver de armazenamento](#driver-de-armazenamento)
+3. [Regras que valem o tempo todo](#regras-que-valem-o-tempo-todo)
+4. [O que você precisa ter antes](#o-que-você-precisa-ter-antes)
+5. [Imagens offline](#imagens-offline)
+6. [Smoke test `containers`](#smoke-test-containers)
+7. [Medições](#medições-23102026-vm-debian-13-no-hyper-v-com-kvm-4-vcpu-e-8-gb)
+8. [Problemas conhecidos](#problemas-conhecidos)
+9. [Como relatar uma falha](#como-relatar-uma-falha)
+
 ## Como funciona
 
 | Peça | Onde | O que faz |
@@ -28,6 +42,20 @@ Solução adotada: `var-lib-docker.mount` monta um tmpfs (`size=50%`: o teto é 
 
 Consequência: os dados do Docker (imagens carregadas, contêineres) somem a cada boot. A carga do `nexus-images.service` refaz as imagens.
 
+## Regras que valem o tempo todo
+
+1. **Faça só o que está escrito aqui** e confira o "Deve aparecer" de cada passo antes de seguir.
+2. **O build da ISO exige Docker e internet** na VM de build (para o `docker pull`); dentro da ISO nada baixa.
+3. **Os dados do Docker na ISO ficam em RAM** e somem a cada boot: não guarde nada neles.
+4. **O repositório é público:** nunca cole em issue senha, chave, token ou dado pessoal.
+
+## O que você precisa ter antes
+
+| # | Item | Por quê | Como conseguir |
+| --- | --- | --- | --- |
+| 1 | Para **adicionar uma imagem**: a VM de build com Docker, `sudo` e internet | O `prepare-offline.sh` baixa e salva a imagem | [ambiente-de-build.md](ambiente-de-build.md) |
+| 2 | Para **testar**: a ISO gerada em `dist/` e a VM de build com QEMU | O smoke inicia a ISO sem rede | [manual.md](manual.md), seção "Gerar a ISO" |
+
 ## Imagens offline
 
 `scripts/prepare-offline.sh` (precisa de Docker e de internet na VM de build, como root):
@@ -37,12 +65,24 @@ Consequência: os dados do Docker (imagens carregadas, contêineres) somem a cad
 3. Confere o digest de `RepoDigests` com o travado. Divergindo, falha com `FALHA: digest de ... diverge`.
 4. `docker save` para `live-build/config/includes.chroot/var/lib/nexus-os/images/<repositório>_<tag>.tar` (`/` e `:` viram `_`), por exemplo `quay.io_frrouting_frr_10.7.1.tar`, 199157248 bytes.
 
-Para adicionar uma imagem:
+### Como adicionar uma imagem, passo a passo
 
-1. `docker pull <repositório>:<tag>` na VM de build e leia o digest: `docker image inspect --format '{{index .RepoDigests 0}}' <repositório>:<tag>`.
-2. Acrescente a linha `<repositório>:<tag> sha256:<digest>` em `live-build/offline/imagens.txt`.
-3. Rode `sudo scripts/build-iso.sh`. O `.tar` entra na ISO e o `nexus-images.service` o carrega no boot.
-4. Acrescente ao `tests/containers.sh` (ou a um teste novo) a checagem da imagem.
+**Onde:** terminal da VM de build, na raiz do repositório.
+
+**Passo 1: baixar a imagem e ler o digest.** O *digest* é a impressão digital da imagem (`sha256:...`); travá-lo garante que o build sempre use exatamente a mesma imagem.
+
+```bash
+sudo docker pull <repositório>:<tag>
+sudo docker image inspect --format '{{index .RepoDigests 0}}' <repositório>:<tag>
+```
+
+**Deve aparecer:** o `pull` termina com `Status: Downloaded newer image` (ou `Image is up to date`) e o segundo comando imprime `<repositório>@sha256:<digest>`. **Se não aparecer:** `pull access denied` ou `not found` indica nome ou tag errados; sem internet o `pull` falha.
+
+**Passo 2: travar o digest.** Acrescente a linha `<repositório>:<tag> sha256:<digest>` em `live-build/offline/imagens.txt` (linhas em branco e `#` são ignoradas).
+
+**Passo 3: gerar a ISO.** `sudo scripts/build-iso.sh`. **Deve aparecer:** `OK: <repositório>:<tag> sha256:<digest> -> live-build/config/includes.chroot/var/lib/nexus-os/images/...tar` e o `.tar` entra na ISO; o `nexus-images.service` o carrega no boot. **Se não aparecer:** `FALHA: digest de ... diverge` indica digest errado na linha do passo 2.
+
+**Passo 4: testar.** Acrescente ao `tests/containers.sh` (ou a um teste novo) a checagem da imagem e rode o smoke da seção seguinte.
 
 `nexus-images-load` lê as tags do `manifest.json` do `.tar` e só roda `docker load` se alguma tag faltar; rodar de novo imprime `já carregada`. A unidade é `Type=oneshot` com `RemainAfterExit=yes` (`ActiveState=active`, `SubState=exited` depois da carga), com `After=` e `Requires=` de `docker.service`. `nexus-smoke.service` tem `After=nexus-images.service`. O `systemd-analyze verify` das três unidades (`nexus-images.service`, `nexus-smoke.service`, `var-lib-docker.mount`) dentro da ISO deu saída vazia e código 0. A saída do `nexus-images.service` vai só para o journal: texto no console depois do `login:` fazia o `tests/iso.sh` não achar o prompt no fim da linha.
 
@@ -56,9 +96,13 @@ Para adicionar uma imagem:
 4. `docker run --rm --network none --entrypoint /usr/lib/frr/zebra <imagem> --version` imprime `zebra version 10.7.1_git`.
 5. `docker ps -aq` vazio no fim.
 
+**Como rodar** (na VM de build, depois de gerar a ISO, sem rede e sem janela):
+
 ```bash
 tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso containers
 ```
+
+**Por quê:** inicia a ISO sem rede num QEMU e roda o `tests/containers.sh` dentro dela. **Deve aparecer:** `OK: 1 teste(s) sem falha em <segundos> s`, com `containers=2s` nos tempos por teste. **Se não aparecer:** `FALHA: smoke com falhas: ... END com erro` com a mensagem `FALHA:` do teste (por exemplo `driver de armazenamento do Docker é vfs, esperado overlay2` ou `imagem ... não carregada`); relate com ela.
 
 ## Medições (23/10/2026, VM Debian 13 no Hyper-V com KVM, 4 vCPU e 8 GB)
 
@@ -90,3 +134,7 @@ O `tests/iso.sh` continua com 1024 MiB: a carga cabe, então não foi criada a v
 - `docker load` não preserva `RepoDigests`: dentro da ISO o teste confere a tag, e o digest só é conferido no build.
 - O smoke `containers` só prova o Docker e a imagem do FRR. O pacote `frr` e o Containerlab entraram na parte 4 (veja [nfv.md](nfv.md)); a lista de imagens não mudou, e o `scripts/prepare-offline.sh` agora também baixa o `.deb` do Containerlab.
 - Reprodução por segunda pessoa pendente.
+
+## Como relatar uma falha
+
+**Quando:** para cada falha que se repete, para qualquer erro de comando deste documento e para tudo que ele não explicou. **Onde:** uma **issue** no repositório no GitHub. **Título:** `<tarefa>: <passo>: <resumo curto>`. **Corpo:** **Passos** (comandos exatos), **Saída** (texto exato copiado e colado), **Esperado** (o que o documento dizia) e **Ambiente** (Debian, versão do Docker, RAM da VM, com ou sem KVM, commit). Uma issue por falha, sem dado pessoal.

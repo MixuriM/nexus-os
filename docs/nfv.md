@@ -2,6 +2,23 @@
 
 Validação da F2.7: dois nós FRR em uma topologia Containerlab versionada trocam rotas por OSPF (área 0). FRRouting é a VNF de exemplo do Nexus OS.
 
+Este documento foi escrito para quem **nunca viu o projeto**: cada passo diz **onde fazer**, **o que fazer**, **por que fazer**, **o que deve aparecer** e **o que fazer se não aparecer**. **O que é:** **NFV** (virtualização de funções de rede) roda funções de rede, como um roteador, como software; uma **VNF** é uma dessas funções (aqui o **FRRouting**, um roteador de software que fala **OSPF**, protocolo em que roteadores descobrem vizinhos e trocam rotas); o **Containerlab** sobe topologias de contêineres ligados entre si a partir de um arquivo YAML.
+
+## Sumário
+
+1. [Resultado](#resultado-22102026)
+2. [Regras que valem o tempo todo](#regras-que-valem-o-tempo-todo)
+3. [O que você precisa ter antes](#o-que-você-precisa-ter-antes)
+4. [Instalação](#instalação)
+5. [Subir e destruir](#subir-e-destruir)
+6. [Tabela de rotas dos dois nós](#tabela-de-rotas-dos-dois-nós)
+7. [Teste automatizado](#teste-automatizado)
+8. [Decisões e problemas conhecidos](#decisões-e-problemas-conhecidos)
+9. [Na ISO (F3.5 e F3.7)](#na-iso-f35-e-f37)
+10. [Orquestração (F3.6)](#orquestração-f36)
+11. [Cenário integrado (F4.3)](#cenário-integrado-f43)
+12. [Como relatar uma falha](#como-relatar-uma-falha)
+
 ## Resultado (22/10/2026)
 
 | Item | Valor |
@@ -16,27 +33,48 @@ Validação da F2.7: dois nós FRR em uma topologia Containerlab versionada troc
 
 Endereços de laboratório (blocos reservados para documentação, RFC 5737): loopbacks 198.51.100.1/32 (`r1`) e 198.51.100.2/32 (`r2`), enlace 203.0.113.0/30.
 
+## Regras que valem o tempo todo
+
+1. **Faça só o que está escrito aqui** e confira o "Deve aparecer" de cada passo antes de seguir.
+2. **O Containerlab precisa de root:** use `sudo` nos comandos `containerlab`.
+3. **Destrua a topologia no fim** (`containerlab destroy ... --cleanup`): sobras de uma tentativa fazem a seguinte falhar.
+4. **O repositório é público:** nunca cole em issue senha, chave, token ou dado pessoal.
+
+## O que você precisa ter antes
+
+| # | Item | Por quê | Como conseguir |
+| --- | --- | --- | --- |
+| 1 | Uma VM ou máquina **Debian 13** com `sudo` e internet | A instalação baixa o Containerlab e a imagem FRR | [ambiente-de-build.md](ambiente-de-build.md) |
+| 2 | O repositório clonado | As topologias e configurações estão em `labs/containerlab/` | `git clone https://github.com/MixuriM/nexus-os.git` e `cd nexus-os` |
+| 3 | Na **ISO**, nada: o Docker, a imagem FRR e o Containerlab já vêm dentro dela | A ISO funciona sem internet | [manual.md](manual.md), seções "Containerlab" e "Orquestração" |
+
 ## Instalação
 
-Na VM Debian:
+**Onde:** terminal da VM Debian (fora da ISO; a ISO já traz tudo).
+
+**O que fazer:**
 
 ```bash
 sudo apt install docker.io curl
 bash -c "$(curl -sL https://get.containerlab.dev)"
 ```
 
-O segundo comando é o método de instalação do Containerlab indicado em https://containerlab.dev/install (script que detecta o Debian e instala o pacote `.deb` da versão mais recente). Confira a versão instalada:
+**Por quê:** o primeiro comando instala o Docker e o `curl`; o segundo é o método de instalação do Containerlab indicado em https://containerlab.dev/install (script que detecta o Debian e instala o pacote `.deb` da versão mais recente). **Deve aparecer:** o `apt` termina sem erro e o script termina sem erro. **Se não aparecer:** sem internet, o `curl` falha com `Could not resolve host`.
+
+**Conferir a versão e baixar a imagem:**
 
 ```bash
 containerlab version
-docker pull quay.io/frrouting/frr:10.7.1
+sudo docker pull quay.io/frrouting/frr:10.7.1
 ```
 
-O Containerlab precisa de root: use `sudo` nos comandos `containerlab`. O `docker exec` funciona com o usuário no grupo `docker` (vale a partir do próximo login) ou com `sudo`.
+**Deve aparecer:** `containerlab version` mostra a versão (0.81.1 nesta medição) e o `docker pull` termina com `Status: Downloaded newer image` (ou `Image is up to date`). O `docker exec` funciona com o usuário no grupo `docker` (vale a partir do próximo login) ou com `sudo`.
 
 ## Subir e destruir
 
-Na raiz do repositório:
+**Onde:** na raiz do repositório, num terminal.
+
+**O que fazer:**
 
 ```bash
 sudo containerlab deploy -t labs/containerlab/frr-duo.clab.yml
@@ -45,7 +83,9 @@ sudo docker exec clab-frr-duo-r2 vtysh -c 'show ip route ospf'
 sudo containerlab destroy -t labs/containerlab/frr-duo.clab.yml --cleanup
 ```
 
-Os contêineres se chamam `clab-frr-duo-r1` e `clab-frr-duo-r2`. A convergência do OSPF levou 16 s no teste.
+**Por quê:** o `deploy` cria os dois contêineres e o enlace entre eles; os dois `docker exec ... vtysh` mostram as rotas OSPF aprendidas por cada nó; o `destroy --cleanup` remove tudo. Os contêineres se chamam `clab-frr-duo-r1` e `clab-frr-duo-r2`.
+
+**Deve aparecer:** uma tabela do `deploy` com os dois nós `running` e, depois de alguns segundos, as rotas `O>*` da seção seguinte (a convergência do OSPF levou 16 s no teste). **Se não aparecer:** se `show ip route ospf` vier vazio, espere uns 15 s e repita (o OSPF ainda converge); se o `deploy` falhar sem rede, a imagem FRR não está local: veja a seção "Instalação".
 
 ## Tabela de rotas dos dois nós
 
@@ -63,11 +103,13 @@ O>* 198.51.100.1/32 [110/10] via 203.0.113.1, eth1, weight 1, 00:00:01
 
 ## Teste automatizado
 
+**O que fazer** (na raiz do repositório):
+
 ```bash
 sudo tests/nfv.sh
 ```
 
-O teste implanta a topologia, espera até 90 s pela rota OSPF do loopback do outro nó nos dois lados, imprime as duas tabelas, destrói a topologia (`--cleanup`) e confere que nenhum contêiner do laboratório sobrou.
+**Por quê:** o teste implanta a topologia, espera até 90 s pela rota OSPF do loopback do outro nó nos dois lados, imprime as duas tabelas, destrói a topologia (`--cleanup`) e confere que nenhum contêiner do laboratório sobrou. **Deve aparecer:** `OK: tests/nfv.sh (r1 e r2 trocaram os loopbacks por OSPF em <segundos> s)`, código 0. **Se não aparecer:** a mensagem `FALHA:` diz o que falhou; relate com ela.
 
 ## Decisões e problemas conhecidos
 
@@ -90,7 +132,7 @@ A versão do pacote (10.3) é diferente da imagem de contêiner (10.7.1). Isso n
 
 ### Configuração de exemplo do FRR
 
-`nfv/frr/exemplo/daemons` e `nfv/frr/exemplo/frr.conf`: um roteador `ex1` com `zebra=yes`, `ospfd=yes` e o loopback 198.51.100.10/32 em OSPF área 0 (bloco RFC 5737). Na ISO ficam em `/usr/share/nexus-os/nfv/frr/exemplo/`. O pacote não ativa o `ospfd` por padrão: para usar o exemplo, copie os dois arquivos para `/etc/frr/` (dono `frr:frr`, modo 0640) e reinicie o serviço:
+`nfv/frr/exemplo/daemons` e `nfv/frr/exemplo/frr.conf`: um roteador `ex1` com `zebra=yes`, `ospfd=yes` e o loopback 198.51.100.10/32 em OSPF área 0 (bloco RFC 5737). Na ISO ficam em `/usr/share/nexus-os/nfv/frr/exemplo/`. O pacote não ativa o `ospfd` por padrão. **Onde:** num terminal da ISO. **O que fazer:** para usar o exemplo, copie os dois arquivos para `/etc/frr/` (dono `frr:frr`, modo 0640) e reinicie o serviço:
 
 ```bash
 sudo install -m 0640 -o frr -g frr /usr/share/nexus-os/nfv/frr/exemplo/daemons /etc/frr/daemons
@@ -100,9 +142,11 @@ sudo vtysh -c 'show running-config'
 sudo vtysh -c 'show ip ospf'
 ```
 
-O smoke `frr` (`tests/frr.sh`) faz exatamente isso, confere o loopback e o `router ospf` na configuração em execução e o `ospfd`, e restaura os arquivos originais no fim.
+**Deve aparecer:** `show running-config` com `ip address 198.51.100.10/32` e `router ospf`, e `show ip ospf` com o processo OSPF. **Se não aparecer:** `sudo systemctl status frr` mostra se o serviço subiu. Antes de sobrescrever, faça uma cópia de `/etc/frr/daemons` e `/etc/frr/frr.conf` para poder restaurar. O smoke `frr` (`tests/frr.sh`) faz exatamente isso, confere o loopback e o `router ospf` na configuração em execução e o `ospfd`, e restaura os arquivos originais no fim.
 
 ### Topologia em um comando
+
+**Onde:** num terminal da ISO. **O que fazer:**
 
 ```bash
 sudo containerlab deploy -t /usr/share/nexus-os/labs/containerlab/frr-duo.clab.yml
@@ -110,7 +154,7 @@ sudo docker exec clab-frr-duo-r1 vtysh -c 'show ip route ospf'
 sudo containerlab destroy -t /usr/share/nexus-os/labs/containerlab/frr-duo.clab.yml --cleanup
 ```
 
-O smoke `nfv` é o `tests/nfv.sh` da F2.7, sem alteração, rodando dentro da ISO sem rede com a imagem que já está nela.
+**Deve aparecer:** a tabela do `deploy` com os dois nós `running` e a rota `O>* 198.51.100.2/32` em `r1`. **Se não aparecer:** repita o `docker exec` depois de 15 s. O smoke `nfv` é o `tests/nfv.sh` da F2.7, sem alteração, rodando dentro da ISO sem rede com a imagem que já está nela.
 
 ### Como o `.deb` do Containerlab entra na ISO
 
@@ -144,6 +188,8 @@ Um script único, `nfv/nexus-vnf.sh`, faz o papel simplificado de NFVO/VNFM: ins
 
 **Infraestrutura usada:** Containerlab com um contêiner FRR (Docker, imagem `quay.io/frrouting/frr:10.7.1`). O libvirt não participa da orquestração nesta fase; as máquinas virtuais continuam no `nexus-vm` (F3.3).
 
+**Onde:** num terminal da ISO (ou, no repositório, com `sudo nfv/nexus-vnf.sh <comando>`). **O que fazer:**
+
 ```bash
 sudo nexus-vnf up        # na ISO; no repositório: sudo nfv/nexus-vnf.sh up
 sudo nexus-vnf status
@@ -151,7 +197,7 @@ sudo nexus-vnf down
 sudo nexus-vnf up labs/containerlab/integrado.clab.yml   # topologia opcional (F4.3)
 ```
 
-Na ISO, `/usr/local/bin/nexus-vnf` é um link (criado pelo hook) para `/usr/share/nexus-os/nfv/nexus-vnf.sh`; o script resolve o caminho real com `readlink -f` para achar a topologia.
+**Deve aparecer:** `OK: VNF vnf1 instanciada (clab-vnf-frr-vnf1, FRR respondeu em <s> s)` no `up`, `OK: VNF vnf1 rodando` no `status` e `OK: VNF vnf1 removida` no `down`. **Se não aparecer:** `FALHA: containerlab deploy falhou` indica problema do Containerlab ou da imagem; `sudo nexus-vnf down` limpa sobras. Na ISO, `/usr/local/bin/nexus-vnf` é um link (criado pelo hook) para `/usr/share/nexus-os/nfv/nexus-vnf.sh`; o script resolve o caminho real com `readlink -f` para achar a topologia.
 
 A VNF é o nó `vnf1` de `labs/containerlab/vnf-frr.clab.yml` (laboratório `vnf-frr`, contêiner `clab-vnf-frr-vnf1`), com `labs/containerlab/configs/vnf1/{daemons,frr.conf}`: loopback 198.51.100.11/32 em OSPF área 0. O nó não tem enlaces: o Containerlab aceitou a topologia sem a seção `links`, medido na VM de laboratório.
 
@@ -175,7 +221,7 @@ OK: VNF vnf1 rodando
 
 ### Teste
 
-`sudo tests/orquestracao.sh` roda `up`, `status` (0, com FRR e o loopback), `down`, `status` (1), `up` duas vezes (o contêiner não é recriado), `down` duas vezes, confere que nada sobrou e que o uso inválido sai com 2. Depois, a topologia opcional: arquivo inexistente e argumento a mais saem com 2, a VNF padrão passada por extenso se comporta como sem argumento e a `frr-duo` sobe, informa os dois nós, não é recriada pelo segundo `up`, desce sem resíduo e dá `status` 1. Na ISO é o smoke `orquestracao`, que usa o link `/usr/local/bin/nexus-vnf` (a RC2 traz o script anterior ao argumento opcional, então esse teste novo só passa na ISO gerada depois deste commit).
+`sudo tests/orquestracao.sh` roda `up`, `status` (0, com FRR e o loopback), `down`, `status` (1), `up` duas vezes (o contêiner não é recriado), `down` duas vezes, confere que nada sobrou e que o uso inválido sai com 2. Depois, a topologia opcional: arquivo inexistente e argumento a mais saem com 2, a VNF padrão passada por extenso se comporta como sem argumento e a `frr-duo` sobe, informa os dois nós, não é recriada pelo segundo `up`, desce sem resíduo e dá `status` 1. Na ISO é o smoke `orquestracao`, que usa o link `/usr/local/bin/nexus-vnf` (a RC2 da rodada 5 trazia o script anterior ao argumento opcional; a RC2 final já traz o novo).
 
 ### Medições (26/10/2026, VM Debian 13 no Hyper-V, com KVM, sem rede na ISO)
 
@@ -211,7 +257,7 @@ Topologia `labs/containerlab/integrado.clab.yml` (laboratório `integrado`): `r1
 
 **Mecanismo.** Segundo essa página, o Containerlab não cria a ponte: ela tem de existir antes (`ovs-vsctl add-br`), entra na topologia como um nó `kind: ovs-bridge` com o mesmo nome da ponte, e cada enlace usa o nome do nó e o de uma interface nova (`br-integrado:ovsp1`, que não pode colidir com interface existente). O `containerlab deploy --help` da versão 0.81.1 não lista os kinds; a conferência foi o `deploy` real, que ligou as duas portas (`ovs-vsctl list-ports br-integrado` mostra `ovsp1` e `ovsp2`) e as tirou da ponte no `destroy`. As regras usam o nome das portas (`in_port=ovsp1`), que o `ovs-ofctl` resolve para o número do OpenFlow depois do `deploy`; por isso as regras são carregadas depois do `up`.
 
-Ordem dos comandos (o bloco `bash nexus-exec` equivalente está em [manual.md](manual.md), seção "Cenário integrado"):
+**Onde:** num terminal da ISO (os caminhos de `labs/` e `sdn/` valem na raiz do repositório; na ISO use `/usr/share/nexus-os/labs/...` e `/usr/share/nexus-os/sdn/...`). **Ordem dos comandos** (o bloco `bash nexus-exec` equivalente está em [manual.md](manual.md), seção "Cenário integrado"):
 
 ```bash
 sudo ovs-vsctl add-br br-integrado -- set bridge br-integrado fail_mode=secure
@@ -224,9 +270,11 @@ sudo nexus-vnf down labs/containerlab/integrado.clab.yml
 sudo ovs-vsctl del-br br-integrado
 ```
 
+**Por quê:** a ponte tem de existir **antes** do `up` (o Containerlab não a cria); as regras são carregadas **depois** do `up`, porque usam o nome das portas, que só existem depois; o `drop` do protocolo 89 prova que o OSPF depende da regra. **Deve aparecer:** vizinho `198.51.100.22` em `Full/-`, a adjacência caindo em cerca de 5 s com o `drop` e voltando ao remover a regra. **Se não aparecer:** limpe com `sudo nexus-vnf down <topologia>` e `sudo ovs-vsctl --if-exists del-br br-integrado`.
+
 ### Teste T6 (F4.3)
 
-`tests/cenario-t6.sh <iso>` roda o cenário 3 vezes seguidas, cada uma num QEMU novo, sem rede e sem persistência, com 2560 MiB (a RAM recomendada com o desktop, [requisitos.md](requisitos.md)). Os arquivos do cenário vão dentro do script do convidado, porque a RC2 ainda não os traz; entram na ISO a partir da próxima geração. Critérios por execução e mutações: [plano-de-testes.md](plano-de-testes.md). Medido em 09/11/2026, com KVM, na RC2 (evidências em `evidencias/T6/`):
+`tests/cenario-t6.sh <iso>` roda o cenário 3 vezes seguidas, cada uma num QEMU novo, sem rede e sem persistência, com 2560 MiB (a RAM recomendada com o desktop, [requisitos.md](requisitos.md)). Os arquivos do cenário foram levados dentro do script do convidado nas execuções de 09/11/2026 na RC2 da rodada 5, que ainda não os trazia; a RC2 final já os traz. Critérios por execução e mutações: [plano-de-testes.md](plano-de-testes.md). Medido em 09/11/2026, com KVM, na RC2 (evidências em `evidencias/T6/`):
 
 | Execução | `nexus-vnf up` | Convergência inicial (a partir do `up`) | Queda após o descarte do protocolo 89 | Recuperação após remover o descarte | `down` | Tempo no convidado | Tempo total (boot ao desligamento) |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -238,6 +286,10 @@ Limites do teste: convergência inicial 120 s (parâmetro `T6_LIMITE`), queda 12
 
 ### Problemas conhecidos (integrado)
 
-- A RC2 não traz `integrado.clab.yml`, `integrado.flows` nem o `nexus-vnf` com topologia opcional: o T6 os carrega no script do convidado. O `tests/orquestracao.sh` e o `tests/manual.sh` completos (o bloco "Cenário integrado") só passam em ISO gerada depois deste commit.
+- A RC2 da rodada 5 não trazia `integrado.clab.yml`, `integrado.flows` nem o `nexus-vnf` com topologia opcional (o T6 os carregava no script do convidado); a RC2 final os traz, e o `tests/orquestracao.sh` e o `tests/manual.sh` completos (com o bloco "Cenário integrado") passam nela.
 - A regra de IP geral (prioridade 90) também deixa o OSPF passar; é a regra explícita do protocolo 89 (prioridade 100) que o teste exige com pacotes contados, e o descarte (prioridade 200) manda mais que as duas.
 - Reprodução por segunda pessoa pendente.
+
+## Como relatar uma falha
+
+**Quando:** para cada falha que se repete, para qualquer erro de comando deste documento e para tudo que ele não explicou. **Onde:** uma **issue** no repositório no GitHub. **Título:** `<tarefa>: <passo>: <resumo curto>`. **Corpo:** **Passos** (comandos exatos), **Saída** (texto exato copiado e colado), **Esperado** (o que o documento dizia) e **Ambiente** (Debian ou ISO, versões do Containerlab e da imagem FRR, com ou sem KVM, commit). Uma issue por falha, sem dado pessoal.

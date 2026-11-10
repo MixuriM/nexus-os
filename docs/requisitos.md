@@ -70,6 +70,14 @@ O `tests/iso.sh` só espera o `login:` na serial. Medido com `NEXUS_ISO_MEM`, um
 - O `tests/iso.sh` só chega ao `login:` na serial: não prova que a sessão gráfica sobe com 512 MiB. O mínimo que cobre a sessão e todos os componentes é o dos smokes, 1536 MiB.
 - Hyper-V Geração 1: a ISO subiu e foi usada à mão em 28/10/2026 (janela de 1024x768), sem medição de RAM. Hyper-V Geração 2 (subiu em 29/10/2026, 22 s até a barra, sem medição de RAM), VirtualBox e vídeo real não foram medidos com o desktop.
 
+## Como repetir a medição, passo a passo
+
+**Onde:** na VM de build, na raiz do repositório, com a ISO em `dist/` (veja [manual.md](manual.md), "Gerar a ISO"). **Você precisa de** `/dev/kvm` (os números abaixo são todos com KVM) e de cerca de 5 minutos por execução.
+
+1. **Coletar o pico:** `NEXUS_SMOKE_MEM=4096 tests/iso-smoke.sh dist/nexus-os-rc2-amd64.iso all`. **Por quê:** com RAM de sobra o pico não é limitado pela memória do convidado. **Deve aparecer:** `OK: 8 teste(s) sem falha em <s> s, com KVM, ... RAM usada: repouso <n> MiB, pico <n> MiB de 4096 MiB`. **Se não aparecer:** `FALHA: NEXUS-SMOKE-DONE não apareceu em <limite> s` indica pouca RAM ou ISO que não terminou.
+2. **Validar a RAM recomendada:** `NEXUS_SMOKE_MEM=2560 tests/iso-smoke.sh dist/nexus-os-rc2-amd64.iso all`. **Deve aparecer:** `OK` com o pico abaixo de 2560 MiB.
+3. **Conferir a tabela:** `tests/requisitos.sh`. **Deve aparecer:** `OK: requisitos conferidos (...)`. Se os números mudaram, atualize a tabela acima antes.
+
 ## Método
 
 1. O `nexus-smoke` da ISO imprime, na serial, `NEXUS-SMOKE-MEM <ponto> <MiB>` (em repouso e depois de cada teste), `NEXUS-SMOKE-MEMPEAK <MiB>` e `NEXUS-SMOKE-DISK <ponto>:<caminho> <MiB>`. O `tests/iso-smoke.sh` repassa os valores no `OK:`. Marcadores: [integracao-iso.md](integracao-iso.md).

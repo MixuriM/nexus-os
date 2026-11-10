@@ -57,7 +57,7 @@ A versão que está em teste se chama **RC2** (*release candidate 2*, a segunda 
 | 1 | Um computador com **Windows 10 ou 11** (64 bits), com pelo menos **8 GB de RAM** e **10 GB livres** em disco | A VM usa 2,5 GB de RAM; o Windows e o VirtualBox precisam do resto. O disco guarda a ISO (cerca de 1,9 GB) e a VM | Verifique em Configurações, Sistema, Sobre |
 | 2 | **VirtualBox 7.2** instalado | É o programa que está sendo testado. O roteiro foi escrito para a 7.2; versão diferente pode ter comandos diferentes | Baixe em https://www.virtualbox.org/wiki/Downloads (pacote "Windows hosts") e instale com as opções padrão |
 | 3 | A **ISO** `nexus-os-rc2-amd64.iso` | É o que se testa | Peça o arquivo a quem gerou a ISO (o responsável pelo build do projeto). Não gere a ISO você mesmo: o build só roda em Linux e leva mais de 20 minutos |
-| 4 | O **SHA256 correto da ISO** | Prova que o arquivo não está corrompido nem é outra versão | Está em `docs/rc2.md`, tabela "Identificação", linha "SHA256". Na data deste documento: `bb6d89c68970fb24bb6e35ec3db0a74a88490b257eed166729edb941ce673e58` (tamanho 1990639616 bytes). Se o arquivo de `docs/rc2.md` no GitHub mostrar outro valor, **vale o do GitHub** |
+| 4 | O **SHA256 correto da ISO** | Prova que o arquivo não está corrompido nem é outra versão | Está em `docs/rc2.md`, tabela "Identificação", linha "SHA256". Na data deste documento: `5f47083bfd5a009a7c11b093e98edfd3bdf21ac593f80f4d549bfe3310c10dbe` (RC2 final, tamanho 1990639616 bytes; a RC2 da rodada 5 era `bb6d89c68970...3e58`). Se o arquivo de `docs/rc2.md` no GitHub mostrar outro valor, **vale o do GitHub** |
 | 5 | Este roteiro aberto num **segundo lugar** (celular, segundo monitor ou impresso) | Dentro da VM você não consegue ler o roteiro na mesma tela | Abra `docs/teste-virtualbox.md` no GitHub, branch `main` ou a branch indicada por quem passou a ISO |
 | 6 | Um **editor de texto** (Bloco de Notas) e uma pasta para as capturas | Para anotar resultados e guardar imagens | Crie uma pasta, por exemplo `Documentos\teste-nexus` |
 | 7 | **Tempo livre sem interrupção:** cerca de 20 min para preparar e de 2 h a 3 h para o roteiro | O VirtualBox roda sem KVM e é mais lento que o QEMU e o Hyper-V; o roteiro tem muitos itens | Reserve a tarde |
@@ -289,7 +289,7 @@ Na área de trabalho, **duplo clique** em cada ícone, na ordem. Nos atalhos de 
 | # | Atalho | O que deve aparecer |
 | --- | --- | --- |
 | H5.1 | Terminal do Nexus OS | Janela de terminal |
-| H5.2 | Documentação do Nexus OS | Firefox com a página escura "Documentação do Nexus OS" e a lista dos documentos; clique em **Manual v1 do Nexus OS** e confira que abre. Funciona sem internet |
+| H5.2 | Documentação do Nexus OS | Firefox com a página escura "Documentação do Nexus OS" e a lista dos documentos; clique em **Manual v2 do Nexus OS** e confira que abre. Funciona sem internet |
 | H5.3 | Gerenciador de máquinas virtuais | A janela **Gerenciador de máquinas virtuais** abre (até 15 s) e lista uma conexão **QEMU/KVM**. **Não** crie VM. Feche. Dentro do VirtualBox não há KVM; anote se a janela mostrar aviso sobre isso |
 | H5.4 | Laboratório Open vSwitch | Terminal com `== Nexus OS: sudo nexus-sdn up ==` e `Código de saída: 0`. **Depois**, no terminal, rode `sudo nexus-sdn down` (o atalho só cria o laboratório) |
 | H5.5 | VNF FRR: instanciar | `OK:` e `Código de saída: 0` |

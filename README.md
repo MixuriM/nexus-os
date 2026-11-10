@@ -67,39 +67,60 @@ Como foram medidas: [docs/ambiente-de-build.md](docs/ambiente-de-build.md).
 
 ## Como gerar a ISO
 
-**Exige** Linux (VM Debian 13), usuário com `sudo`, Docker, internet e espaço livre: o build limpo da RC2 ocupou 14098 MiB no clone (medido em 09/11/2026, veja [docs/rc2.md](docs/rc2.md)); o da RC1, sem desktop, 5383 MiB (26/10/2026, [docs/rc1.md](docs/rc1.md)). Deixe pelo menos 20 GiB livres.
-Preparo da VM: [docs/ambiente-de-build.md](docs/ambiente-de-build.md). Resultado esperado e medições: [docs/iso-poc.md](docs/iso-poc.md).
+**O que é:** a ISO é gerada por um único script (`scripts/build-iso.sh`) numa máquina Linux. O passo a passo completo, com o que deve aparecer e o que fazer se algo falhar, está na seção "Gerar a ISO" do [manual v2](docs/manual.md); abaixo está o resumo.
 
-1. Clone o repositório no disco do Linux (nunca em pasta compartilhada com o Windows nem em `/mnt/*`):
+**Você precisa de:** Linux (VM Debian 13), usuário com `sudo`, Docker, internet e espaço livre: o build limpo da RC2 ocupou 14098 MiB no clone (medido em 09/11/2026, veja [docs/rc2.md](docs/rc2.md)); o da RC1, sem desktop, 5383 MiB (26/10/2026, [docs/rc1.md](docs/rc1.md)). Deixe pelo menos 20 GiB livres. Preparo da VM: [docs/ambiente-de-build.md](docs/ambiente-de-build.md) (com KVM no Hyper-V: [docs/hyperv.md](docs/hyperv.md)). Resultado esperado e medições: [docs/iso-poc.md](docs/iso-poc.md).
 
-   ```bash
-   git clone https://github.com/MixuriM/nexus-os.git
-   cd nexus-os
-   ```
+### Passo 1: clonar o repositório
 
-2. Gere a ISO (516 s medidos com KVM na VM do Hyper-V; o log fica em `live-build/build.log`):
+**Onde:** terminal do Linux, no disco do Linux (nunca em pasta compartilhada com o Windows nem em `/mnt/*`).
 
-   ```bash
-   sudo scripts/build-iso.sh
-   ```
+```bash
+git clone https://github.com/MixuriM/nexus-os.git
+cd nexus-os
+```
 
-   A saída são `dist/nexus-os-poc-amd64.iso` e `dist/nexus-os-poc-amd64.iso.sha256`. Esses arquivos não vão para o Git.
+**Por quê:** baixa o código e entra na pasta; os comandos seguintes rodam dentro dela. **Deve aparecer:** o progresso do download, sem erro. **Se não aparecer:** `Could not resolve host` indica falta de internet.
 
-3. Teste a ISO (confere o SHA256 e inicia a ISO no QEMU até aparecer `login:`):
+### Passo 2: gerar a ISO
 
-   ```bash
-   tests/iso.sh dist/nexus-os-poc-amd64.iso
-   ```
+```bash
+sudo scripts/build-iso.sh
+```
 
-4. Antes de commitar, rode `tests/lint-repo.sh`.
+**Por quê:** monta a ISO com o live-build (de 19 a 23 minutos com KVM na RC2; 516 s medidos na RC1 sem desktop); o log fica em `live-build/build.log`. **Deve aparecer:** `P: Build completed successfully` e `OK: dist/nexus-os-poc-amd64.iso, <bytes> bytes, <segundos> s`. A saída são `dist/nexus-os-poc-amd64.iso` e `dist/nexus-os-poc-amd64.iso.sha256`; esses arquivos não vão para o Git. **Se não aparecer:** `FALHA: precisa de root` (faltou o `sudo`), `FALHA: o build não roda em /mnt/*` (clone em pasta do Windows) ou `FALHA: o build falhou, veja live-build/build.log` (leia o fim do log).
+
+### Passo 3: testar a ISO
+
+```bash
+tests/iso.sh dist/nexus-os-poc-amd64.iso
+```
+
+**Por quê:** confere o SHA256 e inicia a ISO no QEMU até aparecer `login:`. **Deve aparecer:** `OK: ISO chegou ao login ... com KVM, SHA256 conferido`. **Se não aparecer:** `FALHA: SHA256 da ISO não confere` (ISO corrompida: gere de novo) ou `FALHA: login: não apareceu em ... s` (a ISO não inicia: relate).
+
+### Passo 4: conferir o repositório antes de commitar
+
+```bash
+tests/lint-repo.sh
+```
+
+**Deve aparecer:** `OK: lint-repo, ...`.
 
 > **Aviso:** o live-build deve ser executado em Debian ou Ubuntu, com root e sistema de arquivos Linux. Não builde em pasta Windows. Veja [docs/ambiente-de-build.md](docs/ambiente-de-build.md).
 
 ## Usar a ISO integrada
 
-1. Inicie a ISO numa VM com vídeo (testado: QEMU com KVM; o Hyper-V está descrito em [docs/rc1.md](docs/rc1.md)) com **2560 MiB de RAM** (a recomendada com o desktop; o mínimo medido é 1792 MiB, veja [docs/requisitos.md](docs/requisitos.md)) e a ISO anexada à VM. O menu de boot inicia sozinho em 5 segundos (Enter adianta). A ISO entra no desktop XFCE já logada como `user`. **Internet:** no QEMU use `-nic user`; no Hyper-V, a VM criada sem rede precisa de `Connect-VMNetworkAdapter -VMName <vm> -SwitchName "Default Switch"` (comandos completos em [docs/manual.md](docs/manual.md), seção "Ambiente gráfico").
-2. Use o menu "Nexus OS" ou os ícones da área de trabalho, ou abra um terminal. Se a sessão pedir login: usuário `user` e senha `live` (credencial pública da Debian Live, de laboratório). O `sudo` não pede senha.
-3. Os atalhos chamam os comandos abaixo; no terminal use os comandos diretamente.
+**O que é:** a ISO é *live*: inicia na memória, sem instalar nada. O passo a passo completo (QEMU, Hyper-V e VirtualBox, com o que deve aparecer em cada passo) está nas seções "Iniciar a ISO" e "Ambiente gráfico" do [manual v2](docs/manual.md); abaixo está o resumo.
+
+### Passo 1: iniciar a ISO numa VM com vídeo
+
+Teste a ISO numa VM com vídeo (testado: QEMU com KVM; o Hyper-V Geração 1 e 2 e o VirtualBox estão descritos em [docs/manual.md](docs/manual.md), [docs/rc1.md](docs/rc1.md) e [docs/teste-virtualbox.md](docs/teste-virtualbox.md)) com **2560 MiB de RAM** (a recomendada com o desktop; o mínimo medido é 1792 MiB, veja [docs/requisitos.md](docs/requisitos.md)) e a ISO anexada à VM. **Por quê:** o desktop e os contêineres usam memória. **Deve aparecer:** o menu de boot do Nexus OS (inicia sozinho em 5 segundos; Enter adianta) e, depois de cerca de 25 s com KVM, o desktop XFCE já logado como `user`. **Se não aparecer:** veja a seção "Problemas no desktop" do manual.
+
+**Internet:** no QEMU use `-nic user`; no Hyper-V, a VM criada sem rede precisa de `Connect-VMNetworkAdapter -VMName <vm> -SwitchName "Default Switch"` (comandos completos em [docs/manual.md](docs/manual.md), seção "Ambiente gráfico").
+
+### Passo 2: usar os componentes
+
+Use o menu "Nexus OS" ou os ícones da área de trabalho, ou abra um terminal (duplo clique em **Terminal do Nexus OS**). Se a sessão pedir login: usuário `user` e senha `live` (credencial pública da Debian Live, de laboratório). O `sudo` não pede senha. Os atalhos chamam os comandos abaixo; no terminal use os comandos diretamente. **Deve aparecer** em cada comando o que está descrito no guia da última coluna.
 
 | Comando | O que faz | Guia |
 | --- | --- | --- |
@@ -107,9 +128,9 @@ Preparo da VM: [docs/ambiente-de-build.md](docs/ambiente-de-build.md). Resultado
 | `nexus-vm criar <nome>\|listar\|remover <nome>` | VMs de teste do libvirt (funciona sem `sudo` para quem está no grupo `libvirt`, como o `user`) | [docs/virtualizacao.md](docs/virtualizacao.md) |
 | `sudo nexus-vnf up\|status\|down` | Ciclo da VNF FRR sobre o Containerlab | [docs/nfv.md](docs/nfv.md) |
 | `sudo containerlab deploy -t /usr/share/nexus-os/labs/containerlab/frr-duo.clab.yml` | Topologia de demonstração: dois nós FRR trocando rotas por OSPF | [docs/nfv.md](docs/nfv.md) |
-| `sudo nexus-smoke <nome>|all` | Smoke tests dos componentes dentro da ISO, com medição de RAM e disco | [docs/integracao-iso.md](docs/integracao-iso.md) |
-| `nexus-barra centro|esquerda|alternar` | Menu e ícones da barra no centro (padrão) ou no canto esquerdo, só na sessão | [docs/gui.md](docs/gui.md) |
-| `nexus-icone <app.desktop> padrao|nexus` e `nexus-icones padrao|nexus` | Ícone original de um aplicativo ou de todos, ou o ícone do tema Nexus; também pela janela "Ícones dos aplicativos" do menu | [docs/manual.md](docs/manual.md) |\|all` | Smoke tests dos componentes dentro da ISO, com medição de RAM e disco | [docs/integracao-iso.md](docs/integracao-iso.md) |
+| `sudo nexus-smoke <nome>\|all` | Smoke tests dos componentes dentro da ISO, com medição de RAM e disco | [docs/integracao-iso.md](docs/integracao-iso.md) |
+| `nexus-barra centro\|esquerda\|alternar` | Menu e ícones da barra no centro (padrão) ou no canto esquerdo, só na sessão | [docs/gui.md](docs/gui.md) |
+| `nexus-icone <app.desktop> padrao\|nexus` e `nexus-icones padrao\|nexus` | Ícone original de um aplicativo ou de todos, ou o ícone do tema Nexus; também pela janela "Ícones dos aplicativos" do menu | [docs/manual.md](docs/manual.md) |
 
 ## Requisitos medidos da RC1
 
@@ -157,7 +178,7 @@ Cada script imprime `OK:` ou `FALHA:` e sai com código diferente de zero em fal
 | `tests/run-fase3.sh [iso]` | `lint-repo`, `docs`, `gui-spec`, `atalhos`, `identidade`, `iso`, `iso-smoke all`, `requisitos` e `manual`, parando no primeiro erro |
 
 Validação da RC1 (com KVM): `all` com 7 de 7 testes em 69 s (4096 MiB) e 73 s (1536 MiB). Numa VM do Hyper-V sem KVM, 6 de 7 na primeira execução, com uma falha intermitente do `libvirt` ([issue 35](https://github.com/MixuriM/nexus-os/issues/35)).
-Para testar a documentação do zero: [checklist](docs/checklist-teste-documentacao.md).
+Testes funcionais da Fase 4 (T1 a T7, com evidências em `evidencias/`): `tests/run-fase4.sh [iso]`, com o plano em [docs/plano-de-testes.md](docs/plano-de-testes.md). Para testar a documentação do zero: [checklist](docs/checklist-teste-documentacao.md).
 
 ## Estrutura
 
@@ -183,7 +204,7 @@ nexus-os/
 - Ambiente: [build](docs/ambiente-de-build.md), [VM no Hyper-V com KVM](docs/hyperv.md), [ISO da prova de conceito](docs/iso-poc.md)
 - Componentes: [SDN](docs/sdn.md), [virtualização](docs/virtualizacao.md), [contêineres](docs/containers.md), [NFV](docs/nfv.md)
 - Integração: [como a ISO é montada](docs/integracao-iso.md), [RC1](docs/rc1.md), [requisitos de hardware](docs/requisitos.md)
-- Uso: [manual v1](docs/manual.md) e [GNS3, só documentado](docs/gns3.md)
+- Uso: [manual v2](docs/manual.md) e [GNS3, só documentado](docs/gns3.md)
 - Testes manuais: [checklist da documentação](docs/checklist-teste-documentacao.md) e [teste no VirtualBox, passo a passo completo](docs/teste-virtualbox.md)
 - RC2: [identificação, SHA256 e testes](docs/rc2.md) e [requisitos com desktop](docs/requisitos.md)
 - Ambiente gráfico: [escolha do desktop, instalação na ISO, atalhos e medições](docs/gui.md)
@@ -196,7 +217,7 @@ Acompanhadas como issues no GitHub.
 - Abaixo de cerca de 896 MiB de RAM o Docker não carrega a imagem FRR (issue 31).
 - O `nexus-smoke.service` executa como root o conteúdo de um CD com rótulo `NEXUS_SMOKE`; a decisão de removê-lo ou condicioná-lo fica para o congelamento da ISO (issue 32).
 - A RAM em repouso varia entre execuções (issue 33) e o desligamento da live pede ENTER (issue 34).
-- O desktop foi medido só com KVM em um ambiente (Hyper-V) e sem KVM uma vez; o boot com desktop no VirtualBox (o Hyper-V Geração 2 foi validado em 29/10/2026, com a Secure Boot desligada), o papel de parede em monitores com outro nome que `Virtual-1` e os fluxos interativos (clique nos ícones, terminal esperando Enter) não foram exercitados; no Hyper-V Geração 1 a ISO de SHA256 `c1a1d5c2...0eba` subiu sozinha no Hyper-V Geração 1 (2560 MB, 2 vCPU, `Default Switch`) em 28/10/2026, conferida por um integrante do grupo a partir de capturas de tela: menu de boot, desktop em janela de 1024x768 (limite do vídeo da Geração 1), barra inferior, hora de Brasília, internet no Firefox, LibreOffice Writer em português, `.md` no Mousepad, tecla Print e teclado ABNT2. Nessa ISO o ícone "Disco Disquete" (hardware virtual da Geração 1, sem mídia) dava `Error mounting /dev/fd0 ... Can't open blockdev`; a ISO atual bloqueia o módulo `floppy` e o ícone não aparece (conferido no QEMU com disquete virtual, ainda não repetido no Hyper-V). O roteiro humano completo está na parte H de [docs/checklist-teste-documentacao.md](docs/checklist-teste-documentacao.md). O congelamento da RC2 e a tag são da Fase 4.
+- O desktop foi medido só com KVM em um ambiente (Hyper-V) e sem KVM uma vez; o boot com desktop no VirtualBox (o Hyper-V Geração 2 foi validado em 29/10/2026, com a Secure Boot desligada), o papel de parede em monitores com outro nome que `Virtual-1` e os fluxos interativos foram exercitados no T7 (atalhos, Enter fechando o terminal, `virt-manager` com a VM, documentação) e na rodada humana de 09/11/2026 no Hyper-V Geração 2; no Hyper-V Geração 1 a ISO de SHA256 `c1a1d5c2...0eba` subiu sozinha no Hyper-V Geração 1 (2560 MB, 2 vCPU, `Default Switch`) em 28/10/2026, conferida por um integrante do grupo a partir de capturas de tela: menu de boot, desktop em janela de 1024x768 (limite do vídeo da Geração 1), barra inferior, hora de Brasília, internet no Firefox, LibreOffice Writer em português, `.md` no Mousepad, tecla Print e teclado ABNT2. Nessa ISO o ícone "Disco Disquete" (hardware virtual da Geração 1, sem mídia) dava `Error mounting /dev/fd0 ... Can't open blockdev`; a ISO atual bloqueia o módulo `floppy` e o ícone não aparece (conferido no QEMU com disquete virtual, ainda não repetido no Hyper-V). O roteiro humano completo está na parte H de [docs/checklist-teste-documentacao.md](docs/checklist-teste-documentacao.md). O congelamento da RC2 e a tag são da Fase 4.
 
 ## Fluxo de trabalho
 

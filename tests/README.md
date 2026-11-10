@@ -2,6 +2,38 @@
 
 Testes e validações do Nexus OS. Cada script imprime `OK:` ou `FALHA:` e sai com código diferente de zero em falha.
 
+## Como usar este diretório, passo a passo
+
+**O que é:** cada arquivo `<nome>.sh` é um teste. Eles rodam em três lugares diferentes, e o rótulo de cada item da lista diz qual:
+
+| Onde roda | Quais testes | O que você precisa |
+| --- | --- | --- |
+| **Git Bash do Windows** ou Linux (estáticos) | `lint-repo.sh`, `docs.sh`, `requisitos.sh`, `atalhos.sh`, `gui-spec.sh`, `identidade.sh`, `evidencias.sh` | Só o repositório clonado |
+| **VM de build** (Debian 13 com QEMU, `xorriso`, `sudo`, Docker e Containerlab) | `iso.sh`, `iso-smoke.sh`, `manual.sh`, `cenario-t1.sh` a `cenario-t7.sh`, `run-fase2.sh`, `run-fase3.sh`, `run-fase4.sh`, `sdn.sh`, `virtualizacao.sh`, `nfv.sh`, `orquestracao.sh` | A ISO gerada em `dist/` ([docs/manual.md](../docs/manual.md), "Gerar a ISO") e, de preferência, `/dev/kvm` ([docs/hyperv.md](../docs/hyperv.md)) |
+| **Dentro da ISO** (pelo `nexus-smoke`) | `libvirt.sh`, `containers.sh`, `frr.sh`, `desktop.sh` e os que também rodam na VM de build | Nada: o `tests/iso-smoke.sh` inicia a ISO e roda o teste |
+
+**Passo 1: o teste mais simples (no Git Bash ou Linux, na raiz do repositório).**
+
+```bash
+tests/docs.sh
+```
+
+**Por quê:** confere a documentação por escrito, sem ISO. **Deve aparecer:** `OK: tests/docs.sh (...)`, código de saída 0. **Se não aparecer:** a linha `FALHA: ...` diz o que está errado (por exemplo link quebrado ou seção ausente); corrija o que ela aponta e rode de novo.
+
+**Passo 2: um teste na VM de build.**
+
+```bash
+tests/iso.sh dist/nexus-os-rc2-amd64.iso
+```
+
+**Por quê:** confere o SHA256 e inicia a ISO até o `login:`. **Deve aparecer:** `OK: ISO chegou ao login ... com KVM, SHA256 conferido`. **Se não aparecer:** `FALHA:` com o motivo (ISO corrompida, QEMU ausente, ISO que não inicia).
+
+**Passo 3: os cenários funcionais.** `tests/run-fase4.sh dist/nexus-os-rc2-amd64.iso` roda T1 a T7 em ordem e para no primeiro erro (cerca de 20 minutos com KVM). **Deve aparecer:** `OK: tests/run-fase4.sh (7 cenários)`. A evidência de cada cenário fica em `evidencias/Tn/`. **Se não aparecer:** o resumo mostra o cenário que falhou; rode só esse (`tests/cenario-tN.sh dist/nexus-os-rc2-amd64.iso`) e leia a `FALHA:`.
+
+**Como relatar uma falha:** abra uma issue no GitHub com o título `<tarefa>: <teste>: <resumo curto>` e o corpo com **Passos** (o comando exato), **Saída** (a linha `FALHA:` e as últimas linhas, copiadas e coladas), **Esperado** (o `OK:` que o teste devia imprimir) e **Ambiente** (com ou sem KVM, RAM, SHA256 da ISO, commit). Sem dado pessoal.
+
+## Lista dos testes
+
 - `lint-repo.sh`: verificação estática (CRLF, travessão, ISO ou `.img` versionados, padrões de segredo, sintaxe e `shellcheck`). Roda no Git Bash do Windows e em Linux.
 - `iso.sh <iso>`: confere o SHA256 da ISO e inicia a ISO no QEMU até aparecer `login:`. Precisa de Linux com `qemu-system-x86`. A RAM vem de `NEXUS_ISO_MEM` (padrão 2048 MiB).
 - `sdn.sh`: laboratório Open vSwitch (bridge `br-nexus` em modo `secure`, namespaces `h1` e `h2`): ping com as regras de `sdn/flows/basico.flows` e sem ping sem elas. Roda com `sudo` na VM Debian.
