@@ -326,6 +326,12 @@ for c in mousepad evince ristretto file-roller galculator xfce4-screenshooter vl
 done
 [ "$(como_user xfconf-query -c xfce4-keyboard-shortcuts -p /commands/default/Print)" = xfce4-screenshooter ]     || fail "a tecla Print não chama o xfce4-screenshooter"
 for h in index manual; do [ -f "/usr/share/nexus-os/docs-html/$h.html" ] || fail "documentação em HTML ausente em /usr/share/nexus-os/docs-html"; done
+# Rodada humana H1 (defeito 4): a cerca "```bash nexus-exec" do manual vira caixa de código, não texto corrido.
+html_manual=/usr/share/nexus-os/docs-html/manual.html
+! grep -qF '```' "$html_manual" || fail "$html_manual tem cerca de código crua: a marca nexus-exec impediu a conversão em <pre>"
+grep -qF '<pre><code' "$html_manual" || fail "$html_manual sem nenhuma caixa de código (<pre><code)"
+# Rodada humana H1 (defeito 6): o bash do user não usa a colagem em bloco, que escrevia ^[[200~ e ~ no terminal.
+como_user bash -ic 'bind -v' 2>/dev/null | grep -qx 'set enable-bracketed-paste off' || fail "o bash do $usuario ainda usa a colagem em bloco (~/.inputrc sem 'set enable-bracketed-paste off')"
 id -nG "$usuario" | tr ' ' '\n' | grep -qx wireshark || fail "$usuario fora do grupo wireshark (captura sem root)"
 { [ -n "$(getcap /usr/bin/dumpcap 2>/dev/null)" ] || [ -u /usr/bin/dumpcap ]; } || fail "dumpcap sem permissão de captura para o grupo wireshark"
 # Disquete virtual (Hyper-V Geração 1): o módulo floppy fica bloqueado, sem /dev/fd0 e sem unidade na sessão.
