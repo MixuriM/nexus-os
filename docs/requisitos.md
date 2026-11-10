@@ -34,7 +34,7 @@ Medido em 2026-11-03, **com KVM**, na ISO da RC2 (ISO do build limpo do commit `
 | Desktop: tempo até a sessão (s) | 23 | s | (rodada 4) início do último processo do desktop (`xfce4-session`, `xfce4-panel`, `xfwm4`, `xfdesktop`) em segundos de uptime do guest: 23,7 e 22,6 |
 | Desktop: mínimo de RAM do tests/iso.sh (MiB) | 512 | MiB | `NEXUS_ISO_MEM`: 1024, 768 e 512 chegam ao `login:` em 36 s; valores abaixo de 512 não foram testados |
 | Desktop: mínimo de RAM dos smokes (MiB) | 1792 | MiB | `NEXUS_SMOKE_MEM` com o `all`: 1792 passa (307 s, o `desktop` leva 202 s); 1536, 1280 e 1024 falham |
-| Desktop: SHA256 | `5f47083bfd5a009a7c11b093e98edfd3bdf21ac593f80f4d549bfe3310c10dbe` | | `sha256sum` da ISO, o mesmo de [rc2.md](rc2.md) |
+| Desktop: SHA256 | `28efa0450893064d988cf00842eb191ba2905b3cc8cb089e3f593f8bfcd8de97` | | `sha256sum` da ISO, o mesmo de [rc2.md](rc2.md) |
 
 Para gerar a ISO (RC2 final, 09/11/2026): 1134 s com KVM e 14098 MiB de disco no clone (`live-build/` com 10273 MiB mais as duas cópias da ISO em `dist/`), então deixe pelo menos 20 GiB livres ([ambiente-de-build.md](ambiente-de-build.md)). A RC1, sem desktop, ocupou 5383 MiB.
 
