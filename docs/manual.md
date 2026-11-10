@@ -1,4 +1,4 @@
-# Manual v2 do Nexus OS (RC2 final)
+# Manual v2.1 do Nexus OS (RC2 final)
 
 Este manual explica, do zero, como gerar a ISO do Nexus OS, iniciá-la e usar cada componente dela. Foi escrito para quem **nunca viu o projeto**: cada passo diz **onde fazer**, **o que fazer**, **por que fazer**, **o que deve aparecer** e **o que fazer se não aparecer**. Leia a seção do passo inteira antes de executá-lo.
 
@@ -26,6 +26,7 @@ Os blocos marcados `bash nexus-exec` são os que o `tests/manual.sh` executa den
 18. [Solução de problemas](#solução-de-problemas)
 19. [Como relatar uma falha](#como-relatar-uma-falha)
 20. [Verificação](#verificação)
+21. [Apêndice A: RC1 (histórico)](#apêndice-a-rc1-histórico)
 
 ## O que mudou da v1
 
@@ -39,6 +40,9 @@ Os blocos marcados `bash nexus-exec` são os que o `tests/manual.sh` executa den
 | Cenário integrado | Os arquivos do cenário já estão na ISO; tempos medidos no T6 (convergência, queda e recuperação) e contadores esperados das regras |
 | Ambiente gráfico | O Enter fecha o terminal dos atalhos de forma confiável (antes o terminal podia ficar em modo cru, issue 78); passo a passo do primeiro uso do desktop |
 | Verificação | Os comandos usam a ISO da RC2 final (`dist/nexus-os-rc2-amd64.iso`) |
+| v2.1, Iniciar a ISO | Só a RC2 no texto: o Jeito 1 (QEMU) diz que é só para Linux, o Windows usa o Jeito 2, a VM do Hyper-V é a Geração 2 e há o caso da VM já criada (só `Start-VM` e `vmconnect.exe`). Os comandos da RC1 foram para o "Apêndice A: RC1 (histórico)" (lacunas 1, 2 e 3 da rodada humana H1) |
+| v2.1, colar sem rede | Seção "Colar comandos numa VM sem rede": abrir o manual que está dentro da ISO no Mousepad e colar com Ctrl+Shift+V (lacuna 5). A ISO nova não escreve mais `^[[200~` ao colar e mostra os blocos de código na Documentação (defeitos 6 e 4) |
+| v2.1, Cenário integrado | A "Prova de controle" virou um bloco completo que sobe e derruba o laboratório sozinho (lacuna 7) |
 
 ## Visão geral
 
@@ -148,23 +152,25 @@ cp dist/nexus-os-poc-amd64.iso dist/nexus-os-rc2-amd64.iso
 
 **Se não aparecer:** `No such file or directory` indica que o passo 2 não terminou; rode `ls dist`.
 
-A RC1 validada é a cópia `dist/nexus-os-rc1-amd64.iso` (identificação em [rc1.md](rc1.md)). A ISO e o `.sha256` não vão para o Git.
+A ISO e o `.sha256` não vão para o Git. A RC1 (sem desktop) ficou só no [Apêndice A](#apêndice-a-rc1-histórico).
 
 ## Iniciar a ISO
 
-Use pelo menos **1536 MiB de RAM** com a ISO da RC1 e **2560 MiB** com a da RC2, que tem o desktop ([requisitos.md](requisitos.md)). A ISO tem boot BIOS (isolinux) e UEFI: no Hyper-V use a Geração 1 ou a Geração 2 com a Secure Boot desligada. Na tela do menu de boot, aperte Enter (ou espere 5 segundos). Escolha **um** dos três jeitos abaixo.
+Use pelo menos **2560 MiB de RAM** ([requisitos.md](requisitos.md)). A ISO tem boot BIOS (isolinux) e UEFI: no Hyper-V use a Geração 2 com a Secure Boot desligada (a Geração 1 só está no [Apêndice A](#apêndice-a-rc1-histórico)). Na tela do menu de boot, aperte Enter (ou espere 5 segundos).
 
-### Jeito 1: QEMU no Linux
+**Qual jeito usar:** **No Windows, use o Jeito 2 (Hyper-V).** No Linux, use o Jeito 1 (QEMU). O Jeito 3 (VirtualBox) serve para os dois, mas é o mais lento. Os comandos do Jeito 1 não existem no PowerShell do Windows: se aparecer `qemu-system-x86_64: O termo ... não é reconhecido`, você escolheu o jeito errado.
+
+### Jeito 1: QEMU no Linux (só no Linux)
 
 **Onde:** terminal do Linux, na pasta `nexus-os` (onde está `dist/`).
 
 **O que fazer:**
 
 ```bash
-qemu-system-x86_64 -enable-kvm -cpu host -m 2048 -smp 2 -cdrom dist/nexus-os-rc1-amd64.iso -boot d
+qemu-system-x86_64 -enable-kvm -cpu host -m 2560 -smp 2 -vga std -cdrom dist/nexus-os-rc2-amd64.iso -boot d
 ```
 
-**Por quê:** `-enable-kvm -cpu host` usa a aceleração do processador (sem eles a emulação por software é bem mais lenta); `-m 2048` dá 2048 MiB de RAM; `-smp 2` dá 2 processadores; `-cdrom` liga a ISO como DVD; `-boot d` inicia por ele. Para a RC2 com desktop use `-m 2560` e `-vga std` (veja a seção "Ambiente gráfico").
+**Por quê:** `-enable-kvm -cpu host` usa a aceleração do processador (sem eles a emulação por software é bem mais lenta); `-m 2560` dá 2560 MiB de RAM; `-smp 2` dá 2 processadores; `-vga std` dá vídeo à sessão gráfica; `-cdrom` liga a ISO como DVD; `-boot d` inicia por ele.
 
 **Deve aparecer:** uma janela do QEMU com o menu de boot do Nexus OS.
 
@@ -174,21 +180,7 @@ qemu-system-x86_64 -enable-kvm -cpu host -m 2048 -smp 2 -cdrom dist/nexus-os-rc1
 
 **Onde:** PowerShell **como administrador** (menu Iniciar, digite PowerShell, botão direito, "Executar como administrador"). A ISO fica em `C:\HyperV` (pasta sem acentos e sem espaços, fora do repositório).
 
-**O que fazer (Geração 1, a validada na RC1):** copie e cole um comando por vez.
-
-```powershell
-$vm = "nexus-rc1-lab"
-New-VM -Name $vm -Generation 1 -MemoryStartupBytes 4096MB -BootDevice CD -NoVHD
-Set-VMProcessor -VMName $vm -Count 2
-Set-VMMemory -VMName $vm -DynamicMemoryEnabled $false -StartupBytes 4096MB
-Add-VMDvdDrive -VMName $vm -Path "C:\HyperV\nexus-os-rc1-amd64.iso"
-Start-VM -Name $vm
-vmconnect.exe localhost $vm
-```
-
-**Por quê:** `New-VM ... -NoVHD` cria a VM sem disco (a ISO é live) e `-BootDevice CD` inicia pelo DVD; `Set-VMProcessor -Count 2` dá 2 processadores; `Set-VMMemory -DynamicMemoryEnabled $false` fixa a memória (a memória dinâmica deixa a VM com cerca de 528 MB e ela trava); `Add-VMDvdDrive` põe a ISO no leitor; `Start-VM` liga; `vmconnect.exe` abre a janela da VM. Procedimento validado em [rc1.md](rc1.md), seção "Boot no Hyper-V".
-
-**Para a Geração 2** (UEFI), troque o bloco por este (validado em 29/10/2026 e em 09/11/2026):
+**O que fazer (Geração 2, validada em 29/10/2026, em 09/11/2026 e em 10/11/2026):** copie e cole um comando por vez.
 
 ```powershell
 $vm = "nexus-rc2-lab"
@@ -202,15 +194,42 @@ Start-VM -Name $vm
 vmconnect.exe localhost $vm
 ```
 
-**Por quê:** `-EnableSecureBoot Off` é obrigatório: com a Secure Boot padrão do Hyper-V a ISO não inicia. `-FirstBootDevice` põe o DVD como primeiro dispositivo de boot. A Geração 2 não tem controlador de disquete.
+**Por quê:** `New-VM ... -NoVHD` cria a VM sem disco (a ISO é live), sem rede; `Set-VMProcessor -Count 2` dá 2 processadores; `Set-VMMemory -DynamicMemoryEnabled $false` fixa a memória (a memória dinâmica deixa a VM com cerca de 528 MB e ela trava); `-EnableSecureBoot Off` é obrigatório: com a Secure Boot padrão do Hyper-V a ISO não inicia; `Add-VMDvdDrive` põe a ISO no leitor e `-FirstBootDevice` faz o DVD iniciar primeiro; `Start-VM` liga; `vmconnect.exe` abre a janela da VM. A Geração 2 não tem controlador de disquete.
 
 **Deve aparecer:** uma janela do Hyper-V com o menu de boot do Nexus OS. A VM nasce **sem rede** e sem KVM: para ter internet, veja o parágrafo "Internet na VM do Hyper-V" na seção "Ambiente gráfico"; para o VM de build com KVM, veja [hyperv.md](hyperv.md).
+
+**Se a VM já existe** (por exemplo, outra pessoa a criou para você): não repita os comandos `New-VM`. Faltam só estes dois, com o nome da VM no lugar de `nexus-rc2-lab`:
+
+```powershell
+Start-VM -Name nexus-rc2-lab
+vmconnect.exe localhost nexus-rc2-lab
+```
 
 **Se não aparecer:** se algum comando der erro, copie a mensagem inteira e relate. `Start-VM` com erro de memória indica pouca RAM livre no Windows: feche programas. Para apagar a VM no fim: `Stop-VM -Name $vm -TurnOff` (se estiver ligada) e depois `Remove-VM -Name $vm -Force`.
 
 ### Jeito 3: VirtualBox
 
 O VirtualBox serve só como VM **sem KVM** (em processador AMD, o KVM aninhado derruba a VM: issue 25), então é mais lento. O passo a passo completo, do SHA256 até apagar a VM, está em [teste-virtualbox.md](teste-virtualbox.md).
+
+### Colar comandos numa VM sem rede
+
+**Quando:** a VM não tem rede e o Windows não compartilha a área de transferência com ela (é o caso do Hyper-V acima). Sem isto você teria de digitar cada bloco à mão.
+
+**Onde:** dentro da VM, no **Terminal do Nexus OS** (duplo clique no ícone da área de trabalho).
+
+**O que fazer:** o manual está dentro da ISO, em texto puro. Abra-o no Mousepad:
+
+```bash
+mousepad /usr/share/nexus-os/docs/manual.md &
+```
+
+No Mousepad, procure a seção (Ctrl+F), selecione só as linhas de dentro do bloco (sem as linhas com três crases) e aperte Ctrl+C. No terminal, aperte **Ctrl+Shift+V** (no terminal é Ctrl+Shift, não só Ctrl) e depois Enter.
+
+**Por quê:** copiar e colar **dentro** da VM funciona; o que não funciona é entre o Windows e a VM. A opção "Digitar texto da área de transferência" do menu do Hyper-V digita teclas e erra com o teclado brasileiro, por isso não é usada. O atalho "Documentação" também mostra o manual, em HTML, mas a cópia no Mousepad é a mais fácil de selecionar.
+
+**Deve aparecer:** o comando do bloco rodando no terminal, sem `^[[200~` no começo nem `~` no fim.
+
+**Se não aparecer:** se aparecer `^[[200~`, o terminal está com a colagem em bloco ligada (a ISO desta versão a desliga em `~/.inputrc`): cole de novo. `mousepad: comando não encontrado` indica ISO incompleta: confira o SHA256 e relate.
 
 ## Login de laboratório
 
@@ -431,12 +450,37 @@ sudo ovs-vsctl del-br br-integrado
 
 **Deve aparecer:** vizinho `198.51.100.22` em `Full/-` e a rota `O>* 198.51.100.22/32` em `r1`; seis regras no `dump-flows`, com `n_packets` maior que zero nas de ARP e nas duas do protocolo 89 (as de IP em geral só contam pacotes com tráfego além do OSPF, por exemplo um `ping` entre os loopbacks).
 
-**Prova de controle (opcional, com o laboratório no ar, antes do `nexus-vnf down`):** a regra abaixo descarta o OSPF e derruba a adjacência em cerca de 5 s; remover a regra a restaura.
+**Prova de controle (opcional):** o bloco acima já removeu o laboratório, então este sobe tudo de novo, espera o OSPF ficar `Full`, descarta o protocolo 89 (a adjacência cai em cerca de 5 s), remove a regra (a adjacência volta em cerca de 6 s) e derruba o laboratório no fim.
 
 ```bash
+topo=/usr/share/nexus-os/labs/containerlab/integrado.clab.yml
+regras=/usr/share/nexus-os/sdn/flows/integrado.flows
+# espera até 60 s o OSPF do r1 ficar Full (sim) ou deixar de ficar (nao)
+espera() {
+    local quer=$1 i
+    for i in $(seq 1 60); do
+        if [[ $(sudo docker exec clab-integrado-r1 vtysh -c 'show ip ospf neighbor' 2>/dev/null || true) == *Full/* ]]; then
+            [ "$quer" = sim ] && return 0
+        else
+            [ "$quer" = nao ] && return 0
+        fi
+        sleep 1
+    done
+    return 1
+}
+sudo ovs-vsctl add-br br-integrado -- set bridge br-integrado fail_mode=secure
+sudo nexus-vnf up "$topo"
+sudo ovs-ofctl add-flows br-integrado "$regras"
+espera sim && echo "OSPF Full"
 sudo ovs-ofctl add-flow br-integrado 'priority=200,ip,nw_proto=89,actions=drop'
+espera nao && echo "OSPF caiu com o descarte do protocolo 89"
 sudo ovs-ofctl --strict del-flows br-integrado 'priority=200,ip,nw_proto=89'
+espera sim && echo "OSPF voltou"
+sudo nexus-vnf down "$topo"
+sudo ovs-vsctl del-br br-integrado
 ```
+
+**Deve aparecer na prova:** as três linhas `OSPF Full`, `OSPF caiu com o descarte do protocolo 89` e `OSPF voltou`, nessa ordem, e nenhuma mensagem de erro no fim.
 
 **Se não aparecer:** se o bloco falhar no meio, limpe com `sudo nexus-vnf down /usr/share/nexus-os/labs/containerlab/integrado.clab.yml` e `sudo ovs-vsctl --if-exists del-br br-integrado` antes de repetir.
 
@@ -721,3 +765,25 @@ tests/manual.sh dist/nexus-os-rc2-amd64.iso
 **Por quê:** o `tests/docs.sh` confere o manual por escrito (título, seções, links, comandos); o `tests/manual.sh` executa dentro da ISO todos os blocos `bash nexus-exec` deste manual.
 
 **Deve aparecer:** `OK: tests/docs.sh ...` e `OK: tests/manual.sh ...` (com o número de blocos executados dentro da ISO e o modo, com ou sem KVM). Cada falha ou limitação encontrada ao seguir o manual vira uma issue ([checklist-teste-documentacao.md](checklist-teste-documentacao.md), parte E).
+
+## Apêndice A: RC1 (histórico)
+
+A RC1 (núcleo da stack, **sem desktop**) não é mais a ISO de entrega: use a RC2 final no restante deste manual. Os comandos abaixo só valem para quem precisa rodar a ISO antiga `dist/nexus-os-rc1-amd64.iso` (identificação em [rc1.md](rc1.md)). Ela pede pelo menos **1536 MiB de RAM**.
+
+**QEMU no Linux:**
+
+```bash
+qemu-system-x86_64 -enable-kvm -cpu host -m 2048 -smp 2 -cdrom dist/nexus-os-rc1-amd64.iso -boot d
+```
+
+**Hyper-V no Windows, Geração 1** (PowerShell como administrador, um comando por vez; procedimento validado em [rc1.md](rc1.md), seção "Boot no Hyper-V"):
+
+```powershell
+$vm = "nexus-rc1-lab"
+New-VM -Name $vm -Generation 1 -MemoryStartupBytes 4096MB -BootDevice CD -NoVHD
+Set-VMProcessor -VMName $vm -Count 2
+Set-VMMemory -VMName $vm -DynamicMemoryEnabled $false -StartupBytes 4096MB
+Add-VMDvdDrive -VMName $vm -Path "C:\HyperV\nexus-os-rc1-amd64.iso"
+Start-VM -Name $vm
+vmconnect.exe localhost $vm
+```

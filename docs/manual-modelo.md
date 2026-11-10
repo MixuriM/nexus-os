@@ -103,7 +103,7 @@ Este documento explica, do zero, <o que o leitor consegue fazer ao final>. Foi e
 
 | Documento | Para quê |
 | --- | --- |
-| [manual.md](manual.md) | Manual v2 do Nexus OS: gerar a ISO, iniciá-la e usar cada componente |
+| [manual.md](manual.md) | Manual v2.1 do Nexus OS: gerar a ISO, iniciá-la e usar cada componente |
 | [teste-virtualbox.md](teste-virtualbox.md) | O documento de referência do padrão: teste da RC2 no VirtualBox |
 | [hyperv.md](hyperv.md) | VM de build no Hyper-V com KVM |
 | [ambiente-de-build.md](ambiente-de-build.md) | Preparo da VM de build |

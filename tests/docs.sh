@@ -68,7 +68,7 @@ fi
 
 # Manual v2 (F4.4): título, seção "O que mudou da v1" com tabela, comandos exatos de "Gerar a ISO" e lacunas do T5 corrigidas.
 if [ -f docs/manual.md ]; then
-    [ "$(head -n 1 docs/manual.md)" = '# Manual v2 do Nexus OS (RC2 final)' ] || fail "docs/manual.md: o título devia ser '# Manual v2 do Nexus OS (RC2 final)' (achei: $(head -n 1 docs/manual.md))"
+    [ "$(head -n 1 docs/manual.md)" = '# Manual v2.1 do Nexus OS (RC2 final)' ] || fail "docs/manual.md: o título devia ser '# Manual v2.1 do Nexus OS (RC2 final)' (achei: $(head -n 1 docs/manual.md))"
     grep -qxF '## O que mudou da v1' docs/manual.md || fail "docs/manual.md sem a seção '## O que mudou da v1'"
     mudou=$(awk '/^## /{dentro = ($0 == "## O que mudou da v1")} dentro' docs/manual.md)
     [ "$(grep -c '^| ' <<<"$mudou")" -ge 4 ] || fail "a seção 'O que mudou da v1' devia ter uma tabela com pelo menos 3 linhas de mudança"
@@ -82,7 +82,27 @@ if [ -f docs/manual.md ]; then
     grep -qF 'desde o início do `deploy`' <<<"$cl" || fail "a seção Containerlab sem a convergência medida desde o início do deploy (lacuna do T5)"
 fi
 if [ -f docs/README.md ]; then
-    grep -qF '[Manual v2 (RC2 final)](manual.md)' docs/README.md || fail "docs/README.md sem o índice do Manual v2"
+    grep -qF '[Manual v2.1 (RC2 final)](manual.md)' docs/README.md || fail "docs/README.md sem o índice do Manual v2.1"
+fi
+
+# Manual v2.1 (lacunas da rodada humana H1, 10/11/2026): RC1 separada da RC2, jeito certo por sistema, colar sem rede
+# e a prova de controle do cenário integrado completa.
+if [ -f docs/manual.md ]; then
+    mudou=$(awk '/^## /{dentro = ($0 == "## O que mudou da v1")} dentro' docs/manual.md)
+    grep -qF 'v2.1' <<<"$mudou" || fail "a seção 'O que mudou da v1' não tem a linha da v2.1"
+    grep -qxF '## Apêndice A: RC1 (histórico)' docs/manual.md || fail "docs/manual.md sem a seção '## Apêndice A: RC1 (histórico)'"
+    fora=$(awk '/^## /{dentro = ($0 == "## Apêndice A: RC1 (histórico)")} !dentro' docs/manual.md)
+    ! grep -qE 'nexus-os-rc1|nexus-rc1' <<<"$fora" || fail "docs/manual.md cita arquivo ou VM da RC1 fora do apêndice: $(grep -nE 'nexus-os-rc1|nexus-rc1' <<<"$fora" | head -n 1 | cut -c1-80)"
+    ini=$(awk '/^## /{dentro = ($0 == "## Iniciar a ISO")} dentro' docs/manual.md)
+    grep -qF 'No Windows, use o Jeito 2' <<<"$ini" || fail "'Iniciar a ISO' não diz que no Windows se usa o Jeito 2"
+    grep -qF 'Se a VM já existe' <<<"$ini" || fail "'Iniciar a ISO' sem o caso da VM já criada (só Start-VM e vmconnect.exe)"
+    grep -qxF '### Jeito 1: QEMU no Linux (só no Linux)' <<<"$ini" || fail "'Iniciar a ISO' sem o título '### Jeito 1: QEMU no Linux (só no Linux)'"
+    grep -qxF '### Colar comandos numa VM sem rede' <<<"$ini" || fail "'Iniciar a ISO' sem a seção '### Colar comandos numa VM sem rede'"
+    grep -qF 'mousepad /usr/share/nexus-os/docs/manual.md' <<<"$ini" || fail "a seção de colar sem rede não manda abrir o manual da ISO no Mousepad"
+    grep -qF 'Ctrl+Shift+V' <<<"$ini" || fail "a seção de colar sem rede não cita Ctrl+Shift+V"
+    integ_md=$(awk '/^## /{dentro = ($0 == "## Cenário integrado")} dentro' docs/manual.md)
+    [ "$(grep -c 'add-br br-integrado' <<<"$integ_md")" -ge 2 ] || fail "a prova de controle do 'Cenário integrado' não sobe o laboratório sozinha (add-br br-integrado só uma vez)"
+    ! grep -qF 'com o laboratório no ar, antes do' <<<"$integ_md" || fail "a prova de controle ainda manda rodar 'com o laboratório no ar', que o bloco anterior já derrubou"
 fi
 
 # A seção do desktop precisa de blocos que a máquina executa e do roteiro humano (checklist, parte H).
