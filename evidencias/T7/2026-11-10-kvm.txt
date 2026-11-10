@@ -1,0 +1,73 @@
+--- tests/iso-smoke.sh --extra t7.sh <iso> t7
+OK: 1 teste(s) sem falha em 150 s, com KVM, por teste: t7=112s, RAM usada: repouso 895 MiB, pico 1609 MiB de 2560 MiB, disco: repouso:/=27 MiB, repouso:/var/lib/docker=193 MiB, fim:/=68 MiB, fim:/var/lib/docker=193 MiB
+--- saída do convidado (t7)
+NEXUS-SMOKE-BEGIN t7
+sem rota padrão e sem resolução de nomes
+NEXUS-CENARIO-METRICA tempo_ate_sessao_s: 23.0
+sessão 1 de user ativa: xfce4-session xfce4-panel xfwm4 xfdesktop
+NEXUS-SMOKE-PONTO desktop-pronto
+OK: VM cen-t7 criada e iniciada (virt-type kvm)
+atalho nexus-virt-manager: janela \("virt-manager" aberta em 5 s
+NEXUS-SMOKE-PONTO virt-manager-com-vm
+[   82.831723] br-a3ddfc9965e6: port 1(veth24bb76e) entered blocking state
+[   82.832825] br-a3ddfc9965e6: port 1(veth24bb76e) entered disabled state
+[   82.835489] veth24bb76e: entered allmulticast mode
+[   82.836729] veth24bb76e: entered promiscuous mode
+[   83.426366] eth0: renamed from veth972c34b
+[   83.430229] br-a3ddfc9965e6: port 1(veth24bb76e) entered blocking state
+[   83.431205] br-a3ddfc9965e6: port 1(veth24bb76e) entered forwarding state
+atalho nexus-vnf-up: código 0 em 7 s
+NEXUS-CENARIO-METRICA atalho_nexus-vnf-up_s: 7
+NEXUS-SMOKE-PONTO vnf-acima
+NEXUS-SMOKE-TECLA 1 ret
+[   97.365709] br-a3ddfc9965e6: port 1(veth24bb76e) entered disabled state
+[   97.367768] veth972c34b: renamed from eth0
+[   97.405306] br-a3ddfc9965e6: port 1(veth24bb76e) entered disabled state
+[   97.408135] veth24bb76e (unregistering): left allmulticast mode
+[   97.409175] veth24bb76e (unregistering): left promiscuous mode
+[   97.410086] br-a3ddfc9965e6: port 1(veth24bb76e) entered disabled state
+atalho nexus-vnf-down: código 0 em 2 s
+NEXUS-CENARIO-METRICA atalho_nexus-vnf-down_s: 2
+NEXUS-SMOKE-TECLA 2 ret
+[  100.573102] br-6929e6e570ca: port 1(veth2439bb6) entered blocking state
+[  100.574222] br-6929e6e570ca: port 1(veth2439bb6) entered disabled state
+[  100.576133] veth2439bb6: entered allmulticast mode
+[  100.581278] veth2439bb6: entered promiscuous mode
+[  100.601173] br-6929e6e570ca: port 2(vethc79db46) entered blocking state
+[  100.602246] br-6929e6e570ca: port 2(vethc79db46) entered disabled state
+[  100.607041] vethc79db46: entered allmulticast mode
+[  100.607868] vethc79db46: entered promiscuous mode
+[  100.834279] eth0: renamed from veth7a09ece
+[  100.858016] eth0: renamed from vethd4267af
+[  100.862903] br-6929e6e570ca: port 2(vethc79db46) entered blocking state
+[  100.863996] br-6929e6e570ca: port 2(vethc79db46) entered forwarding state
+[  100.871392] br-6929e6e570ca: port 1(veth2439bb6) entered blocking state
+[  100.872456] br-6929e6e570ca: port 1(veth2439bb6) entered forwarding state
+[  100.957686] eth1: renamed from clab-9551fd5f
+[  100.981288] eth1: renamed from clab-8394ad1e
+atalho nexus-clab-deploy: código 0 em 5 s
+NEXUS-CENARIO-METRICA atalho_nexus-clab-deploy_s: 5
+NEXUS-SMOKE-PONTO clab-acima
+NEXUS-SMOKE-TECLA 3 ret
+[  114.605877] br-6929e6e570ca: port 1(veth2439bb6) entered disabled state
+[  114.609052] vethd4267af: renamed from eth0
+[  114.630909] br-6929e6e570ca: port 1(veth2439bb6) entered disabled state
+[  114.632379] veth2439bb6 (unregistering): left allmulticast mode
+[  114.633219] veth2439bb6 (unregistering): left promiscuous mode
+[  114.633969] br-6929e6e570ca: port 1(veth2439bb6) entered disabled state
+[  114.637497] veth7a09ece: renamed from eth0
+[  114.639327] br-6929e6e570ca: port 2(vethc79db46) entered disabled state
+[  114.656956] br-6929e6e570ca: port 2(vethc79db46) entered disabled state
+[  114.661484] vethc79db46 (unregistering): left allmulticast mode
+[  114.662327] vethc79db46 (unregistering): left promiscuous mode
+[  114.663091] br-6929e6e570ca: port 2(vethc79db46) entered disabled state
+atalho nexus-clab-destroy: código 0 em 2 s
+NEXUS-CENARIO-METRICA atalho_nexus-clab-destroy_s: 2
+NEXUS-SMOKE-TECLA 4 ret
+atalho nexus-docs: janela "[^"]*Nexus OS[^"]*": \("(Navigator|firefox-esr)" aberta em 8 s
+NEXUS-SMOKE-PONTO docs-abertos
+limpeza: sem contêiner, rede clab nem VM
+NEXUS-CENARIO-OK t7
+NEXUS-SMOKE-TIME t7 112
+NEXUS-SMOKE-END t7 0
+OK: 5 pontos com captura válida

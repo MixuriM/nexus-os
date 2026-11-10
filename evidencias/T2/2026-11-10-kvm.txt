@@ -1,0 +1,44 @@
+--- tests/iso-smoke.sh --extra t2.sh <iso> t2
+OK: 1 teste(s) sem falha em 57 s, com KVM, por teste: t2=17s, RAM usada: repouso 1089 MiB, pico 1214 MiB de 4096 MiB, disco: repouso:/=27 MiB, repouso:/var/lib/docker=193 MiB, fim:/=28 MiB, fim:/var/lib/docker=193 MiB
+--- saída do convidado (t2)
+NEXUS-SMOKE-BEGIN t2
+[   29.162844] ovs-system: entered promiscuous mode
+[   29.171172] Timeout policy base is empty
+[   29.210344] br-cen: entered promiscuous mode
+[   29.290896] ca-br: entered promiscuous mode
+[   29.362349] cb-br: entered promiscuous mode
+[   29.435449] cc-br: entered promiscuous mode
+ponte br-cen: fail-mode secure, sem controlador
+regra: priority=100,arp,actions=normal
+regra: priority=100,ip,in_port=1,nw_dst=192.0.2.2,actions=output:2
+regra: priority=100,ip,in_port=2,nw_dst=192.0.2.1,actions=output:1
+regra: priority=50,ip,in_port=1,nw_dst=192.0.2.3,actions=output:3
+regra: priority=50,ip,in_port=3,nw_dst=192.0.2.1,actions=output:1
+regra: priority=300,ip,in_port=1,nw_dst=192.0.2.3,actions=drop
+ping A para B: passou
+ping A para C: falhou, como esperado
+contadores: permissão A para B n_packets=3, descarte A para C n_packets=3
+regra de descarte removida
+ping A para C sem o descarte: passou
+regra: priority=300,ip,in_port=1,nw_dst=192.0.2.3,actions=drop
+ping A para C com o descarte recolocado: falhou, como esperado
+--- dump-flows final
+NXST_FLOW reply (xid=0x4):
+ cookie=0x0, duration=16.253s, table=0, n_packets=3, n_bytes=294, idle_age=14, priority=100,ip,in_port=1,nw_dst=192.0.2.2 actions=output:2
+ cookie=0x0, duration=16.248s, table=0, n_packets=3, n_bytes=294, idle_age=14, priority=100,ip,in_port=2,nw_dst=192.0.2.1 actions=output:1
+ cookie=0x0, duration=16.243s, table=0, n_packets=2, n_bytes=196, idle_age=7, priority=50,ip,in_port=1,nw_dst=192.0.2.3 actions=output:3
+ cookie=0x0, duration=16.239s, table=0, n_packets=3, n_bytes=294, idle_age=6, priority=50,ip,in_port=3,nw_dst=192.0.2.1 actions=output:1
+ cookie=0x0, duration=6.050s, table=0, n_packets=4, n_bytes=392, idle_age=4, priority=300,ip,in_port=1,nw_dst=192.0.2.3 actions=drop
+ cookie=0x0, duration=16.263s, table=0, n_packets=8, n_bytes=336, idle_age=3, priority=100,arp actions=NORMAL
+NEXUS-CENARIO-METRICA pacotes_permissao_a_b: 3
+NEXUS-CENARIO-METRICA pacotes_permissao_a_c_prioridade_50: 2
+NEXUS-CENARIO-METRICA pacotes_descarte_a_c: 4
+NEXUS-CENARIO-OK t2
+[   45.862324] br-cen: left promiscuous mode
+[   45.881254] ca-br: left promiscuous mode
+[   45.882493] cb-br: left promiscuous mode
+[   45.883256] cc-br: left promiscuous mode
+[   45.885078] ovs-system: left promiscuous mode
+NEXUS-SMOKE-TIME t2 17
+NEXUS-SMOKE-END t2 0
+OK: regras manuais no Open vSwitch

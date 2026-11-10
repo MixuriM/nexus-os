@@ -1,0 +1,26 @@
+--- tests/iso-smoke.sh --extra t4.sh <iso> t4
+OK: 1 teste(s) sem falha em 45 s, com KVM, por teste: t4=6s, RAM usada: repouso 1082 MiB, pico 1138 MiB de 4096 MiB, disco: repouso:/=28 MiB, repouso:/var/lib/docker=193 MiB, fim:/=28 MiB, fim:/var/lib/docker=193 MiB
+--- saída do convidado (t4)
+NEXUS-SMOKE-BEGIN t4
+NEXUS-CENARIO-METRICA kvm_no_convidado: sim
+tipo esperado do domínio: kvm
+--- ciclo 1
+OK: VM cen-t4 criada e iniciada (virt-type kvm)
+NEXUS-CENARIO-METRICA criar_ate_running_s_ciclo1: 1.80
+OK: VM cen-t4 removida
+ciclo 1: criar, listar e remover ok
+--- ciclo 2
+OK: VM cen-t4 criada e iniciada (virt-type kvm)
+NEXUS-CENARIO-METRICA criar_ate_running_s_ciclo2: 0.53
+OK: VM cen-t4 removida
+ciclo 2: criar, listar e remover ok
+--- ciclo 3
+OK: VM cen-t4 criada e iniciada (virt-type kvm)
+NEXUS-CENARIO-METRICA criar_ate_running_s_ciclo3: 0.47
+OK: VM cen-t4 removida
+ciclo 3: criar, listar e remover ok
+NEXUS-CENARIO-METRICA ciclos_ok: 3
+NEXUS-CENARIO-OK t4
+NEXUS-SMOKE-TIME t4 6
+NEXUS-SMOKE-END t4 0
+OK: nexus-vm criar, listar e remover em 3 ciclos
