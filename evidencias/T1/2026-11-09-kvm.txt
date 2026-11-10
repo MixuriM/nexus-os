@@ -1,0 +1,41 @@
+$ bash -c cd "$1" && sha256sum -c "$2" _ dist nexus-os-rc2-amd64.iso.sha256
+nexus-os-rc2-amd64.iso: SUCESSO
+$ /home/<usuario>/nexus-os/tests/iso.sh dist/nexus-os-rc2-amd64.iso
+OK: ISO chegou ao login ("nexus-os login: ") em 36 s, com KVM, SHA256 conferido
+--- tests/iso-smoke.sh --extra t1.sh <iso> t1
+OK: 1 teste(s) sem falha em 39 s, com KVM, por teste: t1=0s, RAM usada: repouso 1053 MiB, pico 1053 MiB de 2560 MiB, disco: repouso:/=27 MiB, repouso:/var/lib/docker=193 MiB, fim:/=27 MiB, fim:/var/lib/docker=193 MiB
+--- saída do convidado (t1)
+NEXUS-SMOKE-BEGIN t1
+serviço openvswitch-switch: ativo
+serviço libvirtd: ativo
+serviço docker: ativo
+serviço frr: ativo
+NEXUS-CENARIO-METRICA memtotal_mib: 2474
+NEXUS-CENARIO-METRICA vcpus: 2
+NEXUS-CENARIO-METRICA kvm_no_convidado: sim
+NEXUS-CENARIO-METRICA uptime_s: 29
+NEXUS-CENARIO-METRICA ram_usada_mib: 1052
+NEXUS-CENARIO-OK t1
+NEXUS-SMOKE-TIME t1 0
+NEXUS-SMOKE-END t1 0
+$ /home/<usuario>/nexus-os/tests/iso-smoke.sh dist/nexus-os-rc2-amd64.iso all
+OK: 8 teste(s) sem falha em 228 s, com KVM, por teste: sdn=6s, virtualizacao=2s, libvirt=1s, containers=2s, frr=1s, nfv=18s, orquestracao=17s, desktop=140s, RAM usada: repouso 976 MiB, pico 1866 MiB de 2560 MiB, disco: repouso:/=27 MiB, repouso:/var/lib/docker=193 MiB, fim:/=69 MiB, fim:/var/lib/docker=193 MiB
+$ env NEXUS_SMOKE_MEM=1536 NEXUS_SMOKE_LIMIT=400 /home/<usuario>/nexus-os/tests/iso-smoke.sh dist/nexus-os-rc2-amd64.iso all
+--- últimas 15 linhas da serial ---
+[  170.245054] nexus-smoke[6071]: identidade: papel de parede /usr/share/backgrounds/nexus-os/papel-de-parede.png, tema Nexus-Dark, ícones Nexus, janelas Nexus-Dark, menu 'Menu do Nexus OS (tecla Windows)', nome 'Nexus OS'
+[  175.345244] nexus-smoke[6071]: atalho nexus-terminal: janela \("xfce4-terminal" aberta e processo vivo depois de 3 s
+[  180.564746] nexus-smoke[6071]: atalho nexus-docs: janela \("(Navigator|firefox-esr)" aberta e processo vivo depois de 3 s
+[  186.255283] nexus-smoke[6071]: atalho nexus-configuracoes: janela \("xfce4-settings-manager" aberta e processo vivo depois de 3 s
+[  209.498353] nexus-smoke[6071]: atalho nexus-virt-manager: janela \("virt-manager" aberta e processo vivo depois de 15 s
+[  223.859087] ovs-system: entered promiscuous mode
+[  223.865577] No such timeout policy "ovs_test_tp"
+[  224.088828] br-nexus: entered promiscuous mode
+[  225.828359] h1-br: entered promiscuous mode
+[  228.575476] h2-br: entered promiscuous mode
+[  233.344065] nexus-smoke[6071]: atalho nexus-sdn-lab: executou com código 0 em 23 s
+[  234.719740] br-nexus: left promiscuous mode
+[  234.749861] h1-br: left promiscuous mode
+[  234.757859] h2-br: left promiscuous mode
+[  234.761431] ovs-system: left promiscuous mode
+FALHA: NEXUS-SMOKE-DONE não apareceu em 400 s, com KVM
+OK: boot, RAM recomendada e controle negativo
