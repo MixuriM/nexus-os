@@ -74,6 +74,8 @@ def titulo_de(texto, padrao):
 
 
 def converte(texto):
+    # A marca depois da linguagem (```bash nexus-exec, lida pelo tests/manual.sh) não é aceita pelo fenced_code.
+    texto = re.sub(r"^(```\w+)[ \t]+\S+[ \t]*$", r"\1", texto, flags=re.MULTILINE)
     corpo = markdown.markdown(texto, extensions=["tables", "fenced_code", "sane_lists"])
     # Links entre documentos: x.md e x.md#ancora viram x.html (links com esquema, como https:, ficam como estão).
     return re.sub(r'href="([^":]+?)\.md(#[^"]*)?"', r'href="\1.html\2"', corpo)
