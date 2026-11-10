@@ -1,0 +1,82 @@
+--- tests/iso-smoke.sh --extra t5.sh <iso> t5
+OK: 1 teste(s) sem falha em 61 s, com KVM, por teste: t5=21s, RAM usada: repouso 1094 MiB, pico 1311 MiB de 4096 MiB, disco: repouso:/=27 MiB, repouso:/var/lib/docker=193 MiB, fim:/=28 MiB, fim:/var/lib/docker=193 MiB
+--- saída do convidado (t5)
+NEXUS-SMOKE-BEGIN t5
+MANUAL-BLOCO 1
+23:28:39 INFO Containerlab started version=0.81.1
+23:28:39 INFO Parsing & checking topology file=frr-duo.clab.yml
+23:28:39 INFO Creating docker network name=clab IPv4 subnet=<ip-privado>/24 IPv6 subnet=3fff:172:20:20::/64 MTU=0
+23:28:40 INFO Creating lab directory path=/usr/share/nexus-os/labs/containerlab/clab-frr-duo
+23:28:40 INFO Creating container name=r1
+23:28:40 INFO Creating container name=r2
+[   31.760064] br-02d4b0402800: port 1(vethe19cc50) entered blocking state
+[   31.761002] br-02d4b0402800: port 1(vethe19cc50) entered disabled state
+[   31.764288] vethe19cc50: entered allmulticast mode
+[   31.765282] vethe19cc50: entered promiscuous mode
+[   31.774260] br-02d4b0402800: port 2(vethb9f19c8) entered blocking state
+[   31.775208] br-02d4b0402800: port 2(vethb9f19c8) entered disabled state
+[   31.778703] vethb9f19c8: entered allmulticast mode
+[   31.779440] vethb9f19c8: entered promiscuous mode
+[   32.733467] eth0: renamed from vethf404d4b
+[   32.741885] br-02d4b0402800: port 1(vethe19cc50) entered blocking state
+[   32.742957] br-02d4b0402800: port 1(vethe19cc50) entered forwarding state
+[   32.780166] eth0: renamed from vethc69b559
+[   32.786277] br-02d4b0402800: port 2(vethb9f19c8) entered blocking state
+[   32.787393] br-02d4b0402800: port 2(vethb9f19c8) entered forwarding state
+[   32.870501] eth1: renamed from clab-e4fb96ab
+[   32.901949] eth1: renamed from clab-8341c00a
+23:28:41 INFO Created link: r1:eth1 ▪┄┄▪ r2:eth1
+23:28:41 INFO Adding host entries path=/etc/hosts
+23:28:41 INFO Adding SSH config for nodes path=/etc/ssh/ssh_config.d/clab-frr-duo.conf
+23:28:44 INFO Failed fetching latest version information
+╭─────────────────┬──────────────────────────────┬─────────┬───────────────────╮
+│       Name      │          Kind/Image          │  State  │   IPv4/6 Address  │
+├─────────────────┼──────────────────────────────┼─────────┼───────────────────┤
+│ clab-frr-duo-r1 │ linux                        │ running │ <ip-privado>       │
+│                 │ quay.io/frrouting/frr:10.7.1 │         │ 3fff:172:20:20::2 │
+├─────────────────┼──────────────────────────────┼─────────┼───────────────────┤
+│ clab-frr-duo-r2 │ linux                        │ running │ <ip-privado>       │
+│                 │ quay.io/frrouting/frr:10.7.1 │         │ 3fff:172:20:20::3 │
+╰─────────────────┴──────────────────────────────┴─────────┴───────────────────╯
+NEXUS-CENARIO-METRICA convergencia_ospf_s: 19.42
+NEXUS-CENARIO-METRICA limite_convergencia_s: 120
+Codes: K - kernel route, C - connected, L - local, S - static,
+       R - RIP, O - OSPF, I - IS-IS, B - BGP, E - EIGRP, N - NHRP,
+       T - Table, v - VNC, V - VNC-Direct, A - Babel, F - PBR,
+       f - OpenFabric, t - Table-Direct,
+       > - selected route, * - FIB route, q - queued, r - rejected, b - backup
+       t - trapped, o - offload failure
+IPv4 unicast VRF default:
+O>* 198.51.100.2/32 [110/10] via 203.0.113.2, eth1, weight 1, 00:00:01
+Codes: K - kernel route, C - connected, L - local, S - static,
+       R - RIP, O - OSPF, I - IS-IS, B - BGP, E - EIGRP, N - NHRP,
+       T - Table, v - VNC, V - VNC-Direct, A - Babel, F - PBR,
+       f - OpenFabric, t - Table-Direct,
+       > - selected route, * - FIB route, q - queued, r - rejected, b - backup
+       t - trapped, o - offload failure
+IPv4 unicast VRF default:
+O>* 198.51.100.1/32 [110/10] via 203.0.113.1, eth1, weight 1, 00:00:01
+23:28:57 INFO Parsing & checking topology file=frr-duo.clab.yml
+23:28:57 INFO Parsing & checking topology file=frr-duo.clab.yml
+23:28:57 INFO Destroying lab name=frr-duo
+[   49.492990] br-02d4b0402800: port 2(vethb9f19c8) entered disabled state
+[   49.494680] vethc69b559: renamed from eth0
+[   49.510271] vethf404d4b: renamed from eth0
+[   49.514877] br-02d4b0402800: port 1(vethe19cc50) entered disabled state
+[   49.516477] br-02d4b0402800: port 2(vethb9f19c8) entered disabled state
+[   49.520460] vethb9f19c8 (unregistering): left allmulticast mode
+[   49.521256] vethb9f19c8 (unregistering): left promiscuous mode
+[   49.522100] br-02d4b0402800: port 2(vethb9f19c8) entered disabled state
+[   49.561794] br-02d4b0402800: port 1(vethe19cc50) entered disabled state
+[   49.565460] vethe19cc50 (unregistering): left allmulticast mode
+[   49.566486] vethe19cc50 (unregistering): left promiscuous mode
+[   49.567387] br-02d4b0402800: port 1(vethe19cc50) entered disabled state
+23:28:58 INFO Removed container name=clab-frr-duo-r1
+23:28:58 INFO Removed container name=clab-frr-duo-r2
+23:28:58 INFO Removing host entries path=/etc/hosts
+23:28:58 INFO Removing SSH config path=/etc/ssh/ssh_config.d/clab-frr-duo.conf
+MANUAL-FIM 1
+NEXUS-CENARIO-OK t5
+NEXUS-SMOKE-TIME t5 21
+NEXUS-SMOKE-END t5 0
+OK: seção Containerlab do manual, frr-duo com OSPF Full

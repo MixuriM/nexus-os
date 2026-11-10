@@ -1,0 +1,74 @@
+--- tests/iso-smoke.sh --extra t6.sh <iso> t6
+OK: 1 teste(s) sem falha em 69 s, com KVM, por teste: t6=29s, RAM usada: repouso 978 MiB, pico 1319 MiB de 2560 MiB, disco: repouso:/=27 MiB, repouso:/var/lib/docker=193 MiB, fim:/=28 MiB, fim:/var/lib/docker=193 MiB
+--- saída do convidado (t6)
+NEXUS-SMOKE-BEGIN t6
+[   30.138632] ovs-system: entered promiscuous mode
+[   30.139911] Timeout policy base is empty
+[   30.171711] br-integrado: entered promiscuous mode
+[   32.515178] br-7e80cd201eca: port 1(veth53e6e23) entered blocking state
+[   32.516277] br-7e80cd201eca: port 1(veth53e6e23) entered disabled state
+[   32.518417] veth53e6e23: entered allmulticast mode
+[   32.520407] veth53e6e23: entered promiscuous mode
+[   32.558704] br-7e80cd201eca: port 2(vethee6edb6) entered blocking state
+[   32.559807] br-7e80cd201eca: port 2(vethee6edb6) entered disabled state
+[   32.562678] vethee6edb6: entered allmulticast mode
+[   32.565769] vethee6edb6: entered promiscuous mode
+[   33.399958] eth0: renamed from veth8735764
+[   33.417231] br-7e80cd201eca: port 2(vethee6edb6) entered blocking state
+[   33.418259] br-7e80cd201eca: port 2(vethee6edb6) entered forwarding state
+[   33.500537] eth0: renamed from veth874cfb2
+[   33.510989] br-7e80cd201eca: port 1(veth53e6e23) entered blocking state
+[   33.512051] br-7e80cd201eca: port 1(veth53e6e23) entered forwarding state
+[   33.546229] eth1: renamed from clab-c9725620
+[   33.679209] eth1: renamed from clab-11ff781b
+[   33.682694] ovsp1: renamed from clab-f66c4490
+[   33.727713] ovsp1: entered promiscuous mode
+[   33.741506] ovsp2: renamed from clab-68a2f93d
+[   33.788090] ovsp2: entered promiscuous mode
+OK: topologia integrado instanciada (clab-integrado-r1, clab-integrado-r2, FRR respondeu em 0 s)
+NEXUS-CENARIO-METRICA up_s: 6.99
+contêiner: clab-integrado-r1 (running)
+versão: FRRouting 10.7.1_git (r1) on Linux(6.12.116+deb13-amd64).
+loopback: 198.51.100.21/32
+contêiner: clab-integrado-r2 (running)
+versão: FRRouting 10.7.1_git (r2) on Linux(6.12.116+deb13-amd64).
+loopback: 198.51.100.22/32
+OK: topologia integrado rodando
+NEXUS-CENARIO-METRICA convergencia_inicial_s: 13.90
+NEXUS-CENARIO-METRICA limite_convergencia_s: 120
+--- regras com contadores
+ cookie=0x0, duration=10.402s, table=0, n_packets=2, n_bytes=84, idle_age=4, priority=100,arp,in_port=1 actions=output:2
+ cookie=0x0, duration=10.402s, table=0, n_packets=2, n_bytes=84, idle_age=4, priority=100,arp,in_port=2 actions=output:1
+ cookie=0x0, duration=10.402s, table=0, n_packets=5, n_bytes=490, idle_age=1, priority=90,ip,in_port=1 actions=output:2
+ cookie=0x0, duration=10.402s, table=0, n_packets=5, n_bytes=490, idle_age=1, priority=90,ip,in_port=2 actions=output:1
+ cookie=0x0, duration=10.402s, table=0, n_packets=19, n_bytes=1618, idle_age=0, priority=100,ip,in_port=1,nw_proto=89 actions=output:2
+ cookie=0x0, duration=10.402s, table=0, n_packets=18, n_bytes=1548, idle_age=0, priority=100,ip,in_port=2,nw_proto=89 actions=output:1
+--- prova de controle: descartar o protocolo 89
+NEXUS-CENARIO-METRICA queda_s: 3.47
+NEXUS-CENARIO-METRICA limite_queda_s: 12
+NEXUS-CENARIO-METRICA recuperacao_s: 6.13
+NEXUS-CENARIO-METRICA limite_recuperacao_s: 30
+--- remoção
+[   57.941647] ovsp1 (unregistering): left promiscuous mode
+[   57.964760] ovsp2: left promiscuous mode
+[   58.102358] br-7e80cd201eca: port 2(vethee6edb6) entered disabled state
+[   58.104637] veth874cfb2: renamed from eth0
+[   58.105683] veth8735764: renamed from eth0
+[   58.106530] br-7e80cd201eca: port 1(veth53e6e23) entered disabled state
+[   58.131740] br-7e80cd201eca: port 1(veth53e6e23) entered disabled state
+[   58.133367] veth53e6e23 (unregistering): left allmulticast mode
+[   58.134382] veth53e6e23 (unregistering): left promiscuous mode
+[   58.135243] br-7e80cd201eca: port 1(veth53e6e23) entered disabled state
+[   58.196300] br-7e80cd201eca: port 2(vethee6edb6) entered disabled state
+[   58.200194] vethee6edb6 (unregistering): left allmulticast mode
+[   58.201166] vethee6edb6 (unregistering): left promiscuous mode
+[   58.202128] br-7e80cd201eca: port 2(vethee6edb6) entered disabled state
+OK: topologia integrado removida
+NEXUS-CENARIO-METRICA down_s: 0.63
+[   58.527100] br-integrado: left promiscuous mode
+[   58.535835] ovs-system: left promiscuous mode
+NEXUS-CENARIO-METRICA tempo_guest_s: 28.48
+NEXUS-CENARIO-OK t6
+NEXUS-SMOKE-TIME t6 29
+NEXUS-SMOKE-END t6 0
+OK: execução 1 de 3
