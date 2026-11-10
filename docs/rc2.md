@@ -7,11 +7,11 @@ Segunda release candidate: a RC1 (núcleo da stack) mais o **ambiente gráfico**
 | Item | Valor |
 | --- | --- |
 | Arquivo | `dist/nexus-os-rc2-amd64.iso` (cópia da ISO do build limpo, com `.sha256` regenerado para esse nome) |
-| Commit do build | `d3bf729` (clone novo de `origin/marcos`, comandos copiados da seção "Gerar a ISO" do manual v2). A RC2 da rodada 5 (SHA256 `bb6d89c68970fb24bb6e35ec3db0a74a88490b257eed166729edb941ce673e58`, commit `fc57261`) ficou guardada em `dist/nexus-os-rc2-r5-amd64.iso`; a testada no Hyper-V Geração 2 em 03/11/2026 foi a de SHA256 `8889f613...38aa` (commit `f10dcaa`) |
+| Commit do build | `61e02b9` (clone novo de `origin/marcos`, comandos copiados da seção "Gerar a ISO" do manual v2). Esta ISO traz os documentos reescritos no padrão detalhado do `teste-virtualbox.md`; o código e a lista de pacotes são os da ISO anterior (`d3bf729`, SHA256 `5f47083bfd5a009a7c11b093e98edfd3bdf21ac593f80f4d549bfe3310c10dbe`, guardada em `dist/nexus-os-rc2-d3bf729-amd64.iso`), e nenhum arquivo de `live-build/config/includes.chroot/` nem de `package-lists/` mudou entre as duas. A RC2 da rodada 5 (SHA256 `bb6d89c68970fb24bb6e35ec3db0a74a88490b257eed166729edb941ce673e58`, commit `fc57261`) ficou guardada em `dist/nexus-os-rc2-r5-amd64.iso`; a testada no Hyper-V Geração 2 em 03/11/2026 foi a de SHA256 `8889f613...38aa` (commit `f10dcaa`) |
 | Data | 2026-11-09 |
 | Tamanho | 1990639616 bytes (1898 MiB), o mesmo da rodada 5 |
-| SHA256 | `5f47083bfd5a009a7c11b093e98edfd3bdf21ac593f80f4d549bfe3310c10dbe` |
-| Tempo do build | 1134 s (rodada 5: 1355 s; ISO anterior da rodada 5: 1063 s; rodada 4: 1076 s; rodada 3: 816 s), um comando (`sudo scripts/build-iso.sh`), terminou com `Build completed successfully`; mais 42 s do `tests/iso.sh` até o `login:` |
+| SHA256 | `28efa0450893064d988cf00842eb191ba2905b3cc8cb089e3f593f8bfcd8de97` |
+| Tempo do build | 1062 s (ISO anterior, `d3bf729`: 1134 s; rodada 5: 1355 s; ISO anterior da rodada 5: 1063 s; rodada 4: 1076 s; rodada 3: 816 s), um comando (`sudo scripts/build-iso.sh`), terminou com `Build completed successfully`; mais 39 s do `tests/iso.sh` até o `login:` |
 | Ambiente do build | Debian 13 em VM Hyper-V com KVM, 4 vCPU, 6 GB estáticos |
 | Onde fica | na máquina do responsável (VM de build, pasta `dist/` do clone, fora do Git) |
 
@@ -25,8 +25,8 @@ Clone novo de `origin/marcos` em pasta nova, depois só `sudo scripts/build-iso.
 
 | Item | Valor |
 | --- | --- |
-| Tempo | 1134 s (RC2 final, clone novo, 09/11/2026); 1355 s na rodada 5 (clone novo; ISO anterior da rodada 5: 1063 s) |
-| Disco do clone ao fim | 14098 MiB (`live-build/` com 10273 MiB, mais as duas cópias da ISO em `dist/`) |
+| Tempo | 1062 s (RC2 final, commit `61e02b9`, clone novo, 09/11/2026); 1134 s no commit `d3bf729`; 1355 s na rodada 5 (clone novo; ISO anterior da rodada 5: 1063 s) |
+| Disco do clone ao fim | 14108 MiB (`live-build/` com 10274 MiB; 14098 MiB no commit `d3bf729`, mais as duas cópias da ISO em `dist/`) |
 | Tamanho | 1990639616 bytes, +215728128 sobre a rodada 4 (1774911488), +1068941312 sobre a RC1 (921698304) |
 | Origem do aumento sobre a RC2 anterior | LibreOffice, Wireshark, VLC, GIMP, Inkscape, KeePassXC, ferramentas de rede, pacotes de idioma e os demais de `nexus-desktop.list.chroot` ([gui.md](gui.md)); o tema de ícones Nexus e os fundos pesam pouco ([branding.md](branding.md)) |
 
@@ -36,8 +36,10 @@ Todas as execuções abaixo são **com KVM**, exceto a indicada, na VM de build 
 
 | Teste | Resultado |
 | --- | --- |
-| RC2 final: `tests/run-fase4.sh dist/nexus-os-rc2-amd64.iso` (commit `d3bf729`, SHA256 `5f47083b...0dbe`), com KVM | `OK: tests/run-fase4.sh (7 cenários)`: T1 (login em 36 s, `all` em 228 s com 2560 MiB, repouso 976 MiB, pico 1866 MiB, controle negativo com 1536 MiB falhou como esperado), T2, T3 (3 ciclos), T4 (3 ciclos, `virsh` do `user` em `qemu:///system`), T5 (convergência em 19,21 s), T6 (3 de 3 execuções seguidas) e T7 (5 capturas válidas, sessão em 22,8 s, o Enter fechou os 4 terminais dos atalhos); evidências em `evidencias/T1` a `evidencias/T7` |
-| RC2 final: `tests/run-fase3.sh dist/nexus-os-rc2-amd64.iso` e `tests/manual.sh`, com KVM | `OK: tests/run-fase3.sh (9 testes)`; `iso-smoke all`: 8 testes em 226 s (repouso 1095 MiB, pico 2016 MiB de 4096 MiB, `desktop` 135 s); `tests/manual.sh`: 14 blocos do manual v2 em 102 s, com o cenário integrado |
+| RC2 final (commit `61e02b9`, SHA256 `28efa045...de97`): `tests/run-fase4.sh dist/nexus-os-rc2-amd64.iso`, com KVM | `OK: tests/run-fase4.sh (7 cenários)`: T1 (login em 36 s, `all` em 229 s com 2560 MiB, repouso 983 MiB, pico 1879 MiB, controle negativo com 1536 MiB falhou como esperado), T2, T3, T4, T5, T6 (3 de 3) e T7 (5 capturas válidas, sessão em 22,5 s, Enter fechando os terminais dos atalhos); evidências com sufixo novo em `evidencias/T1` a `evidencias/T7` (`2026-11-09-kvm-2` a `-4` e T6 `-7` a `-9`) |
+| RC2 final (commit `61e02b9`): `tests/run-fase3.sh dist/nexus-os-rc2-amd64.iso` e `tests/manual.sh`, com KVM | `OK: tests/run-fase3.sh (9 testes)`; `iso-smoke all`: 8 testes em 222 s (repouso 1044 MiB, pico 2029 MiB de 4096 MiB, `desktop` 136 s); `tests/manual.sh`: 14 blocos em 106 s; `tests/iso.sh` com login em 36 s |
+| ISO anterior (commit `d3bf729`, SHA256 `5f47083b...0dbe`): `tests/run-fase4.sh dist/nexus-os-rc2-amd64.iso`, com KVM | `OK: tests/run-fase4.sh (7 cenários)`: T1 (login em 36 s, `all` em 228 s com 2560 MiB, repouso 976 MiB, pico 1866 MiB, controle negativo com 1536 MiB falhou como esperado), T2, T3 (3 ciclos), T4 (3 ciclos, `virsh` do `user` em `qemu:///system`), T5 (convergência em 19,21 s), T6 (3 de 3 execuções seguidas) e T7 (5 capturas válidas, sessão em 22,8 s, o Enter fechou os 4 terminais dos atalhos); evidências em `evidencias/T1` a `evidencias/T7` |
+| ISO anterior (commit `d3bf729`): `tests/run-fase3.sh dist/nexus-os-rc2-amd64.iso` e `tests/manual.sh`, com KVM | `OK: tests/run-fase3.sh (9 testes)`; `iso-smoke all`: 8 testes em 226 s (repouso 1095 MiB, pico 2016 MiB de 4096 MiB, `desktop` 135 s); `tests/manual.sh`: 14 blocos do manual v2 em 102 s, com o cenário integrado |
 | Rodada 5: RED na ISO da rodada 4 (`--extra tests/desktop.sh`) | `FALHA:` em 42 asserções novas (M1 a M17, D9, D12), sem erro de sintaxe |
 | Rodada 5: `all` na ISO final (commit `fc57261`), 4096 MiB e 2560 MiB | `OK: 8 teste(s) sem falha em 216 s` (`desktop=133s`, repouso 1095 MiB, pico 2006 MiB) e em 219 s com 2560 MiB (`desktop=141s`, repouso 909 MiB, pico 1863 MiB); com KVM |
 | Rodada 5: mutações do `desktop.sh` por `--extra` (18, uma por pedido, sem rebuild) | cada uma terminou em `FALHA:` com o prefixo do pedido (M1 a M17, D9 e D12); com KVM |
@@ -81,7 +83,7 @@ Debian 13 em VM Hyper-V com KVM (`/dev/kvm`), 4 vCPU, 6 GB de RAM estáticos; li
 - A barra da tela de login mostra o relógio e o nome de máquina (agora `nexus-os`).
 - A RAM em repouso varia entre execuções (issue 33); o desligamento da live pede ENTER (issue 34).
 - A RC2 não tem tag Git: a tag é do congelamento.
-- **Documentos dentro da ISO:** os documentos que a ISO traz (`/usr/share/nexus-os/docs` e a versão em HTML, `docs-html`) são os do commit do build (`d3bf729`). Depois dele, os documentos de instrução (manual v2, `hyperv.md`, `ambiente-de-build.md`, `gns3.md`, `fluxo-de-trabalho.md`, `oficina-git.md`, `sdn.md`, `virtualizacao.md`, `containers.md`, `nfv.md`, `integracao-iso.md`, `checklist-teste-documentacao.md`, o `README.md` e os `README.md` de pasta) foram reescritos no padrão de [teste-virtualbox.md](teste-virtualbox.md) (descrito em [manual-modelo.md](manual-modelo.md)); essa versão só entra numa ISO gerada depois. Os blocos `bash nexus-exec` do manual não mudaram e passam na ISO atual (`tests/manual.sh` com 14 blocos).
+- **Documentos dentro da ISO:** a RC2 final (commit `61e02b9`) traz em `/usr/share/nexus-os/docs` e em `docs-html` os documentos de instrução reescritos no padrão de [teste-virtualbox.md](teste-virtualbox.md) (descrito em [manual-modelo.md](manual-modelo.md)): manual v2, `hyperv.md`, `ambiente-de-build.md`, `gns3.md`, `fluxo-de-trabalho.md`, `oficina-git.md`, `sdn.md`, `virtualizacao.md`, `containers.md`, `nfv.md`, `integracao-iso.md` e o `checklist-teste-documentacao.md`. O `rc2.md` e a seção "Com ambiente gráfico" do `requisitos.md` têm o SHA256 da ISO e por isso nascem depois dela: a ISO não os contém.
 - **Limitações abertas de prioridade baixa** (estética ou intermitentes, não corrigidas na RC2 final): issue 79 (papel de parede e ícones aparecem depois da barra, cerca de 2 s no Hyper-V; visto de novo na RC2 final, `humano-2026-11-09-2-tela-preta-inicial.png`, e mantido como baixa por decisão de Marcos); ícone "user" do Thunar fora do estilo; estilo do menu lembra o Windows; grupo da barra cerca de 80 px à esquerda do centro; issue 56 (papel de parede só conferido no monitor `Virtual-1`); issue 57 (barra da tela de login mostra o nome de máquina); issue 35 (smoke `libvirt` falhou uma vez sem KVM); issue 34 (a live pede ENTER ao desligar); issue 33 (RAM em repouso varia). As issues 31 (RAM mínima do Docker) e 32 (serviço do CD `NEXUS_SMOKE`) são decisão do congelamento.
 - **Corrigidas na RC2 final:** issue 78 (o Enter não fechava o terminal dos atalhos: o `nexus-atalho` faz `stty sane` antes do prompt) e issue 74 (o `virsh` do `user` usava `qemu:///session`: `~/.config/libvirt/libvirt.conf` no `/etc/skel`); issue 76 (imprecisões do manual) corrigida no manual v2.
 
