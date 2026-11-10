@@ -8,8 +8,8 @@ Cada cenário é o script `tests/cenario-tN.sh <iso>`, rodado no host (a VM de b
 
 | Item | Valor |
 | --- | --- |
-| ISO | `dist/nexus-os-rc2-amd64.iso` (RC2 da rodada 5, [rc2.md](rc2.md)) |
-| SHA256 | `bb6d89c68970fb24bb6e35ec3db0a74a88490b257eed166729edb941ce673e58` (um `.sha256` ao lado da ISO) |
+| ISO | `dist/nexus-os-rc2-amd64.iso` (RC2 final, [rc2.md](rc2.md); as execuções de T1 a T7 de 06/11 e 09/11/2026 até o bloco 5 são da RC2 da rodada 5, `bb6d89c68970...3e58`, guardada como `dist/nexus-os-rc2-r5-amd64.iso`) |
+| SHA256 | `5f47083bfd5a009a7c11b093e98edfd3bdf21ac593f80f4d549bfe3310c10dbe` (um `.sha256` ao lado da ISO) |
 | Host dos testes | VM Debian 13 no Hyper-V Geração 2, com `/dev/kvm` exposto ([hyperv.md](hyperv.md)); clone do repositório em `~/nexus-os` |
 | Convidado | QEMU dentro da VM, sem rede, com 2 vCPU; RAM por `NEXUS_SMOKE_MEM` ou `NEXUS_ISO_MEM` |
 | Modo | `kvm` quando `/dev/kvm` existe e `lsmod` mostra `kvm`; `emul` caso contrário (`NEXUS_SMOKE_KVM=0 NEXUS_SMOKE_SMP=1`, 2048 MiB) |
@@ -143,13 +143,12 @@ Mutações (provam que o cenário falha de verdade): rode o cenário com `CENARI
 | T7-M2 | `t7.sh` sem a linha `nexus-vm criar` | `a VM cen-t7 não está em execução` |
 | T7-M3 | `T7_CORES=1000000` (nenhuma captura pode ter tantas cores) | `captura vazia: desktop-pronto tem só ... cor(es) distinta(s)` |
 
-T7-M1 e T7-M2 foram provadas com o script do convidado antes da etapa do Enter. Com a etapa do Enter, o defeito real abaixo derruba a execução antes do `docs-abertos` na RC2 `bb6d89c6`, e o T7-M1 deixa de ser prova isolada até a correção.
+T7-M1 e T7-M2 foram provadas duas vezes: com o script do convidado anterior à etapa do Enter (RC2 da rodada 5) e de novo, com a etapa do Enter, na RC2 final (`5f47083b`), com a falha esperada nas duas.
 
 ## Problemas conhecidos
 
-- T7: o Enter não fecha o terminal dos atalhos ("Pressione Enter para fechar...") de forma intermitente. Medido no QEMU e no Hyper-V: depois do `sudo` o terminal fica com `-icrnl -opost -isig -icanon -echo` (o `read` do `nexus-atalho` espera uma quebra de linha e o Enter manda um retorno de carro; a saída também sai em escada). Em execuções seguidas o estado ficou normal em umas e em modo cru em outras, então é uma corrida. A execução `evidencias/T7/2026-11-09-kvm-2.md` falha por isso (`o Enter não fechou o terminal do atalho`); a `2026-11-09-kvm.md` é do roteiro sem a etapa do Enter. A correção é da F4.5 (por exemplo `stty sane` no `nexus-atalho` antes do prompt). O T7 fica sem ✅ até lá.
-
-- T4: o `user` da ISO usa `qemu:///session` no `virsh`, não `qemu:///system`. O libvirt só lê o `/etc/libvirt/libvirt.conf` para o root; o usuário comum lê `~/.config/libvirt/libvirt.conf`. Medido na RC2: `virsh uri` como `user` dá `qemu:///session`; com o arquivo `uri_default = "qemu:///system"` em `~/.config/libvirt/libvirt.conf` dá `qemu:///system`. O T4 fica sem ✅ até a correção (por exemplo, o arquivo em `/etc/skel/.config/libvirt/` na ISO, na F4.5). Sem esse ponto, o resto do T4 passou numa cópia de diagnóstico do script (3 ciclos, `type='kvm'`), que não é evidência.
+- Nenhum defeito de T1 a T7 aberto na RC2 final. Os dois defeitos reais achados na RC2 da rodada 5 foram corrigidos na F4.5 e provados pelos próprios cenários: T4 (o `user` usava `qemu:///session`, issue 74; agora o `~/.config/libvirt/libvirt.conf` vem do `/etc/skel` e o T4 passa em 3 ciclos) e T7 (o Enter não fechava o terminal dos atalhos de forma intermitente, o terminal ficava em modo cru depois do `sudo`, issue 78; agora o `nexus-atalho` faz `stty sane` antes do prompt e o T7 passou em 3 execuções seguidas, com o Enter fechando os 4 terminais em cada uma). As execuções com `FALHA:` na RC2 da rodada 5 ficam como histórico (`evidencias/T4/2026-11-06-kvm.md` e `evidencias/T7/2026-11-09-kvm-2.md`).
+- T7: a rodada humana de 09/11/2026 foi parcial (4 de 5 capturas, sem a documentação nem os atalhos de remover) e foi na RC2 da rodada 5; o T7 só vira ✅ com a rodada humana completa na RC2 final (bloco 7).
 
 ## Fora do escopo
 
