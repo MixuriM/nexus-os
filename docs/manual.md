@@ -41,7 +41,7 @@ Os blocos marcados `bash nexus-exec` são os que o `tests/manual.sh` executa den
 | Ambiente gráfico | O Enter fecha o terminal dos atalhos de forma confiável (antes o terminal podia ficar em modo cru, issue 78); passo a passo do primeiro uso do desktop |
 | Verificação | Os comandos usam a ISO da RC2 final (`dist/nexus-os-rc2-amd64.iso`) |
 | v2.1, Iniciar a ISO | Só a RC2 no texto: o Jeito 1 (QEMU) diz que é só para Linux, o Windows usa o Jeito 2, a VM do Hyper-V é a Geração 2 e há o caso da VM já criada (só `Start-VM` e `vmconnect.exe`). Os comandos da RC1 foram para o "Apêndice A: RC1 (histórico)" (lacunas 1, 2 e 3 da rodada humana H1) |
-| v2.1, colar sem rede | Seção "Colar comandos numa VM sem rede": abrir o manual que está dentro da ISO no Mousepad e colar com Ctrl+Shift+V (lacuna 5). A ISO nova não escreve mais `^[[200~` ao colar e mostra os blocos de código na Documentação (defeitos 6 e 4) |
+| v2.1, colar sem rede | Seção "Colar comandos numa VM sem rede": abrir o manual que está dentro da ISO no Mousepad e colar com Ctrl+Shift+V (lacuna 5). A ISO nova mostra os blocos de código na Documentação (defeito 4). O `^[[200~` que às vezes aparece na primeira colagem é limitação conhecida, com a saída descrita na própria seção (defeito 6) |
 | v2.1, Cenário integrado | A "Prova de controle" virou um bloco completo que sobe e derruba o laboratório sozinho (lacuna 7) |
 
 ## Visão geral
@@ -229,7 +229,7 @@ No Mousepad, procure a seção (Ctrl+F), selecione só as linhas de dentro do bl
 
 **Deve aparecer:** o comando do bloco rodando no terminal, sem `^[[200~` no começo nem `~` no fim.
 
-**Se não aparecer:** se aparecer `^[[200~`, o terminal está com a colagem em bloco ligada (a ISO desta versão a desliga em `~/.inputrc`): cole de novo. `mousepad: comando não encontrado` indica ISO incompleta: confira o SHA256 e relate.
+**Se não aparecer:** se aparecer `^[[200~` no começo (e `~` no fim), é uma falha ocasional da primeira colagem num terminal recém-aberto (limitação conhecida, a causa não foi isolada): aperte Ctrl+C para limpar a linha e cole de novo. Se só o primeiro comando de um bloco com `sudo` rodar e o resto sumir, faça o mesmo. `mousepad: comando não encontrado` indica ISO incompleta: confira o SHA256 e relate.
 
 ## Login de laboratório
 
