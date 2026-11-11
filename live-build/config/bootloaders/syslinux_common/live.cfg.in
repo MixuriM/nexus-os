@@ -5,6 +5,12 @@ label live-@FLAVOUR@
 	initrd @INITRD@
 	append @APPEND_LIVE@
 
+label live-@FLAVOUR@-demo
+	menu label Iniciar o Nexus OS (modo de demonstração)
+	linux @LINUX@
+	initrd @INITRD@
+	append @APPEND_LIVE@ nexus.demo=1
+
 label live-@FLAVOUR@-failsafe
 	menu label Nexus OS (modo de compatibilidade)
 	linux @LINUX@
