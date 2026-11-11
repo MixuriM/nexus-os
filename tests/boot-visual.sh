@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Captura de tela do boot da ISO no QEMU, para conferir a tela de carregamento (RC3) olhando os quadros.
 # Espera 8 s no menu (que espera para sempre) e tira menu.png, escolhe a entrada (1, 2 ou 3) com as setas e Enter, e tira
-# uma captura por segundo durante 50 s em quadro-NN.png. Nas entradas 1 e 2 espera o "login:" na serial e imprime o tempo.
+# uma captura por segundo durante 50 s (BOOT_VISUAL_SEGUNDOS troca) em quadro-NN.png. Nas entradas 1 e 2 espera o "login:" na serial e imprime o tempo.
 # Na entrada 3 não há serial (modo de compatibilidade): só captura.
 # Variáveis: BOOT_VISUAL_ESC=<segundo> manda a tecla Esc nesse segundo depois do Enter (a tela de carregamento mostra o texto);
 # BOOT_VISUAL_MEM (padrão 2560 MiB). Com --uefi usa o firmware OVMF (pacote ovmf).
@@ -24,6 +24,8 @@ saida=$3
 esc=${BOOT_VISUAL_ESC:-}
 [ -z "$esc" ] || [[ $esc =~ ^[0-9]+$ ]] || fail "BOOT_VISUAL_ESC inválido: $esc"
 mem=${BOOT_VISUAL_MEM:-2560}
+segundos=${BOOT_VISUAL_SEGUNDOS:-50}
+[[ $segundos =~ ^[1-9][0-9]*$ ]] || fail "BOOT_VISUAL_SEGUNDOS inválido: $segundos"
 command -v qemu-system-x86_64 >/dev/null || fail "qemu-system-x86_64 não instalado"
 mkdir -p "$saida"
 saida=$(cd "$saida" && pwd)
@@ -95,7 +97,7 @@ captura "$saida/menu-selecionado.png"
 tecla ret
 inicio=$SECONDS
 login=
-for i in $(seq 1 50); do
+for i in $(seq 1 "$segundos"); do
     captura "$saida/quadro-$(printf '%02d' "$i").png"
     if [ -n "$esc" ] && [ "$i" -eq "$esc" ]; then tecla esc; fi
     if [ -z "$login" ] && [ "$entrada" != 3 ] && tem_login; then login=$((SECONDS - inicio)); fi
@@ -113,7 +115,7 @@ if [ "$entrada" != 3 ] && [ -z "$login" ]; then
     done
 fi
 n=$(find "$saida" -name 'quadro-*.png' -size +0 | wc -l)
-[ "$n" -ge 40 ] || fail "poucos quadros capturados: $n de 50"
+[ "$n" -ge $((segundos - 10)) ] || fail "poucos quadros capturados: $n de $segundos"
 if [ "$entrada" = 3 ]; then
     echo "OK: entrada 3, $n quadros em $saida, $modo, $firmware"
 elif [ -n "$login" ]; then

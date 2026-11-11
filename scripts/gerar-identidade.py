@@ -267,7 +267,7 @@ def svg_boot():
 # ---------- tela de carregamento (Plymouth, tema nexus-os): logo e roda ----------
 def svg_logo_plymouth():
     """Logo sem fundo (transparente) para o watermark.png: o fundo do tema é a cor FUNDO_PROFUNDO."""
-    escala = .24
+    escala = .20
     w, h = round(1303 * escala), round(1349 * escala)
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" role="img" aria-labelledby="t">\n'
             f'  <title id="t">Nexus OS</title>\n  <defs>{GRAD_LOGO}</defs>\n  {logo_sem_fundo(escala, w / 2, h / 2)}\n</svg>\n')
@@ -276,7 +276,7 @@ def svg_logo_plymouth():
 def svg_roda(angulo):
     """Roda: trilho escuro e arco de 270 graus em gradiente magenta para azul, girado em `angulo` graus."""
     return (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80" role="img" aria-labelledby="t">\n'
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="96" height="96" role="img" aria-labelledby="t">\n'
         '  <title id="t">Carregando o Nexus OS</title>\n'
         '  <defs><linearGradient id="r" gradientUnits="userSpaceOnUse" x1="10" y1="70" x2="70" y2="10">'
         f'<stop offset="0" stop-color="{MAGENTA_VIVO}"/><stop offset="1" stop-color="{AZUL_VIVO}"/></linearGradient></defs>\n'

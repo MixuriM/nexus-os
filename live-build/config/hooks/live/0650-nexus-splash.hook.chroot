@@ -1,11 +1,22 @@
 #!/bin/sh
 # Hook do Nexus OS (roda dentro do chroot): tela de carregamento da RC3. Define o tema Plymouth nexus-os como padrão
-# (o -R refaz o initramfs) e confere que o tema entrou no initramfs e que é o padrão. Veja docs/demo.md.
+# (o -R refaz o initramfs; antes copia do tema spinner as imagens que o two-step exige) e confere que o tema entrou no initramfs e que é o padrão. Veja docs/demo.md.
 set -e
 
+# O two-step só mostra o tema se achar lock.png (e usa entry, bullet, keyboard, capslock e keymap-render nas telas de senha):
+# vêm do tema spinner do pacote plymouth-themes (sem eles o Plymouth cai no tema de texto, só com "...").
+for img in lock entry bullet keyboard capslock keymap-render; do
+    cp "/usr/share/plymouth/themes/spinner/$img.png" "/usr/share/plymouth/themes/nexus-os/$img.png"
+done
+# O hook do initramfs do plymouth troca o watermark.png de todo tema two-step pelo logo do Debian (desktop-base): põe a logo do Nexus OS nesse lugar.
+cp /usr/share/plymouth/themes/nexus-os/watermark.png /usr/share/desktop-base/debian-logos/logo-text-version-64.png
 plymouth-set-default-theme -R nexus-os
 test "$(plymouth-set-default-theme)" = nexus-os
 for initrd in /boot/initrd.img-*; do
     lsinitramfs "$initrd" | grep -q 'usr/share/plymouth/themes/nexus-os/nexus-os.plymouth'
     lsinitramfs "$initrd" | grep -q 'usr/share/plymouth/themes/nexus-os/throbber-0001.png'
+    lsinitramfs "$initrd" | grep -q 'usr/share/plymouth/themes/nexus-os/lock.png'
+    # o watermark.png do initramfs tem de ser o do Nexus OS (mesmo tamanho em bytes), não o do Debian
+    tam=$(stat -c %s /usr/share/plymouth/themes/nexus-os/watermark.png)
+    lsinitramfs -l "$initrd" | grep 'themes/nexus-os/watermark.png' | grep -q " $tam "
 done
