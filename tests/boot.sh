@@ -91,6 +91,8 @@ for h in 0650-nexus-splash 0700-nexus-demo; do
     grep -qxF 'set -e' "$hook/$h.hook.chroot" || fail "$hook/$h.hook.chroot sem 'set -e'"
 done
 grep -qF 'plymouth-set-default-theme' "$hook/0650-nexus-splash.hook.chroot" 2>/dev/null || fail "hook 0650 não define o tema padrão"
+grep -qF 'themes/spinner/$img.png' "$hook/0650-nexus-splash.hook.chroot" 2>/dev/null || fail "hook 0650 não copia o lock.png do tema spinner (sem ele o two-step não mostra o tema)"
+grep -qF 'logo-text-version-64.png' "$hook/0650-nexus-splash.hook.chroot" 2>/dev/null || fail "hook 0650 não troca o logo do Debian que o hook do initramfs usa como watermark"
 grep -qF 'lsinitramfs' "$hook/0650-nexus-splash.hook.chroot" 2>/dev/null || fail "hook 0650 não confere o tema no initramfs (lsinitramfs)"
 grep -qF '/usr/local/bin/nexus-demo' "$hook/0700-nexus-demo.hook.chroot" 2>/dev/null || fail "hook 0700 sem o link /usr/local/bin/nexus-demo"
 
