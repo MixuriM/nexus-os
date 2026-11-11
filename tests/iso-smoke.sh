@@ -141,7 +141,7 @@ captura() {
     done < <(tr -d '\r' <"$serial" | grep -aoE 'NEXUS-SMOKE-TECLA [0-9]+ [a-z0-9_-]+' | sort -u)
 }
 
-# O menu do isolinux tem contagem de 5 s (timeout 50): manda Enter nos primeiros 60 s para adiantar o boot.
+# O menu do isolinux espera para sempre (timeout 0, RC3): manda Enter nos primeiros 60 s para escolher a entrada padrão.
 start=$SECONDS
 done_line=
 espera=3

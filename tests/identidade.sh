@@ -162,13 +162,13 @@ if [ -f "$painel" ]; then
     grep -qF 'name="button-icon" type="string" value="nexus-os"' "$painel" || fail "$painel sem o ícone nexus-os no botão do menu"
 fi
 grep -qF 'name="workspace_count" type="int" value="1"' "${configs[2]}" 2>/dev/null || fail "${configs[2]} sem workspace_count 1"
-# Menu de boot (syslinux e GRUB) com a identidade Nexus OS, sem capacete nem texto do Debian, e com contagem de 5 s.
+# Menu de boot (syslinux e GRUB) com a identidade Nexus OS, sem capacete nem texto do Debian, e sem contagem regressiva (RC3).
 boot=live-build/config/bootloaders
 grep -qF 'Nexus OS' "$boot/syslinux_common/menu.cfg" 2>/dev/null || fail "$boot/syslinux_common/menu.cfg sem 'Nexus OS'"
 grep -qF 'Nexus OS' "$boot/syslinux_common/live.cfg.in" 2>/dev/null || fail "$boot/syslinux_common/live.cfg.in sem 'Nexus OS'"
 grep -qF 'Nexus OS' "$boot/grub-pc/live-theme/theme.txt" 2>/dev/null || fail "$boot/grub-pc/live-theme/theme.txt sem 'Nexus OS'"
-grep -qE '^timeout [1-9][0-9]*$' "$boot/isolinux/isolinux.cfg" 2>/dev/null || fail "$boot/isolinux/isolinux.cfg sem contagem (timeout 50)"
-grep -qxF 'set timeout=5' "$boot/grub-pc/config.cfg" 2>/dev/null || fail "$boot/grub-pc/config.cfg sem set timeout=5"
+grep -qxF 'timeout 0' "$boot/isolinux/isolinux.cfg" 2>/dev/null || fail "$boot/isolinux/isolinux.cfg sem 'timeout 0' (menu sem contagem regressiva)"
+grep -qxF 'set timeout=-1' "$boot/grub-pc/config.cfg" 2>/dev/null || fail "$boot/grub-pc/config.cfg sem set timeout=-1 (menu sem contagem regressiva)"
 for f in "$boot"/splash.svg "$boot"/syslinux_common/* "$boot"/grub-pc/live-theme/theme.txt; do
     [ -f "$f" ] || continue
     ! grep -qiE 'debian|live-build|live boot menu' "$f" || fail "$f cita Debian, live-build ou 'Live Boot Menu'"
