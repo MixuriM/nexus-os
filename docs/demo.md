@@ -106,4 +106,4 @@ A preencher com as medições da bateria (SHA256, tamanho, tempo de build, tempo
 
 ## 7. Estado da execução
 
-Branch `marcos`. Feito: menu de boot, tema Plymouth, `nexus-demo`, `nexus-demo-boot`, testes novos e commits de código. Build B1 em andamento na VM (clone `~/nexus-os-rc3`, log em `~/rc3-logs/build-b1.log`). Falta: capturas, bateria, medições, texto da seção 6, cofre, PR.
+Branch `marcos` (commits locais; o push direto para `origin/marcos` é recusado pela regra do repositório, "Cannot update this protected ref"). Builds feitos: B1 (`dev1`, tema sem `lock.png`), B2 (`dev2`, tema corrigido) e BF (clone limpo `~/nexus-os-rc3-final` no commit `f236fc5`, ISO `dist/nexus-os-rc3-amd64.iso`, build de 1133 s). Capturas das 3 entradas, do UEFI e do Esc aprovadas na `dev2`. Em andamento: bateria da seção 6 na ISO final (log em `~/rc3-logs/` na VM). Falta: resultado da bateria, texto da seção 6, cofre, RODADA 1 do Marcos e os PRs.
