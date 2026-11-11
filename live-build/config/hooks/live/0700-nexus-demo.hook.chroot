@@ -1,0 +1,9 @@
+#!/bin/sh
+# Hook do Nexus OS (roda dentro do chroot): modo de demonstração da RC3 (entrada "modo de demonstração" do menu de boot).
+# O demo/nexus-demo.sh entra em /usr/share/nexus-os/demo pelo scripts/stage-iso-files.sh. Veja docs/demo.md.
+set -e
+
+ln -sf /usr/share/nexus-os/demo/nexus-demo.sh /usr/local/bin/nexus-demo
+chmod 0755 /usr/share/nexus-os/demo/nexus-demo.sh
+# Os includes do live-build mantêm o modo do repositório, que no Windows perde o bit de execução.
+chmod 0755 /usr/local/bin/nexus-demo-boot
