@@ -179,13 +179,14 @@ cong=docs/congelamento.md
 if [ ! -f "$cong" ]; then
     fail "$cong ausente (o índice final precisa do SHA256 da ISO congelada)"
 else
+    # shellcheck disable=SC2016  # a crase é do texto da tabela, não uma substituição
     sha12=$(sed -n 's/^| SHA256 | `\([0-9a-f]\{12\}\)[0-9a-f]*` |.*/\1/p' "$cong" | head -n 1)
     if [[ ! $sha12 =~ ^[0-9a-f]{12}$ ]]; then
         fail "$cong: SHA256 da ISO congelada não lido"
     else
         for n in 1 2 3 4 5 6 7; do
             ok=0
-            for f in evidencias/T$n/*.md; do
+            for f in "evidencias/T$n"/*.md; do
                 case $f in */humano-*.md | */lacunas.md) continue ;; esac
                 if grep -qx -- "- ISO (SHA256, 12 primeiros): $sha12" "$f" && grep -qx -- '- Resultado: OK' "$f"; then ok=$((ok + 1)); fi
             done
