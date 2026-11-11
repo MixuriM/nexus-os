@@ -20,6 +20,7 @@ O relatório acadêmico do projeto não fica neste repositório.
 - [Manual v2.1 (RC2 final)](manual.md)
 - [Ambiente gráfico: escolha do desktop, instalação na ISO, atalhos e medições](gui.md)
 - [Identidade visual: marca, papel de parede, tema e licenças](branding.md)
+- [RC3: menu de boot, tela de carregamento, modo de demonstração e roteiro de apresentação](demo.md)
 - [Modelo de manual: o padrão de detalhamento dos documentos de instrução](manual-modelo.md)
 - [Checklist de teste da documentação](checklist-teste-documentacao.md)
 - [Teste da RC2 no VirtualBox: passo a passo completo (rodada 2)](teste-virtualbox.md)

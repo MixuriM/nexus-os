@@ -67,12 +67,16 @@ A licença é a do repositório, GPL-3.0-or-later ([LICENSE](../LICENSE)). Os ca
 | `live-build/config/bootloaders/syslinux_common/menu.cfg` | `/isolinux/menu.cfg` | criado para o projeto (a partir do modelo do live-build) | GPL-3.0-or-later | título "Nexus OS" e menu de boot sem a pasta de utilitários |
 | `live-build/config/bootloaders/syslinux_common/live.cfg.in` | `/isolinux/live.cfg` | criado para o projeto (a partir do modelo do live-build) | GPL-3.0-or-later | entradas "Iniciar o Nexus OS" e "modo de compatibilidade" |
 | `live-build/config/bootloaders/syslinux_common/stdmenu.cfg` | `/isolinux/stdmenu.cfg` | criado para o projeto (a partir do modelo do live-build) | GPL-3.0-or-later | cores do menu de boot na paleta da logo |
-| `live-build/config/bootloaders/isolinux/isolinux.cfg` | `/isolinux/isolinux.cfg` | criado para o projeto (a partir do modelo do live-build) | GPL-3.0-or-later | contagem de 5 s: o Nexus OS inicia sozinho |
-| `live-build/config/bootloaders/grub-pc/config.cfg` | `/boot/grub/config.cfg` | criado para o projeto (a partir do modelo do live-build) | GPL-3.0-or-later | GRUB (UEFI) com contagem de 5 s e sem o toque sonoro |
+| `live-build/config/bootloaders/isolinux/isolinux.cfg` | `/isolinux/isolinux.cfg` | criado para o projeto (a partir do modelo do live-build) | GPL-3.0-or-later | sem contagem (`timeout 0`): o menu espera a escolha |
+| `live-build/config/bootloaders/grub-pc/config.cfg` | `/boot/grub/config.cfg` | criado para o projeto (a partir do modelo do live-build) | GPL-3.0-or-later | GRUB (UEFI) sem contagem (`set timeout=-1`) e sem o toque sonoro |
 | `live-build/config/bootloaders/grub-pc/grub.cfg` | `/boot/grub/grub.cfg` | criado para o projeto (a partir do modelo do live-build) | GPL-3.0-or-later | entradas do GRUB com o nome Nexus OS |
 | `live-build/config/bootloaders/grub-pc/theme.cfg` | `/boot/grub/theme.cfg` | cópia do modelo do live-build, sem alteração de conteúdo | GPL-3.0-or-later | liga o tema do GRUB quando existe o `splash.png` |
 | `live-build/config/bootloaders/grub-pc/live-theme/theme.txt` | `/boot/grub/live-theme/theme.txt` | criado para o projeto (a partir do modelo do live-build) | GPL-3.0-or-later | título "Nexus OS" e cores do GRUB |
 | `live-build/config/hooks/live/0600-nexus-identidade.hook.chroot` | não vai para a ISO (roda no build) | criado para o projeto | GPL-3.0-or-later | título e ícone do menu, tamanho da barra, tema, ícones e fonte padrão, papel de parede como alternativa do Debian |
+| `live-build/config/includes.chroot/usr/share/plymouth/themes/nexus-os/nexus-os.plymouth` | `/usr/share/plymouth/themes/nexus-os/nexus-os.plymouth` | criado para o projeto (a partir do modelo do tema `spinner` do Debian) | GPL-3.0-or-later | tema da tela de carregamento (RC3): módulo `two-step`, fundo `#14152a`, logo e roda |
+| `live-build/config/includes.chroot/usr/share/plymouth/themes/nexus-os/watermark.png` | `/usr/share/plymouth/themes/nexus-os/watermark.png` | composição própria com a logo original (`scripts/gerar-identidade.py plymouth`) | GPL-3.0-or-later | logo (marca, "NEXUS" e "OS") sem fundo, 313 x 324 px |
+| `live-build/config/includes.chroot/usr/share/plymouth/themes/nexus-os/throbber-0001.png` a `throbber-0030.png` | `/usr/share/plymouth/themes/nexus-os/throbber-NNNN.png` | desenho próprio (`scripts/gerar-identidade.py plymouth`) | GPL-3.0-or-later | 30 quadros da roda (anel em gradiente magenta para azul, 80 x 80 px, 12 graus por quadro); o `animation-0001.png` é uma cópia do primeiro e só impede o two-step de tratar os `throbber-` como animação final |
+| `live-build/config/hooks/live/0650-nexus-splash.hook.chroot` | não vai para a ISO (roda no build) | criado para o projeto | GPL-3.0-or-later | define o tema `nexus-os` como padrão e confere que ele entrou no initramfs |
 | `scripts/gerar-identidade.py` | não vai para a ISO | criado para o projeto | GPL-3.0-or-later | gera os ícones, os fundos e a marca a partir da logo original |
 | `scripts/gerar-tema-xfwm4.py` | não vai para a ISO | criado para o projeto | GPL-3.0-or-later | gera o tema das janelas a partir do Greybird-dark |
 | `docs/img/login.png` | não vai para a ISO | captura de tela da ISO (QEMU, `screendump`) | GPL-3.0-or-later (os elementos de pacotes na imagem mantêm a licença do pacote) | tela de login da ISO |
@@ -175,7 +179,7 @@ As capturas usam o comando `screendump` do monitor do QEMU com `-vga std` (1280x
 
 - A barra do login mostra o relógio e o nome de máquina (`nexus-os`), porque o `lightdm-gtk-greeter` os mostra sempre.
 - O `desktop-base` continua instalado (dependência do desktop) e traz o logotipo e os papéis de parede do Debian em `/usr/share`; nenhum é usado pelo Nexus OS.
-- O menu de boot (isolinux e GRUB) agora tem a identidade do Nexus OS e contagem de 5 s; o texto "Automatic boot in N seconds..." do isolinux continua em inglês (vem do próprio syslinux).
+- O menu de boot (isolinux e GRUB) agora tem a identidade do Nexus OS e, desde a RC3, não tem contagem regressiva (menu com 3 entradas, veja `demo.md`).
 - O papel de parede padrão foi conferido no monitor `Virtual-1` do QEMU; em outros vídeos (Hyper-V e VirtualBox) ele depende do alternativo `desktop-background` e dos blocos `monitor0` e `monitor1` (issue 56).
 - O `20-hyperv.conf` fixa `/dev/dri/card0` para qualquer vídeo; em máquina com mais de uma placa o dispositivo certo pode ser outro.
 - Reprodução por segunda pessoa e a conferência em VirtualBox e em máquina física continuam pendentes.
