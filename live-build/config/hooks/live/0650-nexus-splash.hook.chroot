@@ -1,0 +1,11 @@
+#!/bin/sh
+# Hook do Nexus OS (roda dentro do chroot): tela de carregamento da RC3. Define o tema Plymouth nexus-os como padrão
+# (o -R refaz o initramfs) e confere que o tema entrou no initramfs e que é o padrão. Veja docs/demo.md.
+set -e
+
+plymouth-set-default-theme -R nexus-os
+test "$(plymouth-set-default-theme)" = nexus-os
+for initrd in /boot/initrd.img-*; do
+    lsinitramfs "$initrd" | grep -q 'usr/share/plymouth/themes/nexus-os/nexus-os.plymouth'
+    lsinitramfs "$initrd" | grep -q 'usr/share/plymouth/themes/nexus-os/throbber-0001.png'
+done
