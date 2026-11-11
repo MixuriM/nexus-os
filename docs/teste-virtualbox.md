@@ -212,7 +212,7 @@ Bloco 5: confere o que foi configurado antes de ligar.
 **O que fazer agora (H2.1 e H2.5):**
 
 1. **Cronômetro:** no instante em que o menu de boot aparecer, comece a contar (celular).
-2. Clique **dentro da janela da VM** (ela captura o mouse; veja a seção 8) e aperte **Enter**, ou espere a contagem de 5 segundos terminar.
+2. Clique **dentro da janela da VM** (ela captura o mouse; veja a seção 8) e aperte **Enter** (o menu espera a escolha, sem contagem).
 3. Não digite nada. Espere as mensagens de boot e depois a tela azul-escura com a logo no centro (o papel de parede).
 4. Pare o cronômetro quando a **barra de baixo** aparecer completa. Esse número é o **tempo até a barra** (anote na ficha, em segundos). Sem KVM pode levar de alguns minutos até cerca de 10 minutos; o projeto **não mediu** o VirtualBox, então o seu número é uma informação nova e valiosa.
 
@@ -249,7 +249,7 @@ Estas tabelas são a parte H do [checklist](checklist-teste-documentacao.md) em 
 
 | # | O que fazer | O que deve aparecer | Por quê |
 | --- | --- | --- | --- |
-| H2.1 | No menu de boot aperte **Enter** ou espere 5 s. O menu **não** deve mostrar o texto "Debian GNU/Linux" nem o capacete do live-build | Mensagens de boot e depois a tela azul-escura com losangos finos e a logo do Nexus OS no centro | Confere a identidade visual do boot |
+| H2.1 | No menu de boot aperte **Enter** (o menu não tem contagem). O menu **não** deve mostrar o texto "Debian GNU/Linux" nem o capacete do live-build | Mensagens de boot e depois a tela azul-escura com losangos finos e a logo do Nexus OS no centro | Confere a identidade visual do boot |
 | H2.2 | Sem digitar nada, espere a barra aparecer na **parte de baixo** | Barra escura de ponta a ponta: no centro o botão do menu (só o ícone da marca) e os ícones dos aplicativos fixados (terminal, arquivos, Firefox, máquinas virtuais, configurações); à direita o som e o relógio (hora em cima, data embaixo). Nada de barra em cima. **Não** pede usuário nem senha | O login automático e a barra são o que o usuário vê primeiro |
 | H2.3 | Só se aparecer tela de login: usuário `user`, senha `live` | O desktop abre. Marque **falhou** em H2.2 (o login devia ser automático) | Registra o desvio |
 | H2.4 | Olhe a área de trabalho | Dez ícones de atalho com nomes, sem aviso de "atalho não confiável" e sem ponto de exclamação, mais **Pasta pessoal**, **Lixeira** e o disco da ISO, no mesmo estilo (quadrado azul-escuro com contorno colorido). **Não** deve haver "Disco Disquete" | O ícone de disquete era um defeito já corrigido; confere que não voltou |

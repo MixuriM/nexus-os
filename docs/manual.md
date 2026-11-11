@@ -156,7 +156,7 @@ A ISO e o `.sha256` não vão para o Git. A RC1 (sem desktop) ficou só no [Apê
 
 ## Iniciar a ISO
 
-Use pelo menos **2560 MiB de RAM** ([requisitos.md](requisitos.md)). A ISO tem boot BIOS (isolinux) e UEFI: no Hyper-V use a Geração 2 com a Secure Boot desligada (a Geração 1 só está no [Apêndice A](#apêndice-a-rc1-histórico)). Na tela do menu de boot, aperte Enter (ou espere 5 segundos).
+Use pelo menos **2560 MiB de RAM** ([requisitos.md](requisitos.md)). A ISO tem boot BIOS (isolinux) e UEFI: no Hyper-V use a Geração 2 com a Secure Boot desligada (a Geração 1 só está no [Apêndice A](#apêndice-a-rc1-histórico)). Na tela do menu de boot, que espera sem contagem, aperte Enter na entrada **Iniciar o Nexus OS** (as outras duas estão em [demo.md](demo.md)).
 
 **Qual jeito usar:** **No Windows, use o Jeito 2 (Hyper-V).** No Linux, use o Jeito 1 (QEMU). O Jeito 3 (VirtualBox) serve para os dois, mas é o mais lento. Os comandos do Jeito 1 não existem no PowerShell do Windows: se aparecer `qemu-system-x86_64: O termo ... não é reconhecido`, você escolheu o jeito errado.
 
@@ -524,7 +524,7 @@ Use pelo menos a RAM recomendada com o desktop em [requisitos.md](requisitos.md)
 qemu-system-x86_64 -enable-kvm -cpu host -m 2560 -smp 2 -vga std -cdrom dist/nexus-os-rc2-amd64.iso -boot d
 ```
 
-**Por quê:** `-m 2560` é a RAM recomendada com o desktop; `-vga std` dá a placa de vídeo que o XFCE usa. O menu de boot do Nexus OS inicia sozinho em 5 segundos (Enter adianta). A janela do QEMU em si não foi exercitada pelos testes (eles usam `-display none` e a captura de tela do monitor do QEMU); a sessão foi verificada por `loginctl` e pelas capturas de `docs/img/`.
+**Por quê:** `-m 2560` é a RAM recomendada com o desktop; `-vga std` dá a placa de vídeo que o XFCE usa. O menu de boot do Nexus OS não inicia sozinho: aperte Enter na primeira entrada. A janela do QEMU em si não foi exercitada pelos testes (eles usam `-display none` e a captura de tela do monitor do QEMU); a sessão foi verificada por `loginctl` e pelas capturas de `docs/img/`.
 
 **Hyper-V no Windows** (PowerShell como administrador; ISO em `C:\HyperV`). Mesmo procedimento da seção "Iniciar a ISO", com a ISO da RC2 e pelo menos 2560 MB de memória estática (Geração 1 abaixo; a Geração 2 está na seção "Iniciar a ISO"):
 
@@ -705,7 +705,7 @@ sudo containerlab destroy -t /usr/share/nexus-os/labs/containerlab/frr-duo.clab.
 | Sintoma | Causa | Correção |
 | --- | --- | --- |
 | Tela preta ou sem janela do QEMU | O QEMU foi iniciado com `-display none` | Tire o `-display none` (a janela abre sozinha) e use `-vga std` |
-| Demora a sair do menu de boot | O menu tem contagem de 5 segundos | Aperte Enter para adiantar |
+| A máquina não sai do menu de boot | O menu não tem contagem regressiva e espera a escolha | Aperte Enter na entrada **Iniciar o Nexus OS** (veja [demo.md](demo.md)) |
 | A sessão demora muito para aparecer | Sem KVM a emulação é lenta (cerca de 259 s medidos com 1 vCPU, [gui.md](gui.md)) | Use um host com KVM ou espere |
 | Docker não carrega a imagem FRR | O tmpfs do Docker é 50% da RAM | Dê pelo menos a RAM recomendada ([requisitos.md](requisitos.md)) |
 | Atalho de terminal fecha a janela sem mostrar nada | O comando terminou com erro antes da saída | Rode o mesmo comando no Terminal do Nexus OS e veja a mensagem |

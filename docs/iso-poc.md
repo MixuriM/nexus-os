@@ -55,7 +55,7 @@ Definidos em `live-build/auto/config`, com os nomes das opções conferidos em `
 
 - Distribuição `trixie`, arquitetura `amd64`, imagem `iso-hybrid`, sem debian-installer, apenas a área `main`, espelho padrão do Debian.
 - Nome da imagem `nexus-os`, rótulo e aplicação "Nexus OS".
-- Linha de comando do kernel: `boot=live components console=tty0 console=ttyS0,115200n8` (console serial além do vídeo, sem `quiet splash`).
+- Linha de comando do kernel na POC: `boot=live components console=tty0 console=ttyS0,115200n8` (console serial além do vídeo, sem `quiet splash`). Desde a RC3 a linha tem `quiet splash plymouth.ignore-serial-consoles vt.global_cursor_default=0` antes dos `console=` (veja [demo.md](demo.md)).
 - Pacotes extras em `live-build/config/package-lists/nexus-base.list.chroot`: `sudo`, `ca-certificates`, `nano`.
 - Sem a opção `--distribution`, o `lb config` usa `testing`. Por isso ela é obrigatória em `auto/config`.
 
