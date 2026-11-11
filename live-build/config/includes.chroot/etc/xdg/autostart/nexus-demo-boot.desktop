@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Demonstração do Nexus OS
+Comment=Abre a demonstração guiada quando o menu de boot escolheu o modo de demonstração
+Exec=/usr/local/bin/nexus-demo-boot
+OnlyShowIn=XFCE;
+X-GNOME-Autostart-enabled=true

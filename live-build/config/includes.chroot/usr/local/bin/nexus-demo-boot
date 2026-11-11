@@ -1,0 +1,6 @@
+#!/bin/bash
+# Abre o terminal da demonstração quando o menu de boot foi escolhido com "modo de demonstração" (nexus.demo=1 em
+# /proc/cmdline). Sem o parâmetro, sai sem abrir nada e sem imprimir nada. Chamado pelo autostart do XFCE.
+# Variáveis só para teste: NEXUS_CMDLINE (arquivo no lugar de /proc/cmdline) e NEXUS_DEMO_TERMINAL (no lugar de xfce4-terminal).
+grep -qFw 'nexus.demo=1' "${NEXUS_CMDLINE:-/proc/cmdline}" 2>/dev/null || exit 0
+exec "${NEXUS_DEMO_TERMINAL:-xfce4-terminal}" --maximize --hold --title "Demonstração do Nexus OS" -x nexus-demo
