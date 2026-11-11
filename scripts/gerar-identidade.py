@@ -5,10 +5,10 @@
 A logo vem de assets/logo-nexus-os.svg e entra na ISO sem redesenho: o script só a copia, recorta a marca
 (losango com o N) e a compõe com o fundo. Os ícones dos 10 atalhos, os ícones padrão da área de trabalho (tema
 Nexus: pasta pessoal, lixeira, unidades) e os fundos do desktop, do login e do menu de boot são desenhados aqui,
-com formas geométricas e a paleta da logo. Escreve os SVG em live-build/config e converte os dois fundos do
-desktop para PNG 1920x1080 com o rsvg-convert (pacote librsvg2-bin, Debian main).
+com formas geométricas e a paleta da logo. Escreve os SVG em live-build/config, converte os dois fundos do
+desktop para PNG 1920x1080 e gera os PNG do tema Plymouth nexus-os (logo e roda, RC3) com o rsvg-convert (pacote librsvg2-bin, Debian main).
 
-Uso: python3 scripts/gerar-identidade.py   (na raiz do repo; precisa de rsvg-convert)
+Uso: python3 scripts/gerar-identidade.py [plymouth]   (na raiz do repo; precisa de rsvg-convert; "plymouth" gera só o tema)
 """
 import pathlib
 import re
@@ -24,6 +24,8 @@ ICONES = INC / "usr/share/icons/hicolor/scalable/apps"
 LOGO = INC / "usr/share/pixmaps/nexus-os-logo.svg"
 TEMA_ICONES = INC / "usr/share/icons/Nexus/scalable"
 BOOT = RAIZ / "live-build/config/bootloaders"
+PLYMOUTH = INC / "usr/share/plymouth/themes/nexus-os"
+QUADROS_RODA = 30  # 30 quadros de 12 graus: uma volta; o tema spinner do Debian também tem 30
 
 # Paleta da logo (azul, magenta, azul-escuro) e tons do mesmo matiz para superfícies e texto.
 AZUL_ESCURO, MAGENTA, AZUL = "#23253e", "#8d2c79", "#2b66a8"
@@ -262,6 +264,46 @@ def svg_boot():
     )
 
 
+# ---------- tela de carregamento (Plymouth, tema nexus-os): logo e roda ----------
+def svg_logo_plymouth():
+    """Logo sem fundo (transparente) para o watermark.png: o fundo do tema é a cor FUNDO_PROFUNDO."""
+    escala = .24
+    w, h = round(1303 * escala), round(1349 * escala)
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" role="img" aria-labelledby="t">\n'
+            f'  <title id="t">Nexus OS</title>\n  <defs>{GRAD_LOGO}</defs>\n  {logo_sem_fundo(escala, w / 2, h / 2)}\n</svg>\n')
+
+
+def svg_roda(angulo):
+    """Roda: trilho escuro e arco de 270 graus em gradiente magenta para azul, girado em `angulo` graus."""
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80" role="img" aria-labelledby="t">\n'
+        '  <title id="t">Carregando o Nexus OS</title>\n'
+        '  <defs><linearGradient id="r" gradientUnits="userSpaceOnUse" x1="10" y1="70" x2="70" y2="10">'
+        f'<stop offset="0" stop-color="{MAGENTA_VIVO}"/><stop offset="1" stop-color="{AZUL_VIVO}"/></linearGradient></defs>\n'
+        f'  <circle cx="40" cy="40" r="30" fill="none" stroke="{AZUL_ESCURO}" stroke-width="6"/>\n'
+        f'  <circle cx="40" cy="40" r="30" fill="none" stroke="url(#r)" stroke-width="6" stroke-linecap="round" '
+        f'stroke-dasharray="141 48" transform="rotate({angulo} 40 40)"/>\n</svg>\n'
+    )
+
+
+def plymouth():
+    """Gera watermark.png, animation-0001.png e throbber-0001..N.png do tema (os SVG ficam em arquivo temporário)."""
+    import tempfile
+    PLYMOUTH.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory() as tmp:
+        def png(svg, destino):
+            arq = pathlib.Path(tmp) / "q.svg"
+            arq.write_text(svg, encoding="utf-8", newline="\n")
+            subprocess.run(["rsvg-convert", "-o", str(destino), str(arq)], check=True)
+            print(f"escrito {destino.relative_to(RAIZ)} ({destino.stat().st_size} bytes)")
+        png(svg_logo_plymouth(), PLYMOUTH / "watermark.png")
+        # O two-step usa animation-* como animação final e, se não achar, trata throbber-* assim e fica sem roda:
+        # um quadro só de animation-* garante que throbber-* seja a roda (UseEndAnimation=false no tema).
+        png(svg_roda(0), PLYMOUTH / "animation-0001.png")
+        for i in range(QUADROS_RODA):
+            png(svg_roda(i * 360 // QUADROS_RODA), PLYMOUTH / f"throbber-{i + 1:04d}.png")
+
+
 def escreve(caminho, texto):
     caminho.parent.mkdir(parents=True, exist_ok=True)
     caminho.write_text(texto, encoding="utf-8", newline="\n")
@@ -277,6 +319,9 @@ def para_png(svg):
 def main():
     if shutil.which("rsvg-convert") is None:
         sys.exit("FALHA: rsvg-convert não encontrado (pacote librsvg2-bin)")
+    if sys.argv[1:] == ["plymouth"]:  # só o tema da tela de carregamento, sem regerar o resto
+        plymouth()
+        return
     # A logo original entra sem alteração (cópia byte a byte); o ícone da barra é só a marca dela.
     LOGO.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(LOGO_ORIGINAL, LOGO)
@@ -292,6 +337,7 @@ def main():
         escreve(TEMA_ICONES / f"{caminho}.svg", tile(corpo))
     para_png(FUNDOS / "papel-de-parede.svg")
     para_png(FUNDOS / "tela-de-login.svg")
+    plymouth()
 
 
 if __name__ == "__main__":

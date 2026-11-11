@@ -1,0 +1,27 @@
+[Plymouth Theme]
+Name=Nexus OS
+Description=Tela de carregamento do Nexus OS: logo e roda animada sobre o fundo escuro da marca.
+ModuleName=two-step
+
+[two-step]
+ImageDir=/usr/share/plymouth/themes/nexus-os
+HorizontalAlignment=.5
+VerticalAlignment=.66
+WatermarkHorizontalAlignment=.5
+WatermarkVerticalAlignment=.29
+DialogHorizontalAlignment=.5
+DialogVerticalAlignment=.5
+Transition=none
+TransitionDuration=0.0
+BackgroundStartColor=0x14152a
+BackgroundEndColor=0x14152a
+MessageBelowAnimation=true
+
+[boot-up]
+UseEndAnimation=false
+
+[shutdown]
+UseEndAnimation=false
+
+[reboot]
+UseEndAnimation=false
