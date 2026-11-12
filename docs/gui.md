@@ -288,8 +288,9 @@ Pontos a saber:
 - Disco ligado depois do login não é montado sozinho, e monitor ligado depois do login não recebe o papel de parede (ambos anotados como `shortcut:` nos scripts).
 - Os testes do `tests/desktop.sh` cobrem o que a VM permite: o monitor `eDP-1` simulado para o papel de parede, `udevadm verify` para a regra de brilho e `lsblk` e `udisksctl` falsos para a montagem (NTFS tenta normal e depois só leitura, EFI, swap e disco já montado ficam de fora). O efeito real do brilho e da montagem de NTFS sujo só se vê em hardware: a VM não tem `backlight` nem disco do Windows.
 - Não foram testados: BitLocker, disco externo ligado depois do login e o `xfce4-power-manager` reduzindo o brilho depois do login (por exemplo, ao escurecer na bateria).
-- Microcode da CPU (`amd64-microcode`, `intel-microcode`) não está na ISO: fica na área `non-free-firmware`, que a RC3 não tinha e que agora entra só pelo `firmware-amd-graphics`. É uma decisão em aberto, o `amd64-microcode` custa poucos MB.
-- O Wi-Fi do notebook pode precisar de firmware próprio (Intel, Realtek ou MediaTek), ainda não incluído nem testado.
+- Microcode da CPU (`amd64-microcode`, `intel-microcode`) fica fora da ISO, por decisão do grupo (12/11/2026). Ele está na área `non-free-firmware`, que agora entra só pelo `firmware-amd-graphics`. Sem ele o sistema funciona, só sem os patches de segurança do processador.
+- Firmware de Wi-Fi também fica fora, pela mesma decisão: o Wi-Fi do notebook pode não funcionar (Intel, Realtek e MediaTek precisam de firmware próprio). Não foi testado.
+- Nome da ISO: a ISO com essas correções continua sendo a RC3 (atualizada, ainda sem release; a release `v1.0.0-rc3` publicada é da ISO anterior, de SHA256 `0a8cc302...`). A RC4 fica reservada para a otimização, ainda a fazer.
 
 ## Problemas conhecidos
 
