@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Papel de parede do Nexus OS
+Exec=/usr/local/bin/nexus-papel-de-parede
+OnlyShowIn=XFCE;
+NoDisplay=true
