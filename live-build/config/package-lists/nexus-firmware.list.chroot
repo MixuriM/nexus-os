@@ -1,0 +1,2 @@
+# Firmware da GPU AMD: sem ele o amdgpu falha (psp -19) e o X não sobe em notebooks Ryzen
+firmware-amd-graphics
