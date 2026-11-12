@@ -10,6 +10,7 @@ lb config noauto \
     --binary-image iso-hybrid \
     --debian-installer none \
     --archive-areas "main non-free-firmware" \
+    --firmware-chroot false \
     --image-name nexus-os \
     --iso-application "Nexus OS" \
     --iso-volume "Nexus OS" \
