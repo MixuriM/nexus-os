@@ -120,6 +120,8 @@ como_user env NEXUS_MONITORES=eDP-1 nexus-papel-de-parede || fail "nexus-papel-d
 img=$(como_user xfconf-query -c xfce4-desktop -p "/backdrop/screen0/monitoreDP-1/workspace0/last-image")
 [ "$(readlink -f "$img")" = "$papel" ] || fail "nexus-papel-de-parede não definiu o papel do monitor eDP-1 (lido '$img')"
 como_user xfconf-query -c xfce4-desktop -r -R -p /backdrop/screen0/monitoreDP-1
+# Brilho no máximo em notebook: a regra do udev existe e é válida (a VM não tem backlight para testar o efeito).
+udevadm verify /etc/udev/rules.d/90-nexus-brilho.rules || fail "regra 90-nexus-brilho.rules ausente ou inválida"
 tema=$(como_user xfconf-query -c xsettings -p /Net/ThemeName)
 [ "$tema" = Nexus-Dark ] || fail "tema GTK do $usuario é '$tema', esperado Nexus-Dark"
 icones=$(como_user xfconf-query -c xsettings -p /Net/IconThemeName)

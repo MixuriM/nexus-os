@@ -1,0 +1,3 @@
+# Notebook: brilho da tela no máximo ao aparecer o backlight (a live não guarda o último nível e o notebook
+# chegava com a tela quase apagada). Monitor externo de PC não tem backlight no sysfs: nada muda.
+ACTION=="add", SUBSYSTEM=="backlight", ATTR{brightness}="$attr{max_brightness}"
