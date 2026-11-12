@@ -61,7 +61,7 @@ grep -qF -- '--bootappend-live "boot=live components quiet splash plymouth.ignor
 if grep -qE -- '--bootappend-live-failsafe .*nosplash' "$cfg" 2>/dev/null; then
     grep -qF 'entrada 3 voltou a nosplash' docs/demo.md 2>/dev/null || fail "$cfg: failsafe com nosplash sem a nota 'entrada 3 voltou a nosplash' em docs/demo.md"
 else
-    grep -qF -- "--bootappend-live-failsafe \"boot=live components memtest noapic noapm nodma nomce nosmp $falha_nova vga=788\"" "$cfg" 2>/dev/null \
+    grep -qF -- "--bootappend-live-failsafe \"boot=live components memtest noapm nodma nomce nosmp $falha_nova vga=788\"" "$cfg" 2>/dev/null \
         || fail "$cfg: --bootappend-live-failsafe sem o valor padrão do live-build trocando nosplash por '$falha_nova'"
 fi
 
