@@ -198,7 +198,7 @@ em vez de uma caixa física, é um programa que sobe e desce com um comando."
     exe "nexus-vnf status"
     n=$(no_vnf)
     [ -n "$n" ] || falha "o contêiner da VNF não foi encontrado"
-    exe "docker exec $n vtysh -c 'show running-config' | head -n 15"
+    exe "docker exec $n vtysh -c 'show running-config' 2>/dev/null | head -n 15"
     mostra "O roteador está no ar e responde aos comandos de configuração, como um equipamento físico."
     pausa
     exe "nexus-vnf down"
@@ -235,8 +235,8 @@ ver a rede cair e, ao tirar o bloqueio, ver a rede se refazer sozinha."
     pausa
     aviso "esperando os roteadores se encontrarem (OSPF)..."
     espera convergiu "$LIMITE_CONVERGE" "o OSPF não chegou a Full com as rotas"
-    exe "docker exec clab-integrado-r1 vtysh -c 'show ip ospf neighbor'"
-    exe "docker exec clab-integrado-r1 vtysh -c 'show ip route ospf'"
+    exe "docker exec clab-integrado-r1 vtysh -c 'show ip ospf neighbor' 2>/dev/null"
+    exe "docker exec clab-integrado-r1 vtysh -c 'show ip route ospf' 2>/dev/null"
     exe "docker exec clab-integrado-r1 ping -c 3 -W 2 -I 198.51.100.21 198.51.100.22"
     mostra "Os dois roteadores se acharam (Full), aprenderam a rota um do outro e conversam pelo switch."
     pausa
@@ -244,16 +244,16 @@ ver a rede cair e, ao tirar o bloqueio, ver a rede se refazer sozinha."
     exe "ovs-ofctl add-flow $BR_INT 'priority=200,ip,nw_proto=89,actions=drop'"
     aviso "esperando a adjacência cair (até $limite_queda s)..."
     espera caiu "$limite_queda" "a adjacência OSPF e as rotas não caíram com o descarte do protocolo 89"
-    exe "docker exec clab-integrado-r1 vtysh -c 'show ip ospf neighbor'"
-    exe "docker exec clab-integrado-r1 vtysh -c 'show ip route ospf'"
+    exe "docker exec clab-integrado-r1 vtysh -c 'show ip ospf neighbor' 2>/dev/null"
+    exe "docker exec clab-integrado-r1 vtysh -c 'show ip route ospf' 2>/dev/null"
     mostra "Sem o OSPF passando, os roteadores perderam um ao outro e as rotas sumiram."
     pausa
     printf '\nAgora vamos remover o bloqueio.\n'
     exe "ovs-ofctl --strict del-flows $BR_INT 'priority=200,ip,nw_proto=89'"
     aviso "esperando a rede se refazer..."
     espera convergiu "$LIMITE_VOLTA" "o OSPF não voltou a Full depois de remover o descarte"
-    exe "docker exec clab-integrado-r1 vtysh -c 'show ip ospf neighbor'"
-    exe "docker exec clab-integrado-r1 vtysh -c 'show ip route ospf'"
+    exe "docker exec clab-integrado-r1 vtysh -c 'show ip ospf neighbor' 2>/dev/null"
+    exe "docker exec clab-integrado-r1 vtysh -c 'show ip route ospf' 2>/dev/null"
     mostra "Tirou a regra, a rede voltou sozinha: o controle da rede está nas regras do switch."
     pausa
     exe "nexus-vnf down $topo"
@@ -305,6 +305,7 @@ menu() {
             5) ato_tudo ;;
             6) limpar; ok "tudo limpo" ;;
             0 | q | sair) exit 0 ;;
+            '') ;;
             *) aviso "opção inválida: $op" ;;
         esac
     done
