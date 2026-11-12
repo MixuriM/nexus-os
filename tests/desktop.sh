@@ -122,6 +122,27 @@ img=$(como_user xfconf-query -c xfce4-desktop -p "/backdrop/screen0/monitoreDP-1
 como_user xfconf-query -c xfce4-desktop -r -R -p /backdrop/screen0/monitoreDP-1
 # Brilho no máximo em notebook: a regra do udev existe e é válida (a VM não tem backlight para testar o efeito).
 udevadm verify /etc/udev/rules.d/90-nexus-brilho.rules || fail "regra 90-nexus-brilho.rules ausente ou inválida"
+# Montagem dos discos: lsblk e udisksctl falsos. O NTFS tenta normal e depois só leitura; EFI, swap e já montado ficam de fora.
+[ -f /etc/xdg/autostart/nexus-montar-discos.desktop ] || fail "autostart do nexus-montar-discos ausente"
+falso=$(mktemp -d)
+chmod 777 "$falso"
+cat > "$falso/lsblk" <<'FALSO'
+#!/bin/sh
+echo 'NAME="/dev/sdx1" FSTYPE="ntfs" MOUNTPOINT="" PARTTYPE="ebd0a0a2-b9e5-4433-87c0-68b6b72699c7"'
+echo 'NAME="/dev/sdx2" FSTYPE="vfat" MOUNTPOINT="" PARTTYPE="c12a7328-f81f-11d2-ba4b-00a0c93ec93b"'
+echo 'NAME="/dev/sdx3" FSTYPE="swap" MOUNTPOINT="" PARTTYPE=""'
+echo 'NAME="/dev/sdx4" FSTYPE="ext4" MOUNTPOINT="/mnt" PARTTYPE=""'
+FALSO
+cat > "$falso/udisksctl" <<'FALSO'
+#!/bin/sh
+echo "$*" >> "$(dirname "$0")/chamadas"
+case "$*" in *"-o ro"*) exit 0 ;; *) exit 1 ;; esac
+FALSO
+chmod 755 "$falso/lsblk" "$falso/udisksctl"
+como_user env PATH="$falso:$PATH" nexus-montar-discos
+[ "$(cat "$falso/chamadas")" = "$(printf 'mount -b /dev/sdx1\nmount -b /dev/sdx1 -o ro')" ] \
+    || fail "nexus-montar-discos: esperado montar /dev/sdx1 normal e depois só leitura, sem tocar nos outros (chamadas: $(tr '\n' ';' < "$falso/chamadas"))"
+rm -rf "$falso"
 tema=$(como_user xfconf-query -c xsettings -p /Net/ThemeName)
 [ "$tema" = Nexus-Dark ] || fail "tema GTK do $usuario é '$tema', esperado Nexus-Dark"
 icones=$(como_user xfconf-query -c xsettings -p /Net/IconThemeName)

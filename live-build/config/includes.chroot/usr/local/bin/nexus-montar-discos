@@ -1,0 +1,15 @@
+#!/bin/sh
+# Monta os discos ainda não montados no início da sessão. Dois motivos: (1) o xfdesktop mostra o ícone de volume
+# não montado com 50% de opacidade (fixo no código dele, não muda por tema); (2) disco do Windows com Inicialização
+# Rápida fica "sujo" e o driver ntfs3 recusa a montagem normal: nesse caso monta só para leitura, que não corrompe nada.
+# Pula EFI, recuperação do Windows, swap, LVM/RAID, volume cifrado e ISO. udisksctl dispensa senha na sessão gráfica.
+# shortcut: disco ligado depois do login não é montado sozinho, trocar por um gancho do udisks se isso importar.
+set -u
+
+lsblk -pnP -o NAME,FSTYPE,MOUNTPOINT,PARTTYPE | while read -r linha; do
+    eval "$linha"
+    [ -n "$FSTYPE" ] && [ -z "$MOUNTPOINT" ] || continue
+    case "$FSTYPE" in swap | crypto_LUKS | BitLocker | LVM2_member | linux_raid_member | iso9660) continue ;; esac
+    case "$PARTTYPE" in c12a7328-f81f-11d2-ba4b-00a0c93ec93b | de94bba4-06d1-4d40-a16a-bfd50179d6ac) continue ;; esac
+    udisksctl mount -b "$NAME" >/dev/null 2>&1 || udisksctl mount -b "$NAME" -o ro >/dev/null 2>&1 || true
+done
