@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Montar discos do Nexus OS
+Exec=/usr/local/bin/nexus-montar-discos
+OnlyShowIn=XFCE;
+NoDisplay=true
