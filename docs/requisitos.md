@@ -112,6 +112,7 @@ A PoC não tinha RAM medida; o crescimento de tamanho vem de libvirt e QEMU (+30
 
 ## Limitações
 
+- Hardware real (12/11/2026): GPU AMD integrada precisa do `firmware-amd-graphics`, que a ISO passou a incluir (a RC3 não tinha e o desktop não subia no notebook Ryzen 7 5825U). Outros firmwares, como o do Wi-Fi, não estão na ISO. Detalhes, com os outros defeitos achados no notebook, em [gui.md](gui.md), seção "Notebook com GPU AMD". O tamanho da ISO (2044821504 bytes) tem folga de cerca de 98 MiB sob o limite de 2 GiB do GitHub, veja [iso-poc.md](iso-poc.md).
 - Todas as medições são **com KVM** (VM de build no Hyper-V). Sem KVM não foram repetidas: os tempos sobem muito (veja [iso-poc.md](iso-poc.md)) e o pico de RAM pode diferir.
 - O pico é amostrado a cada 5 s; um pico mais curto que isso pode escapar. `used` não inclui o cache de arquivos.
 - A RAM em repouso varia entre execuções: três execuções com 4096 MiB deram 796, 775 e 674 MiB e uma com 1536 MiB deu 539 MiB. A causa não foi investigada (issue #33). O repouso é lido ainda perto do fim do boot, cerca de 20 s depois do início.

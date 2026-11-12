@@ -270,6 +270,27 @@ Mutações (4 de 4, com cópia de `tests/desktop.sh` por `--extra`, sem rebuild;
 | M3: esperar os processos do MATE (`mate-session mate-panel marco`) | `FALHA: processo mate-session não está rodando como user`, depois dos 120 s de espera |
 | M4: limite de espera da sessão menor que o boot | Com limite de 5 s o teste ainda passa: a sessão já está ativa quando ele começa e, mesmo depois de `systemctl stop lightdm` e `start`, a sessão e os processos sobem em 2 s com KVM. Com limite de 1 s e o `lightdm` reiniciado: `FALHA: sessão gráfica de user não ficou ativa em 1 s`; o controle (reinício e limite de 120 s) passa com a sessão ativa em 2 s. O laço de espera é real, mas o valor de 5 s do enunciado não chega a falhar nesta VM |
 
+## Notebook com GPU AMD: defeitos achados em hardware real (12/11/2026)
+
+A RC3 gravada com o Rufus funcionou no PC (Ryzen 7 5700X, GeForce RTX 2060) e falhou no notebook (ASUS Vivobook 15 M1502YA, Ryzen 7 5825U, Radeon integrada). Quatro defeitos saíram dessa rodada, nenhum aparecia em VM. As correções ficaram no ramo `marcos`. Cada uma foi conferida no notebook depois de regravar a ISO, exceto a montagem de disco, que ainda espera essa conferência.
+
+| Sintoma no notebook | Causa | Correção |
+|---|---|---|
+| Resolução ruim, tela de erro com `amdgpu: Fatal error during GPU init` (`early_init of IP block <psp> failed -19`), depois só o terminal | A ISO só tinha a área `main` do Debian, sem o firmware da GPU AMD. Sem ele o `amdgpu` não inicia, o X não sobe e o `lightdm` falha | `--archive-areas "main non-free-firmware"` e `--firmware-chroot false` em `live-build/auto/config`, mais o pacote `firmware-amd-graphics` em `live-build/config/package-lists/nexus-firmware.list.chroot`. Conferido no notebook: o desktop sobe |
+| Papel de parede padrão do XFCE em vez do Nexus OS (no notebook e no PC) | O `xfdesktop` lê o papel por nome de monitor (`/backdrop/screen0/monitor<nome>/workspace0/last-image`). O `xfce4-desktop.xml` só tinha `Virtual-1`, `monitor0` e `monitor1`, nomes de VM. A alternativa `desktop-background` do hook `0600` não cobre outros monitores, o `xfdesktop` não a usa | `/usr/local/bin/nexus-papel-de-parede`, chamado pelo autostart `etc/xdg/autostart/nexus-papel-de-parede.desktop`, define o papel de cada monitor listado pelo `xrandr --listmonitors`. Conferido no notebook e no PC |
+| Tela do notebook quase apagada ao entrar | A live não guarda o último nível de brilho: vale o que o notebook tinha | Regra do udev `etc/udev/rules.d/90-nexus-brilho.rules`: quando aparece um dispositivo de `backlight`, copia `max_brightness` para `brightness`. PC com monitor externo não tem `backlight` no sysfs e não muda. Conferido no notebook |
+| "Falha ao montar Volume de 511 GB" (`wrong fs type, bad option, bad superblock ... missing codepage or helper program`) e ícone do disco opaco na área de trabalho | Hipótese ainda sem `dmesg` do notebook: o udisks tenta primeiro o driver de kernel `ntfs3` (`ntfs_drivers=ntfs3,ntfs` no `mount_options.conf`) e o `ntfs3` recusa NTFS sujo ou hibernado, estado em que o Windows com Inicialização Rápida deixa a partição. O ponto de montagem `6ED0CE69D0CE36DD` tem o formato do número de série de um NTFS. O ícone opaco é do `xfdesktop`: `xfdesktop_volume_icon_get_opacity` devolve 0,5 para volume não montado, valor fixo no código, sem ajuste por tema | `/usr/local/bin/nexus-montar-discos`, chamado pelo autostart `etc/xdg/autostart/nexus-montar-discos.desktop`, monta no login o que não está montado. Se a montagem normal falhar, tenta de novo com `-o ro`, o que é seguro para disco do Windows sujo. Pula EFI, recuperação do Windows, swap, LVM, RAID, BitLocker, volume cifrado e ISO. Com o volume montado o ícone volta a 100% |
+
+Pontos a saber:
+
+- Disco do Windows sujo abre só para leitura. Para gravar, desligue o Windows de vez (desative a Inicialização Rápida) antes de iniciar o Nexus OS.
+- Se o disco falhar por outro motivo, por exemplo BitLocker, continua sem montar e o ícone continua opaco. Nesse caso, no notebook: `lsblk -f` e `sudo dmesg | tail -30`.
+- Disco ligado depois do login não é montado sozinho, e monitor ligado depois do login não recebe o papel de parede (ambos anotados como `shortcut:` nos scripts).
+- Os testes do `tests/desktop.sh` cobrem o que a VM permite: o monitor `eDP-1` simulado para o papel de parede, `udevadm verify` para a regra de brilho e `lsblk` e `udisksctl` falsos para a montagem (NTFS tenta normal e depois só leitura, EFI, swap e disco já montado ficam de fora). O efeito real do brilho e da montagem de NTFS sujo só se vê em hardware: a VM não tem `backlight` nem disco do Windows.
+- Não foram testados: BitLocker, disco externo ligado depois do login e o `xfce4-power-manager` reduzindo o brilho depois do login (por exemplo, ao escurecer na bateria).
+- Microcode da CPU (`amd64-microcode`, `intel-microcode`) não está na ISO: fica na área `non-free-firmware`, que a RC3 não tinha e que agora entra só pelo `firmware-amd-graphics`. É uma decisão em aberto, o `amd64-microcode` custa poucos MB.
+- O Wi-Fi do notebook pode precisar de firmware próprio (Intel, Realtek ou MediaTek), ainda não incluído nem testado.
+
 ## Problemas conhecidos
 
 - Os números do passo A (candidatos) são relativos ao estado da VM de build (Docker, QEMU e outros já instalados) e usam `--no-install-recommends`; por isso a sanidade com `xorg` e o applet de rede está acima. A medição que decide é a do passo B, em ISO.
