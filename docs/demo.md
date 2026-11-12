@@ -96,10 +96,10 @@ Medido na VM de build (Debian 13 no Hyper-V Geração 2), **com KVM**, com 4 vCP
 | Item | Valor |
 | --- | --- |
 | Arquivo | `dist/nexus-os-rc3-amd64.iso` (fora do Git) |
-| SHA256 | `ef7688809669f984660b5a786d246e42f7c34e236633102dd252707d47c2decc` |
+| SHA256 | `c76d4c15265c1f04ae0e5e55e0e2df89d375b13a181c4a55031072c9e3b84e8d` |
 | Tamanho | 1988689920 bytes (RC2: 1990639616 bytes; limite de 2147483648 bytes por arquivo em release do GitHub) |
-| Commit do build | `f1cefd1` (antes do rebase do PR) |
-| Build | 1128 s (RC2: 1100 s) |
+| Commit do build | `a02241a` (antes do rebase do PR) |
+| Build | 1057 s (RC2: 1100 s) |
 
 ### Boot e memória, RC2 contra RC3
 
@@ -107,18 +107,18 @@ Três execuções de cada, na mesma sessão da VM, mesmo método (login: `tests/
 
 | Medida | RC2 (mediana, mínimo, máximo) | RC3 (mediana, mínimo, máximo) |
 | --- | --- | --- |
-| Tempo até `login:` na serial | 36 s (36, 36) | 30 s (30, 34) |
-| Tempo até a sessão gráfica | 23,9 s (22,5 a 24,1) | 18,3 s (18,2 a 18,8) |
-| RAM em repouso | 996 MiB (963 a 1038) | 949 MiB (935 a 966) |
-| `all` com 2560 MiB (8 testes) | 219 a 228 s | 228 s, repouso 994 MiB, pico 1833 MiB |
+| Tempo até `login:` na serial | 36 s (36, 36) | 33 s (30 a 33) |
+| Tempo até a sessão gráfica | 23,9 s (22,5 a 24,1) | 18,7 s (18,2 a 19,4) |
+| RAM em repouso | 996 MiB (963 a 1038) | 987 MiB (961 a 1000) |
+| `all` com 2560 MiB (8 testes) | 219 a 228 s | 225 s, repouso 982 MiB, pico 1871 MiB |
 
-A RC3 ficou dentro do custo aceito (até +5 s na sessão e +100 MiB): ficou mais rápida e a RAM em repouso não aumentou. A causa da diferença de tempo não foi investigada.
+A RC3 ficou dentro do custo aceito (até +5 s na sessão e +100 MiB): ficou um pouco mais rápida e a RAM em repouso não aumentou. A causa da diferença de tempo não foi investigada.
 
 ### A tela de carregamento nas capturas (`tests/boot-visual.sh`)
 
-Entrada 1 (BIOS): o menu mostra 3 entradas, sem contagem, e fica parado; depois do Enter o fundo do menu aparece por cerca de 8 s (o carregador lê o kernel e o initramfs do CD) sem nenhuma linha de texto, e a logo com a roda aparece de 11 s a 21 s depois do Enter, com a roda em quadros diferentes; segue uma tela preta, sem texto, até o desktop (a captura de 45 s já mostra o desktop). Em UEFI (OVMF, GRUB) a logo com a roda aparece de 7 s a 18 s. Com **Esc** (segundo 14) as mensagens de boot aparecem no quadro seguinte. A entrada 3 (modo de compatibilidade, com `nosmp`) mostra a mesma tela e chega ao desktop por volta de 70 s. Quadro de exemplo para o Relatório: `docs/img/boot-carregando.png` (entrada 1, 1280x800).
+Entrada 1 (BIOS, QEMU): o menu mostra 3 entradas, sem contagem, e fica parado; depois do Enter o fundo do menu aparece por cerca de 8 s (o carregador lê o kernel e o initramfs do CD) sem nenhuma linha de texto, e a logo com a roda aparece de 11 s a 21 s depois do Enter, com a roda em quadros diferentes; segue uma tela preta, sem texto, até o desktop (a captura de 45 s já mostra o desktop). Em UEFI (OVMF, GRUB) a logo com a roda aparece de 7 s a 18 s. Com **Esc** (segundo 14) as mensagens de boot aparecem no quadro seguinte. A entrada 3 (modo de compatibilidade, com `nosmp`) mostra a mesma tela e chega ao desktop por volta de 70 s no QEMU. Quadro de exemplo para o Relatório: `docs/img/boot-carregando.png` (entrada 1, 1280x800).
 
-Tempo até o `login:` depois do Enter, pela serial: 28 s (entrada 1), 28 s (entrada 2), 24 s (entrada 1 em UEFI) e 27 s (entrada 1 com Esc).
+Tempo até o `login:` depois do Enter, pela serial: 27 s (entrada 1), 26 s (entrada 2), 25 s (entrada 1 em UEFI) e 28 s (entrada 1 com Esc).
 
 ### Tempos da demonstração (`tests/demo.sh`, 2560 MiB, com KVM, `--auto`)
 
@@ -136,18 +136,29 @@ Na execução da ISO de desenvolvimento (antes do build final): 6, 7, 24, 7 e 44
 
 | Teste | Resultado |
 | --- | --- |
-| `tests/iso.sh` (2560 MiB) | OK, `login:` em 35 s |
+| `tests/iso.sh` (2560 MiB) | OK, `login:` em 33 s |
 | `tests/iso-smoke.sh` `all` (2560 MiB) | OK, 8 testes em 228 s |
-| `tests/demo.sh` | OK, 4 de 4 atos em 82 s |
-| `tests/run-fase3.sh` | OK, 9 testes em 371 s |
+| `tests/demo.sh` | OK, 4 de 4 atos em 81 s |
+| `tests/run-fase3.sh` | OK, 9 testes em 366 s |
 | T1 | OK, rodado numa cópia do repositório com o SHA256 da RC3 no lugar do da RC2 em `docs/rc2.md` (o T1 compara com esse arquivo, que é da RC2 congelada) |
-| T2, T3, T4, T5 | OK (62, 60, 46 e 59 s) |
+| T2, T3, T4, T5 | OK (59, 57, 44 e 59 s) |
 | T6 (3 execuções) | OK em 200 s; OSPF `Full` em 13,34, 13,48 e 13,98 s; queda do protocolo 89 em cerca de 3,5 s |
-| T7 | OK em 151 s |
+| T7 | OK em 150 s |
 | `tests/boot-visual.sh` entradas 1, 2, 3, UEFI e Esc | OK (capturas aprovadas por olhar) |
 | Estáticos (`lint-repo` na VM com `shellcheck`, `docs`, `gui-spec`, `atalhos`, `identidade`, `requisitos`, `congelamento`, `evidencias`, `boot`) | OK |
 
 Os testes existentes não foram enfraquecidos. Alterações em testes existentes: `tests/identidade.sh` passou a exigir `timeout 0` (isolinux) e `set timeout=-1` (GRUB); os comentários de `tests/iso.sh` e `tests/iso-smoke.sh` deixaram de falar em contagem de 5 s; em `tests/evidencias.sh`, ajuste mínimo para o `shellcheck` (um `# shellcheck disable=SC2016` e aspas num glob), que já falhava no `tests/lint-repo.sh` da VM na RC2 e não muda o comportamento.
+
+### Rodada humana no Hyper-V Geração 2 (11/11/2026, sem KVM, 2560 MiB, Secure Boot desligada)
+
+| Item | Resultado |
+| --- | --- |
+| Menu (UEFI, GRUB) | 3 entradas, sem contagem, parado até a escolha |
+| Entrada 1 | roda com a logo, depois desktop em cerca de 24 s depois do Enter; nenhum terminal de demonstração; `free -m` com 2409 MiB de total e 1327 MiB usados |
+| Entrada 2 | desktop e terminal maximizado com o menu da demonstração em cerca de 26,5 s; `tudo` interativo completo (sdn, vnf, rede e vm) sem falha, com o vizinho OSPF em `Full`; VM criada com `virt-type qemu` (sem KVM) |
+| Ctrl+C no meio de um ato, depois `limpar` | nada sobrou (`ip netns list`, `sudo docker ps -a` e `virsh -c qemu:///system list --all` vazios) |
+| Entrada 3 | **falhou** na ISO anterior: kernel com `ACPI: SCI (IRQ9) allocation failed` e parada no `(initramfs)`; corrigido tirando o `noapic` do failsafe (ISO desta seção); falta repetir no Hyper-V |
+| Aviso do `vtysh` | as saídas do `vtysh` mostravam `Can't open configuration file /etc/frr/vtysh.conf`; o `nexus-demo` agora esconde esse aviso (`2>/dev/null`) |
 
 ### Limitações e problemas conhecidos
 
@@ -171,4 +182,4 @@ Os testes existentes não foram enfraquecidos. Alterações em testes existentes
 
 ## 7. Estado da execução
 
-Branch `marcos` (commits locais; o push direto para `origin/marcos` é recusado pela regra do repositório, "Cannot update this protected ref", então a integração é por PR). Builds feitos: B1 (tema sem `lock.png`), B2 (tema corrigido), BF1 (clone limpo no commit `f236fc5`, descartado porque depois se ajustaram dois testes para o `shellcheck`) e BF2 (clone limpo no commit `f1cefd1`, ISO final da seção 6). Bateria da seção 6 concluída com tudo OK. Falta: RODADA 1 manual (Hyper-V Geração 2), PR de `marcos` para a `main` e, só depois do merge, a tag `v1.0.0-rc3` e a release.
+Branch `marcos` (commits locais; o push direto para `origin/marcos` é recusado pela regra do repositório, "Cannot update this protected ref", então a integração é por PR). ISO final da seção 6 (clone limpo no commit `a02241a`) com a bateria completa OK. A rodada humana no Hyper-V Geração 2 passou nas entradas 1 e 2 e achou o defeito da entrada 3, já corrigido nesta ISO. Falta: repetir a entrada 3 no Hyper-V, PR de `marcos` para a `main` e, só depois do merge, a tag `v1.0.0-rc3` e a release.
