@@ -1,6 +1,6 @@
 # Menu de boot, tela de carregamento e modo de demonstração (RC3)
 
-Este documento descreve as três mudanças da RC3 (`v1.0.0-rc3`) sobre a RC2 congelada: o menu de boot sem contagem e com 3 entradas, a tela de carregamento com a logo e uma roda animada, e a demonstração guiada de virtualização de redes dentro da própria ISO. Termina com o roteiro de apresentação, as medições da RC3 e as decisões técnicas verificadas.
+Este documento descreve as três mudanças da RC3 (`v1.0.0-rc3`) sobre a RC2 congelada: o menu de boot sem contagem e com 3 entradas, a tela de carregamento com a logo e uma roda animada, e a demonstração guiada de virtualização de redes dentro da própria ISO. Termina com o roteiro de apresentação, as medições da RC3 e as decisões técnicas verificadas. A apresentação usará a RC4, otimizada e ainda a ser feita: as medições e as limitações abaixo são da RC3 e precisam ser medidas de novo na RC4.
 
 ## Índice
 
@@ -165,7 +165,7 @@ Os testes existentes não foram enfraquecidos. Alterações em testes existentes
 ### Limitações e problemas conhecidos
 
 - **BIOS (isolinux): acentos no rótulo da entrada 2.** O `vesamenu.c32` do syslinux mostra mal os caracteres `ç` e `ã` do rótulo "Iniciar o Nexus OS (modo de demonstração)": aparecem dois símbolos no lugar de `çã`. No GRUB (UEFI) o rótulo aparece certo. A entrada continua funcionando; só o texto é afetado na BIOS.
-- **Tela preta sem texto entre a roda e o desktop:** cerca de 18 s no QEMU com KVM (de 22 s a 40 s depois do Enter), enquanto o X sobe. A otimização de desempenho fica para depois da apresentação.
+- **Tela preta sem texto entre a roda e o desktop:** cerca de 18 s no QEMU com KVM (de 22 s a 40 s depois do Enter), enquanto o X sobe. A otimização de desempenho está prevista para a RC4, a ISO da apresentação.
 - **Carregador da BIOS:** no isolinux não há opção documentada para silenciar a mensagem `Loading ...`; nas capturas ela não apareceu.
 - **GRUB (UEFI):** entre o Enter e a tela de carregamento aparece um retângulo preto sobre o fundo do menu (transição do GRUB), sem texto.
 - **Menu sem contagem:** uma máquina sem teclado (ou sem console aberto) fica parada no menu.
@@ -184,4 +184,4 @@ Os testes existentes não foram enfraquecidos. Alterações em testes existentes
 
 ## 7. Estado da execução
 
-Branch `marcos` (commits locais; o push direto para `origin/marcos` é recusado pela regra do repositório, "Cannot update this protected ref", então a integração é por PR). ISO final da seção 6 (clone limpo no commit `b601e60`) com a bateria reduzida OK e a rodada humana no Hyper-V Geração 2 aprovada nas três entradas. Falta: PR de `marcos` para a `main` e, só depois do merge, a tag `v1.0.0-rc3` e a release.
+A RC3 foi mergeada na `main` (PRs #85 e #86) e publicada: tag e release `v1.0.0-rc3`, ISO de SHA256 `0a8cc302b34f3d43c3fbc94620e824bb1c817209cf1db64d06566cf24f4efe5c`. O push direto para `origin/marcos` é recusado pela regra do repositório ("Cannot update this protected ref"), então a integração é por PR. A apresentação usará a RC4, otimizada, ainda a ser feita.
