@@ -96,21 +96,21 @@ Medido na VM de build (Debian 13 no Hyper-V Geração 2), **com KVM**, com 4 vCP
 | Item | Valor |
 | --- | --- |
 | Arquivo | `dist/nexus-os-rc3-amd64.iso` (fora do Git) |
-| SHA256 | `c76d4c15265c1f04ae0e5e55e0e2df89d375b13a181c4a55031072c9e3b84e8d` |
+| SHA256 | `0a8cc302b34f3d43c3fbc94620e824bb1c817209cf1db64d06566cf24f4efe5c` |
 | Tamanho | 1988689920 bytes (RC2: 1990639616 bytes; limite de 2147483648 bytes por arquivo em release do GitHub) |
-| Commit do build | `a02241a` (antes do rebase do PR) |
-| Build | 1057 s (RC2: 1100 s) |
+| Commit do build | `b601e60` (antes do rebase do PR) |
+| Build | 2177 s (VM lenta, cache frio; o build anterior, no commit `a02241a`, levou 1057 s; RC2: 1100 s) |
 
 ### Boot e memória, RC2 contra RC3
 
-Três execuções de cada, na mesma sessão da VM, mesmo método (login: `tests/iso.sh` com `NEXUS_ISO_MEM=2560`; sessão: início do último processo do desktop em segundos de uptime do convidado, como em `requisitos.md`; RAM em repouso: `NEXUS-SMOKE-MEM repouso` do `tests/iso-smoke.sh`).
+Medido na ISO do commit `a02241a`; a ISO final só mudou a linha do failsafe (entrada 3), que não entra no boot da entrada 1. Três execuções de cada, na mesma sessão da VM, mesmo método (login: `tests/iso.sh` com `NEXUS_ISO_MEM=2560`; sessão: início do último processo do desktop em segundos de uptime do convidado, como em `requisitos.md`; RAM em repouso: `NEXUS-SMOKE-MEM repouso` do `tests/iso-smoke.sh`).
 
 | Medida | RC2 (mediana, mínimo, máximo) | RC3 (mediana, mínimo, máximo) |
 | --- | --- | --- |
 | Tempo até `login:` na serial | 36 s (36, 36) | 33 s (30 a 33) |
 | Tempo até a sessão gráfica | 23,9 s (22,5 a 24,1) | 18,7 s (18,2 a 19,4) |
 | RAM em repouso | 996 MiB (963 a 1038) | 987 MiB (961 a 1000) |
-| `all` com 2560 MiB (8 testes) | 219 a 228 s | 225 s, repouso 982 MiB, pico 1871 MiB |
+| `all` com 2560 MiB (8 testes) | 219 a 228 s | 225 s, repouso 982 MiB, pico 1871 MiB (ISO final: 225 s, repouso 1006 MiB, pico 1874 MiB) |
 
 A RC3 ficou dentro do custo aceito (até +5 s na sessão e +100 MiB): ficou um pouco mais rápida e a RAM em repouso não aumentou. A causa da diferença de tempo não foi investigada.
 
@@ -132,19 +132,21 @@ Tempo até o `login:` depois do Enter, pela serial: 27 s (entrada 1), 26 s (entr
 
 Na execução da ISO de desenvolvimento (antes do build final): 6, 7, 24, 7 e 44 s. No modo interativo o tempo é maior, pelas pausas e pela leitura.
 
-### Bateria na ISO final
+### Bateria
+
+A bateria completa rodou na ISO do commit `a02241a`. A ISO final (`b601e60`) só mudou a linha do failsafe, então rodou uma bateria reduzida; as linhas T1 a T7 e `run-fase3` abaixo são da ISO anterior.
 
 | Teste | Resultado |
 | --- | --- |
-| `tests/iso.sh` (2560 MiB) | OK, `login:` em 33 s |
-| `tests/iso-smoke.sh` `all` (2560 MiB) | OK, 8 testes em 228 s |
-| `tests/demo.sh` | OK, 4 de 4 atos em 81 s |
+| `tests/iso.sh` (2560 MiB) | OK, `login:` em 33 s (ISO final: OK em 51 s, com a VM carregada) |
+| `tests/iso-smoke.sh` `all` (2560 MiB) | OK, 8 testes em 228 s (ISO final: a primeira execução falhou por tempo esgotado no teste do desktop, `M7` e `M9`, com a VM carregada e o Hyper-V de teste ligado ao mesmo tempo; repetida com a VM livre: OK, 8 testes em 225 s) |
+| `tests/demo.sh` | OK, 4 de 4 atos em 81 s (ISO final: OK em 99 s) |
 | `tests/run-fase3.sh` | OK, 9 testes em 366 s |
 | T1 | OK, rodado numa cópia do repositório com o SHA256 da RC3 no lugar do da RC2 em `docs/rc2.md` (o T1 compara com esse arquivo, que é da RC2 congelada) |
 | T2, T3, T4, T5 | OK (59, 57, 44 e 59 s) |
 | T6 (3 execuções) | OK em 200 s; OSPF `Full` em 13,34, 13,48 e 13,98 s; queda do protocolo 89 em cerca de 3,5 s |
 | T7 | OK em 150 s |
-| `tests/boot-visual.sh` entradas 1, 2, 3, UEFI e Esc | OK (capturas aprovadas por olhar) |
+| `tests/boot-visual.sh` entradas 1, 2, 3, UEFI e Esc | OK (capturas aprovadas por olhar; repetido na ISO final, as 5 com saída 0) |
 | Estáticos (`lint-repo` na VM com `shellcheck`, `docs`, `gui-spec`, `atalhos`, `identidade`, `requisitos`, `congelamento`, `evidencias`, `boot`) | OK |
 
 Os testes existentes não foram enfraquecidos. Alterações em testes existentes: `tests/identidade.sh` passou a exigir `timeout 0` (isolinux) e `set timeout=-1` (GRUB); os comentários de `tests/iso.sh` e `tests/iso-smoke.sh` deixaram de falar em contagem de 5 s; em `tests/evidencias.sh`, ajuste mínimo para o `shellcheck` (um `# shellcheck disable=SC2016` e aspas num glob), que já falhava no `tests/lint-repo.sh` da VM na RC2 e não muda o comportamento.
@@ -157,7 +159,7 @@ Os testes existentes não foram enfraquecidos. Alterações em testes existentes
 | Entrada 1 | roda com a logo, depois desktop em cerca de 24 s depois do Enter; nenhum terminal de demonstração; `free -m` com 2409 MiB de total e 1327 MiB usados |
 | Entrada 2 | desktop e terminal maximizado com o menu da demonstração em cerca de 26,5 s; `tudo` interativo completo (sdn, vnf, rede e vm) sem falha, com o vizinho OSPF em `Full`; VM criada com `virt-type qemu` (sem KVM) |
 | Ctrl+C no meio de um ato, depois `limpar` | nada sobrou (`ip netns list`, `sudo docker ps -a` e `virsh -c qemu:///system list --all` vazios) |
-| Entrada 3 | **falhou** em duas ISOs: kernel com `ACPI: SCI (IRQ9) allocation failed` e parada no `(initramfs)`, primeiro com `noapic` e depois, sem ele, ainda com `nosmp` (que também desativa o IO-APIC); corrigido tirando os dois do failsafe (ISO desta seção); falta repetir no Hyper-V |
+| Entrada 3 | **falhou** em duas ISOs: kernel com `ACPI: SCI (IRQ9) allocation failed` e parada no `(initramfs)`, primeiro com `noapic` e depois, sem ele, ainda com `nosmp` (que também desativa o IO-APIC); corrigido tirando os dois do failsafe. Na ISO desta seção (`b601e60`) **passou duas vezes**, com o desktop em cerca de 46 s depois do Enter |
 | Aviso do `vtysh` | as saídas do `vtysh` mostravam `Can't open configuration file /etc/frr/vtysh.conf`; o `nexus-demo` agora esconde esse aviso (`2>/dev/null`) |
 
 ### Limitações e problemas conhecidos
@@ -182,4 +184,4 @@ Os testes existentes não foram enfraquecidos. Alterações em testes existentes
 
 ## 7. Estado da execução
 
-Branch `marcos` (commits locais; o push direto para `origin/marcos` é recusado pela regra do repositório, "Cannot update this protected ref", então a integração é por PR). ISO final da seção 6 (clone limpo no commit `a02241a`) com a bateria completa OK. A rodada humana no Hyper-V Geração 2 passou nas entradas 1 e 2 e achou o defeito da entrada 3, já corrigido nesta ISO. Falta: repetir a entrada 3 no Hyper-V, PR de `marcos` para a `main` e, só depois do merge, a tag `v1.0.0-rc3` e a release.
+Branch `marcos` (commits locais; o push direto para `origin/marcos` é recusado pela regra do repositório, "Cannot update this protected ref", então a integração é por PR). ISO final da seção 6 (clone limpo no commit `b601e60`) com a bateria reduzida OK e a rodada humana no Hyper-V Geração 2 aprovada nas três entradas. Falta: PR de `marcos` para a `main` e, só depois do merge, a tag `v1.0.0-rc3` e a release.
