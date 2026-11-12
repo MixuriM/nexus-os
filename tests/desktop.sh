@@ -114,6 +114,12 @@ done
 mon=$(como_user xrandr --listmonitors | awk 'NR == 2 {print $NF}')
 img=$(como_user xfconf-query -c xfce4-desktop -p "/backdrop/screen0/monitor$mon/workspace0/last-image")
 [ "$(readlink -f "$img")" = "$papel" ] || fail "monitor $mon sem o papel de parede do Nexus OS (workspace0/last-image '$img')"
+# Monitor com nome de hardware real (eDP-1, HDMI-A-1...): o nexus-papel-de-parede cria a entrada dele.
+[ -f /etc/xdg/autostart/nexus-papel-de-parede.desktop ] || fail "autostart do nexus-papel-de-parede ausente"
+como_user env NEXUS_MONITORES=eDP-1 nexus-papel-de-parede || fail "nexus-papel-de-parede falhou"
+img=$(como_user xfconf-query -c xfce4-desktop -p "/backdrop/screen0/monitoreDP-1/workspace0/last-image")
+[ "$(readlink -f "$img")" = "$papel" ] || fail "nexus-papel-de-parede não definiu o papel do monitor eDP-1 (lido '$img')"
+como_user xfconf-query -c xfce4-desktop -r -R -p /backdrop/screen0/monitoreDP-1
 tema=$(como_user xfconf-query -c xsettings -p /Net/ThemeName)
 [ "$tema" = Nexus-Dark ] || fail "tema GTK do $usuario é '$tema', esperado Nexus-Dark"
 icones=$(como_user xfconf-query -c xsettings -p /Net/IconThemeName)

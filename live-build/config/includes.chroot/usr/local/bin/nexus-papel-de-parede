@@ -1,0 +1,15 @@
+#!/bin/sh
+# Põe o papel de parede do Nexus OS em todo monitor ligado. O xfdesktop lê o papel por nome de monitor
+# (monitorVirtual-1, monitoreDP-1, ...) e o xfce4-desktop.xml só conhece os nomes das VMs: em hardware real o
+# monitor tem outro nome e o XFCE mostraria o papel padrão dele. Roda no início da sessão (autostart).
+# NEXUS_MONITORES troca a lista de monitores (teste).
+# shortcut: monitor ligado depois do login fica de fora, trocar por um laço que reaja ao xrandr se isso importar.
+set -eu
+
+papel=/usr/share/backgrounds/nexus-os/papel-de-parede.png
+monitores=${NEXUS_MONITORES:-$(xrandr --listmonitors | awk 'NR > 1 {print $NF}')}
+for m in $monitores; do
+    base=/backdrop/screen0/monitor$m/workspace0
+    xfconf-query -c xfce4-desktop -n -t string -p "$base/last-image" -s "$papel"
+    xfconf-query -c xfce4-desktop -n -t int -p "$base/image-style" -s 5
+done
