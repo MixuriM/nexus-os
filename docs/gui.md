@@ -290,7 +290,7 @@ Pontos a saber:
 - Não foram testados: BitLocker, disco externo ligado depois do login e o `xfce4-power-manager` reduzindo o brilho depois do login (por exemplo, ao escurecer na bateria).
 - Microcode da CPU (`amd64-microcode`, `intel-microcode`) fica fora da ISO, por decisão do grupo (12/11/2026). Ele está na área `non-free-firmware`, que agora entra só pelo `firmware-amd-graphics`. Sem ele o sistema funciona, só sem os patches de segurança do processador.
 - Firmware de Wi-Fi também fica fora, pela mesma decisão: o Wi-Fi do notebook pode não funcionar (Intel, Realtek e MediaTek precisam de firmware próprio). Não foi testado.
-- Nome da ISO: a ISO com essas correções continua sendo a RC3 (atualizada, ainda sem release; a release `v1.0.0-rc3` publicada é da ISO anterior, de SHA256 `0a8cc302...`). A RC4 fica reservada para a otimização, ainda a fazer.
+- Nome da ISO: a ISO com essas correções continua sendo a RC3, publicada em 12/11/2026 como atualizações da RC3: `v1.0.0-rc3.1` (firmware da GPU), `rc3.2` (+ papel de parede), `rc3.3` (+ brilho) e `rc3.4` (+ montagem de disco, a mais recente). A `v1.0.0-rc3` original (SHA256 `0a8cc302...`) segue publicada. A RC4 fica reservada para a otimização, ainda a fazer.
 
 ## Problemas conhecidos
 
