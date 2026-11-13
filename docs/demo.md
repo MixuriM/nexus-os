@@ -185,3 +185,5 @@ Os testes existentes não foram enfraquecidos. Alterações em testes existentes
 ## 7. Estado da execução
 
 A RC3 foi mergeada na `main` (PRs #85 e #86) e publicada: tag e release `v1.0.0-rc3`, ISO de SHA256 `0a8cc302b34f3d43c3fbc94620e824bb1c817209cf1db64d06566cf24f4efe5c`. O push direto para `origin/marcos` é recusado pela regra do repositório ("Cannot update this protected ref"), então a integração é por PR. A apresentação usará a RC4, otimizada, ainda a ser feita.
+
+Em 12/11/2026 saíram 4 atualizações da RC3, com as correções achadas em um notebook Ryzen (firmware da GPU AMD, papel de parede por monitor, brilho no máximo e montagem de discos, veja [gui.md](gui.md), seção "Notebook com GPU AMD"): `v1.0.0-rc3.1` a `v1.0.0-rc3.4`, cada uma com a ISO e o `.sha256` anexos. A `v1.0.0-rc3.4` é a mais recente (Latest), com ISO de SHA256 `d9afcb00db65586b665a8c5373077cc4f672ec9f2005674dfba64e1410690a7c` e 2044821504 bytes. As ISOs `rc3.1` a `rc3.3` foram regeradas dos commits equivalentes na `main` (o SHA256 difere das ISOs originais, que não foram guardadas) e não foram testadas.
