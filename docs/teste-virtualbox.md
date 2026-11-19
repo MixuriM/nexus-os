@@ -27,7 +27,7 @@ Não há tarefas separadas por pessoa aqui: o roteiro é um só, do início ao f
 
 O **Nexus OS** é uma distribuição Linux (baseada no Debian 13) para virtualização de redes. Ela vem numa **ISO** que roda "ao vivo" (live): o sistema inicia direto da ISO, na memória RAM da máquina virtual, sem instalar nada em disco. Ao desligar, tudo o que foi feito na sessão some.
 
-A versão que está em teste se chama **RC2** (*release candidate 2*, a segunda candidata a versão final). Ela já foi testada pelo próprio projeto no QEMU (com KVM) e no Hyper-V Geração 2. O que **ainda não foi feito** é rodar no **VirtualBox**, que é o programa de máquinas virtuais que a maior parte das pessoas usa em casa. Este é o objetivo desta rodada.
+A versão que está em teste se chama **RC2** (*release candidate 2*, a segunda candidata a versão final). Ela já foi testada pelo próprio projeto no QEMU (com KVM) e no Hyper-V Geração 2. O teste no **VirtualBox**, o programa de máquinas virtuais que a maior parte das pessoas usa em casa, foi feito por uma segunda pessoa. Este é o objetivo desta rodada.
 
 **Por que testar no VirtualBox?** Cada programa de máquina virtual simula o computador de um jeito (vídeo, rede, teclado). Algo que funciona no QEMU pode falhar no VirtualBox, por exemplo a resolução da tela, o mouse ou o desempenho. Só rodando de fato se descobre. Quem for usar o Nexus OS no VirtualBox precisa saber se funciona e quais são os limites.
 
@@ -214,7 +214,7 @@ Bloco 5: confere o que foi configurado antes de ligar.
 1. **Cronômetro:** no instante em que o menu de boot aparecer, comece a contar (celular).
 2. Clique **dentro da janela da VM** (ela captura o mouse; veja a seção 8) e aperte **Enter** (o menu espera a escolha, sem contagem).
 3. Não digite nada. Espere as mensagens de boot e depois a tela azul-escura com a logo no centro (o papel de parede).
-4. Pare o cronômetro quando a **barra de baixo** aparecer completa. Esse número é o **tempo até a barra** (anote na ficha, em segundos). Sem KVM pode levar de alguns minutos até cerca de 10 minutos; o projeto **não mediu** o VirtualBox, então o seu número é uma informação nova e valiosa.
+4. Pare o cronômetro quando a **barra de baixo** aparecer completa. Esse número é o **tempo até a barra** (anote na ficha, em segundos). Sem KVM pode levar de alguns minutos até cerca de 10 minutos; o número de cada rodada é uma informação útil para o projeto.
 
 **Por que o menu mostra "modo de compatibilidade":** é uma segunda entrada de boot, para máquinas com problema de vídeo. Se a entrada normal não chegar ao desktop, **não** troque de entrada por conta própria: relate a falha. A troca só entra como segundo teste depois de registrar a primeira.
 

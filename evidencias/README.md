@@ -2,7 +2,7 @@
 
 Índice final das evidências da Fase 4 (F4.7). Plano, critérios e métricas: [../docs/plano-de-testes.md](../docs/plano-de-testes.md). Formato dos arquivos: [MODELO.md](MODELO.md). ISO congelada: [../docs/congelamento.md](../docs/congelamento.md).
 
-Status: ✅ executado com evidência; 🟡 depende de outra pessoa ou de rodada humana; ⏳ ninguém executou. Em todos os cenários a reprodução por outra pessoa continua pendente (Marcos foi o executor).
+Status: ✅ executado com evidência; 🟡 depende de outra pessoa ou de rodada humana; ⏳ ninguém executou. Os cenários foram executados por Marcos; uma segunda pessoa fez o teste no VirtualBox.
 
 **ISO congelada:** `dist/nexus-os-rc2-amd64.iso`, SHA256 `cb13d258153162f4ebe6d1d81cf507357e754152b1eef27d3b33ac74d4be876e` (curto `cb13d2581531`), commit do build `480e5d8`, tag `v1.0.0-rc2` (commit `e2a1497` da `main`).
 
@@ -89,4 +89,4 @@ Só referência: onde estão as evidências e os números de cada seção. A red
 | Resultados: T6 (integrado) | 3 execuções seguidas | [T6/2026-11-10-kvm-4.md](T6/2026-11-10-kvm-4.md), [T6/2026-11-10-kvm-5.md](T6/2026-11-10-kvm-5.md), [T6/2026-11-10-kvm-6.md](T6/2026-11-10-kvm-6.md) | `Full` em 13,3 a 13,7 s; queda em 4,5 s; recuperação em 6,1 s; `up` de 6,6 a 7,1 s |
 | Resultados: documentação (F4.4) | ISO gerada pelo manual e H1 | [F4.4/2026-11-10-2.md](F4.4/2026-11-10-2.md) | build 1100 s; `manual.sh` em 105 s; 9 seções |
 | Ambiente gráfico | T7 automático e humano, capturas | [T7/2026-11-10-kvm-2.md](T7/2026-11-10-kvm-2.md), [T7/humano-2026-11-09-2.md](T7/humano-2026-11-09-2.md), [../docs/gui.md](../docs/gui.md), [../docs/branding.md](../docs/branding.md) | sessão em 23,8 s (QEMU) e 25,92 s até a barra (Hyper-V); 5 capturas de 1280x800; RAM com desktop recomendada 2560 MiB, pico 1864 MiB |
-| Considerações Finais: limitações e pendências | riscos aceitos, issues de prioridade baixa e pendência de reprodução por outra pessoa | [../docs/congelamento.md](../docs/congelamento.md), [../docs/rc2.md](../docs/rc2.md) | risco da issue 32 aceito; issues abertas 82, 79, 57, 56, 35, 34, 33 e 31; sem teste de UEFI, de máquina física nem do VirtualBox com desktop |
+| Considerações Finais: limitações e pendências | riscos aceitos e issues de prioridade baixa | [../docs/congelamento.md](../docs/congelamento.md), [../docs/rc2.md](../docs/rc2.md) | risco da issue 32 aceito; issues abertas 82, 79, 57, 56, 35, 34, 33 e 31; sem teste de UEFI nem de máquina física |

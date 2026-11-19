@@ -182,5 +182,5 @@ As capturas usam o comando `screendump` do monitor do QEMU com `-vga std` (1280x
 - O menu de boot (isolinux e GRUB) agora tem a identidade do Nexus OS e, desde a RC3, não tem contagem regressiva (menu com 3 entradas, veja `demo.md`).
 - O papel de parede padrão foi conferido no monitor `Virtual-1` do QEMU; em outros vídeos (Hyper-V e VirtualBox) ele depende do alternativo `desktop-background` e dos blocos `monitor0` e `monitor1` (issue 56).
 - O `20-hyperv.conf` fixa `/dev/dri/card0` para qualquer vídeo; em máquina com mais de uma placa o dispositivo certo pode ser outro.
-- Reprodução por segunda pessoa e a conferência em VirtualBox e em máquina física continuam pendentes.
+- A reprodução por segunda pessoa e a conferência em VirtualBox foram feitas; a conferência em máquina física continua pendente.
 - No Hyper-V Geração 1 a ISO final subiu e o visual conferiu (janela de 1024x768, tema, ícones, barra e papel de parede); o ícone "Disco Disquete" (hardware da VM) que dava `Error mounting /dev/fd0 ... Can't open blockdev` deixou de aparecer porque o módulo `floppy` é bloqueado (`etc/modprobe.d/nexus-os-sem-disquete.conf`); o ícone `media-floppy` do tema fica para o botão Salvar dos aplicativos.

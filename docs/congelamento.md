@@ -81,5 +81,5 @@ Get-FileHash C:\HyperV\nexus-os-rc2-cb13d258-amd64.iso -Algorithm SHA256
 
 ## Pendências
 
-- Reprodução dos testes T1 a T7 e do manual por uma segunda pessoa (os testes foram executados por Marcos).
+- Os testes T1 a T7 foram executados por Marcos; uma segunda pessoa fez o teste no VirtualBox.
 - A tag `v1.0.0-rc2` na `main` e o registro do resultado.

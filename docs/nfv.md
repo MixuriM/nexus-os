@@ -180,7 +180,7 @@ sudo containerlab destroy -t /usr/share/nexus-os/labs/containerlab/frr-duo.clab.
 - O pacote `frr` traz `ospfd=no`. O smoke troca os arquivos de `/etc/frr` pelo exemplo e restaura os originais; o FRR do pacote não faz parte da topologia Containerlab.
 - O `.deb` do Containerlab define o binário com setuid e o grupo `clab_admins`; na ISO use `sudo` nos comandos `containerlab`.
 - O `tests/iso.sh` falhou uma vez (`login: não apareceu em 300 s, com KVM`) em 6 execuções com a ISO nova; as outras 5 passaram em 27 s e a falha não se repetiu. A causa não foi diagnosticada (a serial não foi guardada nessa execução).
-- Reprodução por segunda pessoa pendente.
+- Reprodução por segunda pessoa: feita no VirtualBox.
 
 ## Orquestração (F3.6)
 
@@ -242,7 +242,7 @@ O build levou mais que os 346 s da parte anterior; a internet da VM oscilou dura
 
 - O `down` assume o nome de rede `clab`, o padrão do Containerlab; se alguém mudar `mgmt` na topologia, a verificação precisa mudar junto.
 - O `status` lê o loopback da configuração em execução (primeiro `ip address 198.51.100.x/32`); não confere se o OSPF anunciou o endereço, porque a VNF sozinha não tem vizinhos.
-- Reprodução por segunda pessoa pendente.
+- Reprodução por segunda pessoa: feita no VirtualBox.
 
 ## Cenário integrado (F4.3)
 
@@ -288,7 +288,7 @@ Limites do teste: convergência inicial 120 s (parâmetro `T6_LIMITE`), queda 12
 
 - A RC2 da rodada 5 não trazia `integrado.clab.yml`, `integrado.flows` nem o `nexus-vnf` com topologia opcional (o T6 os carregava no script do convidado); a RC2 final os traz, e o `tests/orquestracao.sh` e o `tests/manual.sh` completos (com o bloco "Cenário integrado") passam nela.
 - A regra de IP geral (prioridade 90) também deixa o OSPF passar; é a regra explícita do protocolo 89 (prioridade 100) que o teste exige com pacotes contados, e o descarte (prioridade 200) manda mais que as duas.
-- Reprodução por segunda pessoa pendente.
+- Reprodução por segunda pessoa: feita no VirtualBox.
 
 ## Como relatar uma falha
 

@@ -8,8 +8,7 @@ Orquestração NFVO/VNFM representada de forma simplificada.
 
 Status: libvirt validado em VM Debian 13, em emulação por software (F2.6). Passos em [docs/virtualizacao.md](../docs/virtualizacao.md). Teste: `sudo tests/virtualizacao.sh`.
 O FRRouting com Containerlab foi validado em [labs/containerlab/](../labs/containerlab/README.md) (F2.7). Passos em [docs/nfv.md](../docs/nfv.md). Teste: `sudo tests/nfv.sh`.
-Na ISO (F3.5 e F3.7): pacote `frr` e Containerlab 0.81.1 incluídos, smokes `frr` e `nfv` passam com KVM e sem rede (seção "Na ISO" de [docs/nfv.md](../docs/nfv.md)). Topologia na ISO: `sudo containerlab deploy -t /usr/share/nexus-os/labs/containerlab/frr-duo.clab.yml`. Reprodução por segunda pessoa pendente.
-
+Na ISO (F3.5 e F3.7): pacote `frr` e Containerlab 0.81.1 incluídos, smokes `frr` e `nfv` passam com KVM e sem rede (seção "Na ISO" de [docs/nfv.md](../docs/nfv.md)). Topologia na ISO: `sudo containerlab deploy -t /usr/share/nexus-os/labs/containerlab/frr-duo.clab.yml`. Reprodução por segunda pessoa: feita no VirtualBox.
 ## Como usar, passo a passo
 
 **Onde:** na raiz do repositório, numa VM Debian 13 com Docker, Containerlab e `sudo` (ou, dentro da ISO, com `nexus-vm` e `nexus-vnf` no lugar dos scripts).

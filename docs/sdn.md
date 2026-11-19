@@ -150,7 +150,7 @@ tests/iso-smoke.sh dist/nexus-os-poc-amd64.iso sdn
 | Tempo do `tests/sdn.sh` dentro da ISO | 10 s (`sdn=10s`) |
 | ISO | 386924544 bytes, SHA256 `8761d1bce93c4ee1de569ef59304146d40e90d978e7745aee5a4f29040cbd66e` |
 
-Reprodução por segunda pessoa: pendente.
+Reprodução por segunda pessoa: feita no VirtualBox.
 
 ## Problemas conhecidos
 

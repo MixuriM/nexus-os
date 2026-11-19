@@ -24,7 +24,7 @@ Antes de cada cenário, registrar o modo: `ls -l /dev/kvm` e `lsmod | grep kvm`.
 - Sanitização: a saída bruta passa por `evidencia_sanitizar` antes de entrar no repositório: sem IP privado, e-mail, caminho de usuário do Windows, `/home/<nome>` (a conta pública `user` da live fica) nem nome de máquina, com no máximo 300 linhas (início e fim, com o corte indicado).
 - Tamanho: cada arquivo de evidência tem até 1 MiB (as capturas PNG do T7 entram nesse limite).
 - Status: ✅ só com evidência (comando, código de saída e arquivo em `evidencias/`); 🟡 quando falta outra pessoa ou rodada humana; ⏳ quando ninguém executou. Cenário que falha por defeito real fica ⏳ ou 🟡 com a issue, nunca ✅.
-- Executor: o dono nominal de cada tarefa está na tabela "Acompanhamento" da Fase 4 do plano de desenvolvimento (os nomes ficam fora do repositório). Sem entrega do dono, Marcos executa e o dono fica de revisor. Isso não conta como execução por segunda pessoa: a reprodução por outra pessoa continua pendente e registrada.
+- Executor: o dono nominal de cada tarefa está na tabela "Acompanhamento" da Fase 4 do plano de desenvolvimento (os nomes ficam fora do repositório). Sem entrega do dono, Marcos executa e o dono fica de revisor. Isso não conta como execução por segunda pessoa: a reprodução por outra pessoa foi feita no VirtualBox.
 - TDD: o teste do cenário é escrito antes do script do convidado (vermelho por asserção), depois fica verde, e cada cenário é provado por mutações (cópia modificada do script do convidado ou do `.sha256`, que tem de dar `FALHA:`).
 - Defeito real vira issue com o ID da tarefa no título; a correção é da geração da RC2 final (F4.5).
 
@@ -95,7 +95,7 @@ Antes de cada cenário, registrar o modo: `ls -l /dev/kvm` e `lsmod | grep kvm`.
 
 - **Objetivo:** provar o desktop XFCE da RC2 em VM com vídeo e sem internet.
 - **Pré-condições:** RC2; VM com vídeo (`-vga std`) e sem rede; capturas de tela; `python3` na VM de build (o `tests/png-info.py` confere as capturas).
-- **Executor:** Marcos (tarefa dele no plano); a reprodução por outra pessoa continua pendente.
+- **Executor:** Marcos (tarefa dele no plano); a reprodução por outra pessoa foi feita no VirtualBox.
 - **Comando:** `tests/cenario-t7.sh dist/nexus-os-rc2-amd64.iso`
 - **Critério de sucesso:** boot até o desktop com login automático; abrir o `virt-manager` e ver a VM criada por `nexus-vm`; subir a VNF FRR e a topologia Containerlab pelos atalhos e fechar cada terminal com Enter; abrir a documentação local; 5 capturas de tela válidas em `evidencias/T7/`; parte automática e rodada humana OK.
 - **Parte automática** (`tests/cenario-t7.sh` no host e `tests/cenarios-guest/t7.sh` no convidado, QEMU com `-vga std`, sem rede, 2560 MiB): o convidado confere que não há rota padrão nem resolução de nomes, espera a sessão `x11` do `user` com os processos do desktop, cria a VM `cen-t7` pelo `nexus-vm`, abre o `virt-manager` pelo atalho, sobe a VNF FRR pelo atalho `nexus-vnf-up`, a derruba pelo `nexus-vnf-down`, sobe e derruba a topologia pelos atalhos `nexus-clab-deploy` e `nexus-clab-destroy` e abre a documentação pelo atalho `nexus-docs`. Cada terminal de atalho fica aberto em "Pressione Enter para fechar..." e é fechado com um Enter de verdade (`NEXUS-SMOKE-TECLA`, `sendkey` do monitor do QEMU): o `xfce4-terminal` tem de sumir em 15 s. Em cada momento o convidado imprime `NEXUS-SMOKE-PONTO <nome>` (`desktop-pronto`, `virt-manager-com-vm`, `vnf-acima`, `clab-acima`, `docs-abertos`) e o `tests/iso-smoke.sh` (variável `NEXUS_SMOKE_CAPTURAS`) tira a captura pelo `screendump -f png` do monitor do QEMU 10.0. No fim a limpeza roda e não pode sobrar contêiner, rede `clab` nem VM.
@@ -163,7 +163,7 @@ T7-M1 e T7-M2 foram provadas duas vezes: com o script do convidado anterior à e
 ## Problemas conhecidos
 
 - Nenhum defeito de T1 a T7 aberto na RC2 final. Os dois defeitos reais achados na RC2 da rodada 5 foram corrigidos na F4.5 e provados pelos próprios cenários: T4 (o `user` usava `qemu:///session`, issue 74; agora o `~/.config/libvirt/libvirt.conf` vem do `/etc/skel` e o T4 passa em 3 ciclos) e T7 (o Enter não fechava o terminal dos atalhos de forma intermitente, o terminal ficava em modo cru depois do `sudo`, issue 78; agora o `nexus-atalho` faz `stty sane` antes do prompt e o T7 passou em 3 execuções seguidas, com o Enter fechando os 4 terminais em cada uma). As execuções com `FALHA:` na RC2 da rodada 5 ficam como histórico (`evidencias/T4/2026-11-06-kvm.md` e `evidencias/T7/2026-11-09-kvm-2.md`).
-- T7: a primeira rodada humana (09/11/2026, RC2 da rodada 5) foi parcial; a segunda, na RC2 final (`humano-2026-11-09-2.md`), passou completa, com o Enter fechando os 4 terminais, e o T7 fica ✅ (parte automática e rodada humana OK). A reprodução por outra pessoa continua pendente.
+- T7: a primeira rodada humana (09/11/2026, RC2 da rodada 5) foi parcial; a segunda, na RC2 final (`humano-2026-11-09-2.md`), passou completa, com o Enter fechando os 4 terminais, e o T7 fica ✅ (parte automática e rodada humana OK). A reprodução por outra pessoa foi feita depois, no VirtualBox.
 
 ## Fora do escopo
 

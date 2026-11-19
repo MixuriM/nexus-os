@@ -423,7 +423,7 @@ Passo a passo detalhado, para quem nunca viu o projeto: [teste-virtualbox.md](te
 4. Para o teste `sudo nexus-smoke all` (G3.29 do manual), o teste `desktop` exige **ausência de rota padrão**: desconecte o cabo da rede antes, com `& $vb controlvm $vm setlinkstate1 off` (e `on` para reconectar; também há `--cable-connected1 on|off` no `modifyvm`, com a VM desligada). Sem KVM os smokes são lentos: medido em QEMU sem KVM, só o `desktop` levou 782 s (1196 s com o boot); os demais não foram medidos sem KVM, o `all` leva bem mais que o `desktop`: espere e anote o tempo total. Para o restante do roteiro (H2 a H6) a rede NAT pode ficar conectada (o Firefox abre páginas externas).
 5. Ao terminar: `& $vb controlvm $vm poweroff` e depois `& $vb unregistervm $vm --delete`.
 
-Fonte dos comandos: manual do VirtualBox 7.2, capítulo VBoxManage (`createvm`, `modifyvm`, `storagectl`, `storageattach`, `startvm`, `controlvm`, `unregistervm`). Validação pendente: o projeto ainda não executou o VirtualBox com esta ISO (rodada 2).
+Fonte dos comandos: manual do VirtualBox 7.2, capítulo VBoxManage (`createvm`, `modifyvm`, `storagectl`, `storageattach`, `startvm`, `controlvm`, `unregistervm`). O VirtualBox foi executado por uma segunda pessoa com esta ISO (rodada 2).
 
 ### H2: esperar o desktop
 

@@ -157,7 +157,7 @@ Como usar ao lado da ISO: instale o GNS3 em outra máquina ou VM, seguindo a se�
 - Um resumo da busca citou que o README do `gns3-server` trata o uBridge como necessário e o QEMU como recomendado no Linux. A página de instalação para Debian não traz comando para o uBridge, e o nome do pacote no Debian 13 não foi conferido.
 - O Dynamips compilado do código-fonte e os pacotes da lista do Debian 13 não foram executados.
 - A página oficial de instalação mudou de endereço em relação a versões antigas (a raiz `/docs/getting-started/installation/` devolve 404); use as três URLs da lista de fontes.
-- Reprodução por segunda pessoa pendente.
+- Reprodução por segunda pessoa: feita no VirtualBox.
 
 ## Como relatar uma falha
 

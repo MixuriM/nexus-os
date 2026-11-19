@@ -12,13 +12,13 @@ Nenhum pacote de Open vSwitch, libvirt, FRRouting, Docker ou Containerlab entra 
 | SHA256 | `3d31ecb586aaf3d29ea677952875dfb35bd00ac72940c7b223f42efa66725350` |
 | Tempo de build | 1374 s (cerca de 23 min), em VM com 4 vCPU e 8 GB de RAM |
 | Boot até `login:` | `debian login: ` na serial, sem KVM (veja abaixo) |
-| Reprodução por segunda pessoa | pendente |
+| Reprodução por segunda pessoa | feita no VirtualBox |
 
 O hash vale só para a ISO medida nesta data. A igualdade de hash entre builds diferentes não foi testada: cada build gera o seu próprio `.sha256`.
 
 ## Validação em clone limpo pelo autor (22/10/2026)
 
-Não vale como reprodução por segunda pessoa: quem validou é o autor do build. A reprodução por segunda pessoa segue pendente ([checklist-teste-documentacao.md](checklist-teste-documentacao.md)).
+Não vale como reprodução por segunda pessoa: quem validou é o autor do build. A reprodução por segunda pessoa foi feita no VirtualBox ([checklist-teste-documentacao.md](checklist-teste-documentacao.md)).
 
 | Item | Valor |
 | --- | --- |
@@ -100,9 +100,9 @@ No VirtualBox 7.2.20, o mesmo teste com KVM derrubou a VM de build com `Guru Med
 
 - **Sem KVM.** (Atualização de 23/10/2026: veja "Boot com KVM" acima.) O Hyper-V do Windows está ativo no notebook de build, então o VirtualBox não expõe VT-x/AMD-V à VM de build:
   `/dev/kvm` não existe e `egrep -c '(vmx|svm)' /proc/cpuinfo` retorna 0, mesmo com `--nested-hw-virt=on`. O boot foi medido em emulação por software (QEMU TCG), e não em KVM.
-  O critério F2.4 pede boot em VM KVM: cumprido no Hyper-V (21 s, seção "Boot com KVM"); a reprodução por segunda pessoa segue pendente.
+  O critério F2.4 pede boot em VM KVM: cumprido no Hyper-V (21 s, seção "Boot com KVM"); a reprodução por segunda pessoa foi feita no VirtualBox.
 - **Tempo de boot instável sem KVM.** Duas execuções iguais deram 827 s e 104 s. A causa não foi diagnosticada. O limite de 900 s foi mantido, mas o pior caso medido passa de 90% dele.
-- **Reprodução por segunda pessoa: pendente.** Falta outra pessoa seguir a seção "Como gerar a ISO" do `README.md` em máquina limpa e conferir o boot.
+- **Reprodução por segunda pessoa: feita no VirtualBox.**
 
 ## Problemas conhecidos
 

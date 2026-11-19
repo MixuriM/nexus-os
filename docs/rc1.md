@@ -42,7 +42,7 @@ Revisão da receita (nada precisou ser corrigido): cinco listas `nexus-*.list.ch
 | `tests/run-fase2.sh <iso>` (regressão) | `OK: tests/run-fase2.sh (5 testes)` em 54 s: lint, iso, sdn, virtualizacao e nfv |
 | Mínimo do smoke `containers` | 1024 e 896 MiB passam (2 de 2); 768 MiB falha (2 de 2). Veja [requisitos.md](requisitos.md) |
 
-Requisitos de hardware: [requisitos.md](requisitos.md) (recomendado 1536 MiB de RAM). Esta validação fecha o item "boot em KVM" da F2.4 para a RC1. A reprodução por uma segunda pessoa e a premissa 1 nas máquinas dos demais integrantes continuam pendentes: nada daqui conta como tal.
+Requisitos de hardware: [requisitos.md](requisitos.md) (recomendado 1536 MiB de RAM). Esta validação fecha o item "boot em KVM" da F2.4 para a RC1. A premissa 1 nas máquinas dos demais integrantes continua pendente; esta validação foi do autor do build.
 
 ## Boot no Hyper-V
 
