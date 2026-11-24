@@ -8,7 +8,7 @@
 
 ![Licença](https://img.shields.io/badge/licen%C3%A7a-GPL--3.0--or--later-blue)
 ![Base](https://img.shields.io/badge/base-Debian%2013%20(trixie)-a80030)
-![Estado](https://img.shields.io/badge/estado-RC3-purple)
+![Estado](https://img.shields.io/badge/estado-RC4-purple)
 
 [Estado atual](#estado-atual) · [Arquitetura](#arquitetura) · [Como gerar a ISO](#como-gerar-a-iso) · [Usar a ISO](#usar-a-iso-integrada) · [Requisitos](#requisitos-medidos-da-rc1) · [Testes](#testes) · [Documentação](#documentação)
 
@@ -28,7 +28,9 @@ A **RC1** é a primeira ISO integrada, só com o núcleo e sem ambiente gráfico
 
 A **RC3** (`v1.0.0-rc3`, 12/11/2026) soma o menu de boot de 3 entradas e sem contagem, a tela de carregamento com a logo e uma roda animada (Plymouth) e a demonstração guiada `nexus-demo` ([docs/demo.md](docs/demo.md)). Ao testar a RC3 gravada em um pendrive com o Rufus, ela subiu em um PC (Ryzen 7 5700X, GeForce RTX 2060) e falhou em um notebook (Ryzen 7 5825U, Radeon integrada). Quatro defeitos de hardware real foram corrigidos: o firmware da GPU AMD (`firmware-amd-graphics`; sem ele só o terminal subia), o papel de parede padrão do XFCE no lugar do Nexus OS (o `xfdesktop` lê o papel por nome de monitor), o brilho da tela quase no mínimo no notebook e o disco do Windows que não montava (o ícone de um volume não montado aparece com metade da opacidade). As correções saíram como `v1.0.0-rc3.1` a `v1.0.0-rc3.4`; detalhes em [docs/gui.md](docs/gui.md), seção "Notebook com GPU AMD".
 
-**ISO mais recente:** a [`v1.0.0-rc3.4`](https://github.com/MixuriM/nexus-os/releases/tag/v1.0.0-rc3.4), `nexus-os-rc3.4-amd64.iso`, SHA256 `d9afcb00db65586b665a8c5373077cc4f672ec9f2005674dfba64e1410690a7c`, 2044821504 bytes (1950 MiB), commit `8004304`, anexada à release junto com o `.sha256`. Testes: smoke `desktop` (137 s, com KVM) e conferência no notebook e no PC; a bateria completa (`all`, T1 a T7 e `run-fase3`) rodou na RC3 original (`0a8cc302...`, com `all` em 225 s) e não foi repetida na `rc3.4`. Microcode da CPU e firmware de Wi-Fi ficam fora da ISO (o Wi-Fi de alguns notebooks pode não funcionar). Um arquivo de release do GitHub tem no máximo 2 GiB e a `rc3.4` fica cerca de 98 MiB abaixo disso ([docs/iso-poc.md](docs/iso-poc.md)). A RC4, otimizada, é a próxima.
+A **RC4** (`v1.0.0-rc4`, 24/11/2026) é a RC3 atualizada com o boot otimizado, sem pacote novo nem mudança de aparência. A única alavanca que ficou foi `Nice=5` na carga da imagem FRR no boot (`nexus-images.service`), para ela não competir com a sessão gráfica nas 2 vCPU. Na VM de build (QEMU com KVM, 2 vCPU, mediana de 3 execuções contra a `rc3.4`): login na serial de 46 s para 33 s, sessão gráfica de 25,4 s para 18,1 s e tela preta estimada de 7,3 s para 5,6 s; a RAM em repouso não piorou. Zram e prioridade forte foram testados e descartados. No Hyper-V Geração 2, com cronômetro e uma execução por ISO, a rc4 ficou na mesma faixa da `rc3.4` (roda do Plymouth some em 16 s contra 17 s; desktop completo em 34 s contra 36 s), sem piora. Método, números e alavancas em [docs/otimizacao.md](docs/otimizacao.md).
+
+**ISO mais recente:** a [`v1.0.0-rc4`](https://github.com/MixuriM/nexus-os/releases/tag/v1.0.0-rc4), `nexus-os-rc4-amd64.iso`, SHA256 `8c2e32c2e2da7dfd5183c1a538d86c0e302e43f44be8d2aaab164de85fc739e3`, 2046820352 bytes (1952 MiB), anexada à release junto com o `.sha256`; build de 1115 s, gerado do commit `1c65487` da branch de trabalho (a tag está na `main`, commit `5e4b58d`). Testes na ISO: `tests/iso.sh`, `iso-smoke.sh all` com 2560 MiB (228 s), `tests/demo.sh` (4 atos), `tests/manual.sh` (14 blocos), `tests/boot-visual.sh` nas entradas 1, 2 e 3 e em UEFI, e o roteiro manual no Hyper-V Geração 2. O `run-fase4` não se aplica (o T1 compara com o SHA256 da RC2). Microcode da CPU e firmware de Wi-Fi ficam fora da ISO (o Wi-Fi de alguns notebooks pode não funcionar). Um arquivo de release do GitHub tem no máximo 2 GiB e a rc4 fica cerca de 96 MiB abaixo disso ([docs/iso-poc.md](docs/iso-poc.md)). A anterior, [`v1.0.0-rc3.4`](https://github.com/MixuriM/nexus-os/releases/tag/v1.0.0-rc3.4) (SHA256 `d9afcb00db65586b665a8c5373077cc4f672ec9f2005674dfba64e1410690a7c`), continua publicada.
 
 **ISO da RC2 (congelada em 10/11/2026, tag `v1.0.0-rc2`):** `dist/nexus-os-rc2-amd64.iso`, SHA256 `cb13d258153162f4ebe6d1d81cf507357e754152b1eef27d3b33ac74d4be876e`, 1990639616 bytes (1898 MiB), build limpo do commit `480e5d8` ([docs/rc2.md](docs/rc2.md)). Testes: `tests/run-fase3.sh` com 9 testes e `all` com 4096 e 2560 MiB, com KVM; Hyper-V Geração 2 conferido à mão em 03/11/2026 (N1 a N20 passaram, com ressalvas registradas). **Falta** o teste no VirtualBox (rodada 2), que tem [passo a passo completo em docs/teste-virtualbox.md](docs/teste-virtualbox.md), e a execução do roteiro por uma segunda pessoa. O congelamento da ISO está em [docs/congelamento.md](docs/congelamento.md).
 
@@ -46,7 +48,7 @@ A **RC3** (`v1.0.0-rc3`, 12/11/2026) soma o menu de boot de 3 entradas e sem con
 
 Fora da ISO: OpenDaylight (opcional, só depois que o núcleo estiver validado) e GNS3 (apenas documentado em [docs/gns3.md](docs/gns3.md)).
 
-O desktop é o **XFCE** com `lightdm`, escolhido por medição. Na ISO ele sobe sozinho no login do `user`: a sessão fica pronta 23 s depois do boot (rodada 4), com 1095 MiB de RAM em repouso e pico de 2006 MiB, e ISO de 1990639616 bytes (rodada 5; com KVM; sem KVM o smoke `desktop` também passa, mais lento). Na RC3 a sessão fica pronta em 18,7 s (mediana, com KVM). Comparação dos candidatos, atalhos, a barra, o menu e as medições em [docs/gui.md](docs/gui.md). **Sem loja de aplicativos (decisão do grupo):** programas instalados com `sudo apt install` na sessão somem ao desligar; o que se quer sempre fica na lista de pacotes da ISO (`live-build/config/package-lists/`).
+O desktop é o **XFCE** com `lightdm`, escolhido por medição. Na ISO ele sobe sozinho no login do `user`: a sessão fica pronta 23 s depois do boot (rodada 4), com 1095 MiB de RAM em repouso e pico de 2006 MiB, e ISO de 1990639616 bytes (rodada 5; com KVM; sem KVM o smoke `desktop` também passa, mais lento). Na RC3 a sessão fica pronta em 18,7 s (mediana, com KVM) e na rc4, medida com o método de [docs/otimizacao.md](docs/otimizacao.md), em 18,1 s. Comparação dos candidatos, atalhos, a barra, o menu e as medições em [docs/gui.md](docs/gui.md). **Sem loja de aplicativos (decisão do grupo):** programas instalados com `sudo apt install` na sessão somem ao desligar; o que se quer sempre fica na lista de pacotes da ISO (`live-build/config/package-lists/`).
 
 ## Arquitetura
 
@@ -177,6 +179,20 @@ Medidos com KVM; a RC3 tem a bateria completa, a `rc3.4` só o smoke `desktop` (
 | Sessão do XFCE pronta | 18,7 s (mediana de 3 execuções) |
 | Build limpo | 835 a 853 s nos builds da `rc3.4` (RC2: 1100 s) |
 
+## Requisitos medidos da rc4
+
+Medidos com KVM, 2 vCPU e sem rede, pelo método de [docs/otimizacao.md](docs/otimizacao.md) (mediana de 3 execuções; `all` e demonstração com 2560 MiB, RAM em repouso e de pico com 4096 MiB). A linha de base `rc3.4` foi medida da mesma forma, por isso alguns valores diferem dos da tabela acima.
+
+| Item | rc3.4 | rc4 |
+| --- | --- | --- |
+| Boot até `login:` | 46 s | 33 s |
+| Sessão do XFCE pronta | 25,4 s | 18,1 s |
+| `all` com 2560 MiB | 282 s | 228 s |
+| `tests/demo.sh` | 108 s | 81 s |
+| RAM em repouso e de pico | 1082 MiB e 2010 MiB | 1068 MiB e 2010 MiB |
+| Tela preta (estimativa) | 7,3 s | 5,6 s |
+| ISO | 2044821504 bytes | 2046820352 bytes (1952 MiB) |
+
 ## Testes
 
 Cada script imprime `OK:` ou `FALHA:` e sai com código diferente de zero em falha. Lista completa em [tests/README.md](tests/README.md).
@@ -232,6 +248,7 @@ nexus-os/
 - RC2: [identificação, SHA256 e testes](docs/rc2.md) e [requisitos com desktop](docs/requisitos.md)
 - Ambiente gráfico: [escolha do desktop, instalação na ISO, atalhos e medições](docs/gui.md)
 - RC3: [menu de boot, tela de carregamento e demonstração guiada](docs/demo.md)
+- RC4: [otimização do boot, medições e alavancas](docs/otimizacao.md)
 - Fase 4: [plano de testes](docs/plano-de-testes.md) e [congelamento da RC2](docs/congelamento.md)
 
 ## Limitações conhecidas
@@ -245,7 +262,8 @@ Acompanhadas como issues no GitHub.
 - Hardware real (12/11/2026): em monitores com nome diferente de `Virtual-1` aparecia o papel de parede padrão do XFCE; hoje o `nexus-papel-de-parede` define o papel de cada monitor, mas um monitor ligado depois do login fica de fora.
 - Disco do Windows com Inicialização Rápida monta só para leitura (a causa provável, o `ntfs3` recusando NTFS sujo, não foi confirmada por `dmesg`); disco ligado depois do login não é montado sozinho.
 - Microcode da CPU e firmware de Wi-Fi não estão na ISO.
-- RC3: cerca de 18 s de tela preta entre a roda do Plymouth e o desktop, e o menu de boot não inicia sozinho ([docs/demo.md](docs/demo.md)).
+- RC3: cerca de 18 s de tela preta entre a roda do Plymouth e o desktop, e o menu de boot não inicia sozinho ([docs/demo.md](docs/demo.md)). Na rc4 a espera até o desktop caiu na medição com KVM, mas no Hyper-V Geração 2 a diferença para a `rc3.4` não é nítida a olho, e o menu continua esperando o Enter.
+- rc4: o teste do painel (`D9`, `M7`, `M9`) do `iso-smoke.sh all` falha de vez em quando, também na `rc3.4`; numa comparação alternada de 12 execuções (6 de cada ISO) todas passaram, então não há diferença reproduzível ([docs/otimizacao.md](docs/otimizacao.md), seção 6).
 - O desktop foi medido só com KVM em um ambiente (Hyper-V) e sem KVM uma vez; o boot com desktop no VirtualBox (o Hyper-V Geração 2 foi validado em 29/10/2026, com a Secure Boot desligada), o papel de parede em monitores com outro nome que `Virtual-1` e os fluxos interativos foram exercitados no T7 (atalhos, Enter fechando o terminal, `virt-manager` com a VM, documentação) e na rodada humana de 09/11/2026 no Hyper-V Geração 2; no Hyper-V Geração 1 a ISO de SHA256 `c1a1d5c2...0eba` subiu sozinha no Hyper-V Geração 1 (2560 MB, 2 vCPU, `Default Switch`) em 28/10/2026, conferida por um integrante do grupo a partir de capturas de tela: menu de boot, desktop em janela de 1024x768 (limite do vídeo da Geração 1), barra inferior, hora de Brasília, internet no Firefox, LibreOffice Writer em português, `.md` no Mousepad, tecla Print e teclado ABNT2. Nessa ISO o ícone "Disco Disquete" (hardware virtual da Geração 1, sem mídia) dava `Error mounting /dev/fd0 ... Can't open blockdev`; a ISO atual bloqueia o módulo `floppy` e o ícone não aparece (conferido no QEMU com disquete virtual, ainda não repetido no Hyper-V). O roteiro humano completo está na parte H de [docs/checklist-teste-documentacao.md](docs/checklist-teste-documentacao.md). O congelamento da RC2 e a tag são da Fase 4.
 
 ## Fluxo de trabalho
